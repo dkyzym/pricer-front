@@ -1,16 +1,16 @@
-import './App.css'
+import { CheckLogin } from '../components/checkLogin';
+import { Login } from '../components/login';
+import { SearchCode } from '../components/searchCode';
+import './App.css';
 
 function App() {
-
-
   return (
     <>
-    
-      <h1>Vite + React</h1>
-      
-    
+      <Login />
+      <CheckLogin />
+      <SearchCode />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
