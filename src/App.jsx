@@ -1,12 +1,13 @@
-import { Login } from '../components/login';
-import { SearchCode } from '../components/searchCode';
+import { Login } from '../components/Login';
+import { Logout } from '../components/Logout';
+import { SearchCode } from '../components/SearchCode';
 import './App.css';
 
 function App() {
   return (
     <>
       <Login />
-
+      <Logout />
       <SearchCode />
     </>
   );
