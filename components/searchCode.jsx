@@ -14,14 +14,23 @@ export const SearchCode = () => {
           withCredentials: true,
         }
       );
+
       if (response.data.success) {
         setResult(response.data.data);
         setMessage('Search successful');
       } else {
-        setMessage('Search failed');
+        setMessage(response.data.message);
       }
     } catch (error) {
-      setMessage('Search failed');
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage(error.message);
+      }
     }
   };
 
