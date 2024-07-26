@@ -1,6 +1,9 @@
 import { Login } from '../components/Login';
 import { Logout } from '../components/Logout';
 import { SearchCode } from '../components/SearchCode';
+
+import { SearchComponent } from '../components/SearchFastUg';
+
 import './App.css';
 
 function App() {
@@ -9,6 +12,7 @@ function App() {
       <Login />
       <Logout />
       <SearchCode />
+      <SearchComponent />
     </>
   );
 }

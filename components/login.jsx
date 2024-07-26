@@ -14,7 +14,7 @@ export const Login = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/login-tc',
+        'http://localhost:3000/login/tc',
         { username, password },
         {
           withCredentials: true,
@@ -31,7 +31,7 @@ export const Login = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/login-ug',
+        'http://localhost:3000/login/ug',
         { usernameUG, passwordUG },
         {
           withCredentials: true,

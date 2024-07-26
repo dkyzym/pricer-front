@@ -8,7 +8,7 @@ export const Logout = () => {
 
   const handleLogoutUG = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/logout-ug', {
+      const response = await axios.get('http://localhost:3000/logout/ug', {
         withCredentials: true,
       });
       if (response.data.success) {
@@ -23,12 +23,9 @@ export const Logout = () => {
 
   const handleLogoutTC = async () => {
     try {
-      const response = await axios.get(
-        'http://localhost:3000/logout-turbocars',
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.get('http://localhost:3000/logout/tc', {
+        withCredentials: true,
+      });
       if (response.data.success) {
         setTCmessage('Logout from Turbo Cars successful');
       } else {
