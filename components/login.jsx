@@ -5,12 +5,9 @@ export const Login = () => {
   const [message, setMessage] = useState('');
   const [ugMessage, setUGmessage] = useState('');
 
-  const handleLogin = async () => {
+  const handleTCLogin = async () => {
     const username = '32831';
     const password = '12345678';
-
-    const usernameUG = 'automir.lg@gmail.com';
-    const passwordUG = '954712';
 
     try {
       const response = await axios.post(
@@ -28,11 +25,16 @@ export const Login = () => {
     } catch (error) {
       setMessage('Login to LC failed');
     }
+  };
+
+  const handleUGLogin = async () => {
+    const username = 'automir.lg@gmail.com';
+    const password = '954712';
 
     try {
       const response = await axios.post(
         'http://localhost:3000/login/ug',
-        { usernameUG, passwordUG },
+        { username, password },
         {
           withCredentials: true,
         }
@@ -50,8 +52,8 @@ export const Login = () => {
   return (
     <>
       <h2>Login</h2>
-      <button onClick={handleLogin}>Login</button>
-
+      <button onClick={handleTCLogin}>Login TC</button>
+      <button onClick={handleUGLogin}>Login UG</button>
       <p>{message}</p>
       <p>{ugMessage}</p>
     </>
