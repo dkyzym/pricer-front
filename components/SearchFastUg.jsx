@@ -6,6 +6,7 @@ export const SearchComponent = () => {
   const [term, setTerm] = useState('');
   const [results, setResults] = useState([]);
   const [message, setMessage] = useState('');
+  const [htmlContent, setHtmlContent] = useState('');
 
   const handleSearch = async (searchTerm) => {
     try {
@@ -31,6 +32,26 @@ export const SearchComponent = () => {
 
   const debouncedSearch = useCallback(debounce(handleSearch, 500), []);
 
+  const handleDeepSearch = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/search-ug/deep?pcode=${term}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        console.log(response.data);
+        setHtmlContent(response.data.data);
+      } else {
+        setHtmlContent('');
+      }
+    } catch (error) {
+      setMessage('Search failed: ' + error.message);
+    }
+  };
+
   const handleInputChange = (e) => {
     const value = e.target.value;
     setTerm(value);
@@ -52,6 +73,7 @@ export const SearchComponent = () => {
         onChange={handleInputChange}
         placeholder="Enter search term"
       />
+      <button onClick={handleDeepSearch}>Fast search</button>
       <p>{message}</p>
       {results.length > 0 ? (
         <ul>
@@ -64,6 +86,7 @@ export const SearchComponent = () => {
       ) : (
         <p>No results found</p>
       )}
+      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
     </div>
   );
 };
