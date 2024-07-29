@@ -4,7 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import Drawer from '@mui/material/Drawer';
 // import { SearchCode } from '../components/SearchCode';
 
-import { SearchComponent } from '../components/SearchFastUg';
+import { SearchComponent } from '../components/SearchUg';
 
 import 'react-toastify/dist/ReactToastify.css';
 
