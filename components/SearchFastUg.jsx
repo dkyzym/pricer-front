@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
+import { Container } from '@mui/material';
 
 export const SearchComponent = () => {
   const [term, setTerm] = useState('');
@@ -30,7 +31,7 @@ export const SearchComponent = () => {
     }
   };
 
-  const debouncedSearch = useCallback(debounce(handleSearch, 500), []);
+  const debouncedSearch = useCallback(debounce(handleSearch, 1000), []);
 
   const handleDeepSearch = async () => {
     try {
@@ -65,7 +66,7 @@ export const SearchComponent = () => {
   };
 
   return (
-    <div>
+    <Container maxWidth="lg">
       <h2>FAST Search</h2>
       <input
         type="text"
@@ -87,6 +88,6 @@ export const SearchComponent = () => {
         <p>No results found</p>
       )}
       <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-    </div>
+    </Container>
   );
 };
