@@ -18,5 +18,6 @@ module.exports = {
       { allowConstantExport: true },
     ],
     'react-hooks/exhaustive-deps': 'off',
+    'react/prop-types': 'off',
   },
 };

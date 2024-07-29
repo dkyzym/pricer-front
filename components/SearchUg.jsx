@@ -97,7 +97,7 @@ export const SearchComponent = () => {
       `Selected item: ${value.brand} - ${value.number} - ${value.descr}`
     );
     setQuery('');
-    setResults([]); // Очищаем результаты после выбора элемента
+    setResults([]);
     setOpen(false);
   };
 
@@ -144,7 +144,7 @@ export const SearchComponent = () => {
             {...params}
             label="Enter search term"
             variant="outlined"
-            onBlur={handleBlur} // Добавлен обработчик onBlur
+            onBlur={handleBlur}
             InputProps={{
               ...params.InputProps,
               autoComplete: 'off', // Prevents browser autocomplete
