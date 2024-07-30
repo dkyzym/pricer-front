@@ -17,6 +17,8 @@ export const SearchComponent = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleDeepSearch = async () => {
     if (!inputValue) {
@@ -25,6 +27,8 @@ export const SearchComponent = () => {
     }
 
     setLoading(true);
+    setError(false);
+    setErrorMessage('');
 
     try {
       const response = await axios.get(
@@ -39,6 +43,8 @@ export const SearchComponent = () => {
       }
     } catch (error) {
       console.log('Search failed: ' + error.message);
+      setError(true);
+      setErrorMessage('Search failed: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -51,6 +57,8 @@ export const SearchComponent = () => {
     }
 
     setLoading(true);
+    setError(false);
+    setErrorMessage('');
 
     try {
       const response = await axios.get(`http://localhost:3000/search-ug`, {
@@ -68,6 +76,8 @@ export const SearchComponent = () => {
       );
     } catch (error) {
       console.log('Fast search failed: ' + error.message);
+      setError(true);
+      setErrorMessage('Fast search failed: ' + error.message);
       setResults([]);
     } finally {
       setLoading(false);
@@ -81,14 +91,12 @@ export const SearchComponent = () => {
 
   const handleOnClose = () => {
     setOpen(false);
-
     setResults([]);
   };
 
   const handleInputChange = (_e, value, reason) => {
     if (reason === 'clear') {
       handleOnClose();
-
       setInputValue('');
     } else if (reason === 'reset') {
       setInputValue('');
@@ -146,6 +154,8 @@ export const SearchComponent = () => {
               {...params}
               label="Enter search term"
               variant="outlined"
+              error={error} // Show error state
+              helperText={error ? errorMessage : ''} // Show error message
               slotProps={{
                 input: {
                   ...params.InputProps,
