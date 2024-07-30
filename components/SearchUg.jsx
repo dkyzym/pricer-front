@@ -1,13 +1,16 @@
+import SearchIcon from '@mui/icons-material/Search';
 import {
   Autocomplete,
+  Button,
   CircularProgress,
   Container,
   InputAdornment,
+  Stack,
   TextField,
 } from '@mui/material';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export const SearchComponent = () => {
   const [inputValue, setInputValue] = useState('');
@@ -15,8 +18,33 @@ export const SearchComponent = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const handleDeepSearch = async () => {
+    if (!inputValue) {
+      setResults([]);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/search-ug/deep?pcode=${inputValue}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        console.log('Search completed: ' + response.data);
+      }
+    } catch (error) {
+      console.log('Search failed: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFastSearch = async (searchQuery) => {
-    console.log('handleFastSearch');
     if (!searchQuery) {
       setResults([]);
       return;
@@ -34,6 +62,7 @@ export const SearchComponent = () => {
       });
 
       setResults(response.data.success ? response.data.data : []);
+
       console.log(
         response.data.success ? 'Search successful' : response.data.message
       );
@@ -51,26 +80,27 @@ export const SearchComponent = () => {
   );
 
   const handleOnClose = () => {
-    console.log('handleOnClose');
     setOpen(false);
+
     setResults([]);
-    setInputValue('');
   };
 
-  const handleInputChange = (e, value, reason) => {
+  const handleInputChange = (_e, value, reason) => {
     if (reason === 'clear') {
       handleOnClose();
-    }
 
-    if (reason === 'input') {
+      setInputValue('');
+    } else if (reason === 'reset') {
+      setInputValue('');
+    } else if (reason === 'input') {
       setInputValue(value);
+
       if (value === '') {
         setResults([]);
       } else {
         debouncedSearch(value);
       }
     }
-    console.log('handleInputChange', e, reason);
   };
 
   const handleItemClick = (_e, value) => {
@@ -85,52 +115,63 @@ export const SearchComponent = () => {
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
       <h2>Search</h2>
-      <Autocomplete
-        freeSolo
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={handleOnClose}
-        inputValue={inputValue}
-        options={results}
-        getOptionLabel={(option) =>
-          `${option.brand} - ${option.number} - ${option.descr}`
-        }
-        onInputChange={handleInputChange}
-        onChange={handleItemClick}
-        renderOption={(props, option) => (
-          <li
-            {...props}
-            key={option.id}
-            onClick={(e) => {
-              props.onClick(e);
-              handleItemClick(e, option);
-            }}
-          >
-            {option.brand} - {option.number} - {option.descr}
-          </li>
-        )}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Enter search term"
-            variant="outlined"
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                autoComplete: 'off',
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {loading ? (
-                      <CircularProgress color="inherit" size={20} />
-                    ) : null}
-                    {params.InputProps.endAdornment}
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-        )}
-      />
+      <Stack direction="row" spacing={1}>
+        <Autocomplete
+          sx={{ width: '100%' }}
+          freeSolo
+          open={open}
+          onOpen={() => setOpen(true)}
+          onClose={handleOnClose}
+          inputValue={inputValue}
+          options={results}
+          getOptionLabel={(option) =>
+            `${option.brand} - ${option.number} - ${option.descr}`
+          }
+          onInputChange={handleInputChange}
+          onChange={handleItemClick}
+          renderOption={(props, option) => (
+            <li
+              {...props}
+              key={option.id}
+              onClick={(e) => {
+                props.onClick(e);
+                handleItemClick(e, option);
+              }}
+            >
+              {option.brand} - {option.number} - {option.descr}
+            </li>
+          )}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Enter search term"
+              variant="outlined"
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  autoComplete: 'off',
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {loading ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null}
+                      {params.InputProps.endAdornment}
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          )}
+        />
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={handleDeepSearch}
+          disabled={loading}
+        >
+          <SearchIcon />
+        </Button>
+      </Stack>
     </Container>
   );
 };
