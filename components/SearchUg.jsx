@@ -62,27 +62,20 @@ export const SearchComponent = () => {
     console.log('handleInputChange', e, reason);
   };
 
+  const handleOnClose = () => {
+    console.log('handleOnClose');
+    setOpen(false);
+    setResults([]);
+    setInputValue('');
+  };
+
   const handleItemClick = (_e, value) => {
     if (value) {
       console.log(
         `Selected item: ${value.brand} - ${value.number} - ${value.descr}`
       );
-      setInputValue('');
-      setResults([]);
-      setOpen(false);
+      handleOnClose();
     }
-  };
-
-  const handleOnClose = () => {
-    console.log('handleOnClose');
-    setOpen(false);
-    setResults([]);
-  };
-
-  const handleBlur = () => {
-    console.log('handleBlur');
-    setInputValue('');
-    setResults([]);
   };
 
   return (
@@ -104,9 +97,9 @@ export const SearchComponent = () => {
           <li
             {...props}
             key={option.id}
-            onClick={(event) => {
-              props.onClick(event);
-              handleItemClick(event, option);
+            onClick={(e) => {
+              props.onClick(e);
+              handleItemClick(e, option);
             }}
           >
             {option.brand} - {option.number} - {option.descr}
@@ -117,7 +110,6 @@ export const SearchComponent = () => {
             {...params}
             label="Enter search term"
             variant="outlined"
-            onBlur={handleBlur}
             slotProps={{
               input: {
                 ...params.InputProps,
