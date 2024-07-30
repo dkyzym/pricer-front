@@ -1,7 +1,7 @@
-import { Login } from '../components/Login';
-import { Logout } from '../components/Logout';
+// import { Login } from '../components/Login';
+// import { Logout } from '../components/Logout';
 import { ToastContainer } from 'react-toastify';
-import Drawer from '@mui/material/Drawer';
+// import Drawer from '@mui/material/Drawer';
 // import { SearchCode } from '../components/SearchCode';
 
 import { SearchComponent } from '../components/SearchUg';
@@ -11,10 +11,10 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
     <>
-      <Drawer open={true} variant="permanent">
+      {/* <Drawer open={true} variant="permanent">
         <Login />
         <Logout />
-      </Drawer>
+      </Drawer> */}
 
       <SearchComponent />
       {/* <SearchCode /> */}
