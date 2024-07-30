@@ -50,7 +50,18 @@ export const SearchComponent = () => {
     []
   );
 
+  const handleOnClose = () => {
+    console.log('handleOnClose');
+    setOpen(false);
+    setResults([]);
+    setInputValue('');
+  };
+
   const handleInputChange = (e, value, reason) => {
+    if (reason === 'clear') {
+      handleOnClose();
+    }
+
     if (reason === 'input') {
       setInputValue(value);
       if (value === '') {
@@ -60,13 +71,6 @@ export const SearchComponent = () => {
       }
     }
     console.log('handleInputChange', e, reason);
-  };
-
-  const handleOnClose = () => {
-    console.log('handleOnClose');
-    setOpen(false);
-    setResults([]);
-    setInputValue('');
   };
 
   const handleItemClick = (_e, value) => {
