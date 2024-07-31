@@ -142,7 +142,6 @@ export const SearchComponent = () => {
             `${option.brand} - ${option.number} - ${option.descr}`
           }
           onInputChange={handleInputChange}
-          onChange={handleItemClick}
           renderOption={(props, option) => (
             <li
               {...props}
