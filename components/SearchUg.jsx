@@ -69,7 +69,6 @@ export const SearchComponent = () => {
         withCredentials: true,
       });
 
-      response.data.success && setInputValue('');
       setResults(response.data.success ? response.data.data : []);
       console.log(
         response.data.success ? 'Search successful' : response.data.message
@@ -138,6 +137,7 @@ export const SearchComponent = () => {
           onClose={handleOnClose}
           inputValue={inputValue}
           options={results}
+          filterOptions={(x) => x}
           getOptionLabel={(option) =>
             `${option.brand} - ${option.number} - ${option.descr}`
           }
