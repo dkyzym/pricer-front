@@ -69,13 +69,13 @@ export const SearchComponent = () => {
         withCredentials: true,
       });
 
+      response.data.success && setInputValue('');
       setResults(response.data.success ? response.data.data : []);
-
       console.log(
         response.data.success ? 'Search successful' : response.data.message
       );
     } catch (error) {
-      console.log('Fast search failed: ' + error.message);
+      console.log('Fast search failed: ', error.message);
       setError(true);
       setErrorMessage('Fast search failed: ' + error.message);
       setResults([]);
@@ -98,16 +98,22 @@ export const SearchComponent = () => {
     if (reason === 'clear') {
       handleOnClose();
       setInputValue('');
-    } else if (reason === 'reset') {
-      setInputValue('');
-    } else if (reason === 'input') {
-      setInputValue(value);
+      return;
+    }
 
+    if (reason === 'reset') {
+      setInputValue('');
+      return;
+    }
+
+    if (reason === 'input') {
+      setInputValue(value);
       if (value === '') {
         setResults([]);
       } else {
         debouncedSearch(value);
       }
+      return;
     }
   };
 
@@ -154,8 +160,8 @@ export const SearchComponent = () => {
               {...params}
               label="Enter search term"
               variant="outlined"
-              error={error} // Show error state
-              helperText={error ? errorMessage : ''} // Show error message
+              error={error}
+              helperText={error ? errorMessage : ''}
               slotProps={{
                 input: {
                   ...params.InputProps,
