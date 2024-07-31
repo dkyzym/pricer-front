@@ -1,4 +1,3 @@
-import SearchIcon from '@mui/icons-material/Search';
 import {
   Autocomplete,
   Button,
@@ -11,6 +10,18 @@ import {
 import axios from 'axios';
 import debounce from 'lodash.debounce';
 import { useMemo, useState } from 'react';
+import { FaSearch } from "react-icons/fa";
+import SvgIcon from '@mui/material/SvgIcon';
+
+
+const SearchIcon = (props) => {
+  return (
+    <SvgIcon {...props}>
+      <FaSearch />
+    </SvgIcon>
+  );
+};
+
 
 export const SearchComponent = () => {
   const [inputValue, setInputValue] = useState('');
@@ -161,7 +172,7 @@ export const SearchComponent = () => {
               variant="outlined"
               error={error}
               helperText={error ? errorMessage : ''}
-              slotProps={{
+              slotprops={{
                 input: {
                   ...params.InputProps,
                   autoComplete: 'off',
@@ -184,7 +195,7 @@ export const SearchComponent = () => {
           onClick={handleDeepSearch}
           disabled={loading}
         >
-          <SearchIcon />
+             <SearchIcon  fontSize="medium"  />
         </Button>
       </Stack>
     </Container>

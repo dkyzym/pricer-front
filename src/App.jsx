@@ -1,26 +1,17 @@
-// import { Login } from '../components/Login';
-// import { Logout } from '../components/Logout';
+import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-// import Drawer from '@mui/material/Drawer';
-// import { SearchCode } from '../components/SearchCode';
-
-import { SearchComponent } from '../components/SearchUg';
-
 import 'react-toastify/dist/ReactToastify.css';
+import {Header} from '../components/Header'
 
-function App() {
+
+const App = () => {
   return (
     <>
-      {/* <Drawer open={true} variant="permanent">
-        <Login />
-        <Logout />
-      </Drawer> */}
-
-      <SearchComponent />
-      {/* <SearchCode /> */}
+      <Header />
+      <Outlet />
       <ToastContainer autoClose={1500} closeOnClick />
     </>
   );
-}
+};
 
 export default App;
