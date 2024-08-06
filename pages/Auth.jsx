@@ -1,5 +1,5 @@
-import { Login } from '../components/Login';
-import { Logout } from '../components/Logout';
+import { Logout } from '../components/auth/Logout';
+import { Login } from '../components/auth/Login';
 
 export const Auth = () => {
   return (
@@ -10,5 +10,3 @@ export const Auth = () => {
     </div>
   );
 };
-
-
