@@ -5,8 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Home } from '../pages/Home';
 import { Auth } from '../pages/Auth';
 import { ErrorPage } from '../pages/ErrorPage';
-import App from './App'
-
+import App from './App';
 
 import CssBaseline from '@mui/material/CssBaseline';
 import './index.css';
