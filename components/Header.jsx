@@ -8,7 +8,7 @@ export const Header = () => {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1 }}>
-          My App
+          Pricer
         </Typography>
 
         <Button
