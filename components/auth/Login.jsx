@@ -36,6 +36,7 @@ export const Login = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
     setLoginData({ ...loginData, [name]: value });
   };
 
@@ -51,11 +52,7 @@ export const Login = () => {
         loginData.password
       );
 
-      if (response.success) {
-        setMessage(`Login to ${selectedSupplier} successful`);
-      } else {
-        setMessage(`Login to ${selectedSupplier} failed`);
-      }
+      setMessage(response.message);
     } catch (error) {
       setMessage(`Login to ${selectedSupplier} failed`);
     } finally {
