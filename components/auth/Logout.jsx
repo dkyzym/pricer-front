@@ -21,7 +21,7 @@ export const Logout = () => {
   return (
     <Container>
       <Typography variant="h4" gutterBottom>
-        Logout from Suppliers
+        Logout from
       </Typography>
       <ButtonGroup
         orientation="horizontal"
