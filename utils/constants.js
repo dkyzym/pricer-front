@@ -34,9 +34,9 @@ export const CREDENTIALS = {
 };
 
 export const SUPPLIERS = [
-  { name: 'ЮГ', color: 'error' },
-  { name: 'TurboCars', color: 'secondary' },
-  { name: 'Патриот', color: 'success' },
-  { name: 'Armtek', color: 'primary' },
-  { name: 'Orion', color: 'warning' },
+  { name: 'ЮГ', shortName: 'ЮГ', color: 'error' },
+  { name: 'TurboCars', shortName: 'TC', color: 'secondary' },
+  { name: 'Патриот', shortName: 'ПТ', color: 'success' },
+  { name: 'Armtek', shortName: 'AR', color: 'primary' },
+  { name: 'Orion', shortName: 'OR', color: 'warning' },
 ];
