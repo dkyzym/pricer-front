@@ -46,10 +46,11 @@ export const Login = () => {
 
     try {
       const response = await loginToSupplier(
-        supplierCredentials.url,
+        supplierCredentials.loginUrl,
         loginData.username,
         loginData.password
       );
+
       if (response.success) {
         setMessage(`Login to ${selectedSupplier} successful`);
       } else {
