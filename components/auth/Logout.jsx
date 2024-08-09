@@ -1,49 +1,60 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { Button, ButtonGroup, Container, Typography } from '@mui/material';
+import { logoutFromSupplier } from '../../api/api';
+import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
 
 export const Logout = () => {
-  //   const [message, setMessage] = useState('');
-  const [ugMessage, setUGmessage] = useState('');
-  const [tcMessage, setTCmessage] = useState('');
+  const [messages, setMessages] = useState(
+    SUPPLIERS.reduce((acc, supplier) => ({ ...acc, [supplier.name]: '' }), {})
+  );
 
-  const handleLogoutUG = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/logout/ug', {
-        withCredentials: true,
-      });
-      if (response.data.success) {
-        setUGmessage('Logout from UG successful');
-      } else {
-        setUGmessage('Logout from UG failed');
-      }
-    } catch (error) {
-      setUGmessage('Logout from UG failed');
-    }
-  };
-
-  const handleLogoutTC = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/logout/tc', {
-        withCredentials: true,
-      });
-      if (response.data.success) {
-        setTCmessage('Logout from Turbo Cars successful');
-      } else {
-        setTCmessage('Logout from Turbo Cars failed');
-      }
-    } catch (error) {
-      setTCmessage('Logout from Turbo Cars failed');
-    }
+  const handleLogout = async (supplierName) => {
+    const result = await logoutFromSupplier(
+      CREDENTIALS[supplierName].logoutUrl
+    );
+    setMessages((prevMessages) => ({
+      ...prevMessages,
+      [supplierName]: result.message,
+    }));
   };
 
   return (
-    <>
-      <h2>Logout</h2>
-      <button onClick={handleLogoutUG}>Logout UG</button>
-      <button onClick={handleLogoutTC}>Logout Turbo Cars</button>
-
-      <p>{ugMessage}</p>
-      <p>{tcMessage}</p>
-    </>
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        Logout from Suppliers
+      </Typography>
+      <ButtonGroup
+        orientation="horizontal"
+        fullWidth
+        variant="outlined"
+        sx={{ mb: 2 }}
+      >
+        {SUPPLIERS.map((supplier) => (
+          <Button
+            key={supplier.name}
+            color={supplier.color}
+            onClick={() => handleLogout(supplier.name)}
+            sx={{
+              borderWidth: 2,
+              '&:hover': {
+                borderWidth: 2,
+              },
+            }}
+          >
+            {supplier.name}
+          </Button>
+        ))}
+      </ButtonGroup>
+      {SUPPLIERS.map((supplier) => (
+        <Typography
+          key={supplier.name}
+          variant="body2"
+          color="textSecondary"
+          sx={{ marginBottom: '8px' }}
+        >
+          {messages[supplier.name]}
+        </Typography>
+      ))}
+    </Container>
   );
 };

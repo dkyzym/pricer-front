@@ -8,18 +8,10 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { loginToSupplier } from '../../api/api';
-import { CREDENTIALS } from '../../utils/constants';
-
-const suppliers = [
-  { name: 'ЮГ', color: 'error' },
-  { name: 'TurboCars', color: 'secondary' },
-  { name: 'Патриот', color: 'success' },
-  { name: 'Armtek', color: 'primary' },
-  { name: 'Orion', color: 'warning' },
-];
+import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
 
 export const Login = () => {
-  const initialSupplier = suppliers[0].name;
+  const initialSupplier = SUPPLIERS[0].name;
   const initialCredentials = CREDENTIALS[initialSupplier];
 
   const [selectedSupplier, setSelectedSupplier] = useState(initialSupplier);
@@ -70,7 +62,7 @@ export const Login = () => {
     }
   };
 
-  const currentSupplier = suppliers.find(
+  const currentSupplier = SUPPLIERS.find(
     (supplier) => supplier.name === selectedSupplier
   );
 
@@ -86,7 +78,7 @@ export const Login = () => {
         fullWidth
         sx={{ mb: 2 }}
       >
-        {suppliers.map((supplier) => (
+        {SUPPLIERS.map((supplier) => (
           <ToggleButton
             key={supplier.name}
             value={supplier.name}
