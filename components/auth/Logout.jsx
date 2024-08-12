@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Button, ButtonGroup, Container, Typography } from '@mui/material';
 import { logoutFromSupplier } from '../../api/api';
 import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
+import { useAuth } from '../../context/AuthContext';
 
 export const Logout = () => {
   const [messages, setMessages] = useState(
     SUPPLIERS.reduce((acc, supplier) => ({ ...acc, [supplier.name]: '' }), {})
   );
+
+  const { logout } = useAuth();
 
   const handleLogout = async (supplierName) => {
     const result = await logoutFromSupplier(
@@ -16,6 +19,10 @@ export const Logout = () => {
       ...prevMessages,
       [supplierName]: result.message,
     }));
+
+    if (result.success) {
+      logout(supplierName);
+    }
   };
 
   return (

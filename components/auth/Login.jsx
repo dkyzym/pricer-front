@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import { loginToSupplier } from '../../api/api';
 import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
+import { useAuth } from '../../context/AuthContext';
 
 export const Login = () => {
   const initialSupplier = SUPPLIERS[0].name;
@@ -21,6 +22,8 @@ export const Login = () => {
   });
   const [message, setMessage] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const { login } = useAuth();
 
   const handleSupplierChange = (e, newSupplier) => {
     if (newSupplier !== null) {
@@ -53,6 +56,7 @@ export const Login = () => {
       );
 
       setMessage(response.message);
+      login(selectedSupplier);
     } catch (error) {
       setMessage(`Login to ${selectedSupplier} failed`);
     } finally {

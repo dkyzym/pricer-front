@@ -1,11 +1,14 @@
 import { Avatar, Box } from '@mui/material';
 import { SUPPLIERS } from '../../utils/constants';
+import { useAuth } from '../../context/AuthContext';
 
-export const LoginStatusIndicator = ({ statuses }) => {
+export const LoginStatusIndicator = () => {
+  const { loginStatuses } = useAuth();
+
   return (
     <Box sx={{ display: 'flex', gap: 1, mr: '20%' }}>
       {SUPPLIERS.map((supplier) => {
-        const isLoggedIn = statuses[supplier.shortName];
+        const isLoggedIn = loginStatuses[supplier.shortName];
 
         return (
           <Avatar

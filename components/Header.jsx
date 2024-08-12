@@ -5,14 +5,6 @@ import { Link } from 'react-router-dom';
 import { LoginStatusIndicator } from './auth/LoginStatusIndicator';
 
 export const Header = () => {
-  const loginStatuses = {
-    ЮГ: true,
-    TC: false,
-    ПТ: true,
-    AR: false,
-    OR: true,
-  };
-
   return (
     <AppBar position="static">
       <Toolbar>
@@ -20,7 +12,7 @@ export const Header = () => {
           Pricer
         </Typography>
 
-        <LoginStatusIndicator statuses={loginStatuses} />
+        <LoginStatusIndicator />
 
         <Button
           color="inherit"
