@@ -6,7 +6,7 @@ export const LoginStatusIndicator = () => {
   const { loginStatuses } = useAuth();
 
   return (
-    <Box sx={{ display: 'flex', gap: 1, mr: '20%' }}>
+    <Box sx={{ display: 'flex', flex: 1, columnGap: 1 }}>
       {SUPPLIERS.map((supplier) => {
         const isLoggedIn = loginStatuses[supplier.shortName];
 

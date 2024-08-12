@@ -7,8 +7,8 @@ import { LoginStatusIndicator } from './auth/LoginStatusIndicator';
 export const Header = () => {
   return (
     <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1 }}>
+      <Toolbar sx={{ width: '100%' }}>
+        <Typography variant="h6" component={Link} to="/" sx={{ flex: 1 }}>
           Pricer
         </Typography>
 
