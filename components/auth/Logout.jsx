@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, ButtonGroup, Container, Typography } from '@mui/material';
 import { logoutFromSupplier } from '../../api/api';
 import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Logout = () => {
   const [messages, setMessages] = useState(

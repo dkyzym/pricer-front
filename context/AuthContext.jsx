@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 
 const AuthContext = createContext();
@@ -38,7 +38,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export default AuthContext;

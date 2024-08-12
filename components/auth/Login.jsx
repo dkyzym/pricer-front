@@ -9,7 +9,7 @@ import {
 import { useState } from 'react';
 import { loginToSupplier } from '../../api/api';
 import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Login = () => {
   const initialSupplier = SUPPLIERS[0].name;
