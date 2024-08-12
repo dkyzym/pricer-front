@@ -1,13 +1,12 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import { Home } from '../pages/Home';
 import { Auth } from '../pages/Auth';
 import { ErrorPage } from '../pages/ErrorPage';
+import { Home } from '../pages/Home';
 import App from './App';
 
-import CssBaseline from '@mui/material/CssBaseline';
+import AppProviders from '../utils/AppProviders';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -29,8 +28,7 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <CssBaseline />
+  <AppProviders>
     <RouterProvider router={router} />
-  </React.StrictMode>
+  </AppProviders>
 );

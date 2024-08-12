@@ -2,7 +2,7 @@ import CottageOutlinedIcon from '@mui/icons-material/CottageOutlined';
 import FollowTheSignsOutlinedIcon from '@mui/icons-material/FollowTheSignsOutlined';
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { LoginStatusAvatars } from './auth/LoginStatusAvatars';
+import { LoginStatusIndicator } from './auth/LoginStatusIndicator';
 
 export const Header = () => {
   const loginStatuses = {
@@ -20,7 +20,7 @@ export const Header = () => {
           Pricer
         </Typography>
 
-        <LoginStatusAvatars statuses={loginStatuses} />
+        <LoginStatusIndicator statuses={loginStatuses} />
 
         <Button
           color="inherit"

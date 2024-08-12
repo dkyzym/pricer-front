@@ -1,7 +1,7 @@
 import { Avatar, Box } from '@mui/material';
 import { SUPPLIERS } from '../../utils/constants';
 
-export const LoginStatusAvatars = ({ statuses }) => {
+export const LoginStatusIndicator = ({ statuses }) => {
   return (
     <Box sx={{ display: 'flex', gap: 1, mr: '20%' }}>
       {SUPPLIERS.map((supplier) => {
