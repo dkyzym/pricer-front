@@ -14,10 +14,10 @@ export const CREDENTIALS = {
     logoutUrl: `${BASE_URL}logout/tc`,
   },
   Патриот: {
-    username: '',
-    password: '',
-    loginUrl: '',
-    logoutUrl: '',
+    username: 'automir.lg@gmail.com',
+    password: '296942aA',
+    loginUrl: `${BASE_URL}login/pt`,
+    logoutUrl: `${BASE_URL}logout/pt`,
   },
   Armtek: {
     username: '',
