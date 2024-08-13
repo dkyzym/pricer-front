@@ -2,18 +2,13 @@ import { logoutFromSupplier } from '@api/api';
 import { useAuth } from '@hooks/useAuth';
 import { Button, ButtonGroup, Container, Typography } from '@mui/material';
 import { CREDENTIALS, SUPPLIERS } from '@utils/constants';
-import { hasSupplierCookie } from '@utils/hasSupplierCookie';
+
 import { toast } from 'react-toastify';
 
 export const Logout = () => {
   const { logout } = useAuth();
 
   const handleLogout = async (supplierName) => {
-    if (!hasSupplierCookie(supplierName)) {
-      toast.error(`You are not logged in to ${supplierName}`);
-      return;
-    }
-
     try {
       const response = await logoutFromSupplier(
         CREDENTIALS[supplierName].logoutUrl
@@ -22,8 +17,6 @@ export const Logout = () => {
       logout(supplierName);
       toast.success(response.message);
     } catch (error) {
-      console.error(error);
-
       toast.error(`Logout failed`);
     }
   };
