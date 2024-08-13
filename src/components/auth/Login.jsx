@@ -10,12 +10,14 @@ import { useState } from 'react';
 import { loginToSupplier } from '../../api/api';
 import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
 import { useAuth } from '../../hooks/useAuth';
+import { findShortName } from '../../utils/findShortName';
 
 export const Login = () => {
   const initialSupplier = SUPPLIERS[0].name;
   const initialCredentials = CREDENTIALS[initialSupplier];
 
   const [selectedSupplier, setSelectedSupplier] = useState(initialSupplier);
+
   const [loginData, setLoginData] = useState({
     username: initialCredentials.username,
     password: initialCredentials.password,
@@ -25,7 +27,7 @@ export const Login = () => {
 
   const { login } = useAuth();
 
-  const handleSupplierChange = (e, newSupplier) => {
+  const handleSupplierChange = (_e, newSupplier) => {
     if (newSupplier !== null) {
       const newCredentials = CREDENTIALS[newSupplier];
       setSelectedSupplier(newSupplier);
@@ -56,7 +58,8 @@ export const Login = () => {
       );
 
       setMessage(response.message);
-      login(selectedSupplier);
+
+      login(findShortName(selectedSupplier));
     } catch (error) {
       setMessage(`Login to ${selectedSupplier} failed`);
     } finally {
@@ -70,7 +73,7 @@ export const Login = () => {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         Login to
       </Typography>
       <ToggleButtonGroup

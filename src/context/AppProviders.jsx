@@ -1,5 +1,5 @@
 import CssBaseline from '@mui/material/CssBaseline';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider } from './AuthContext';
 
 const AppProviders = ({ children }) => {
   return (

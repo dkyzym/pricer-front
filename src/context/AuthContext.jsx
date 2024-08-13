@@ -1,20 +1,14 @@
 import { createContext } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
+import { findShortName } from '../utils/findShortName';
+import { INITIAL_STATUSES } from '../utils/constants';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const initialStatuses = {
-    ЮГ: false,
-    TC: false,
-    ПТ: false,
-    AR: false,
-    OR: false,
-  };
-
   const [loginStatuses, setLoginStatuses] = useLocalStorage(
     'loginStatuses',
-    initialStatuses
+    INITIAL_STATUSES
   );
 
   const login = (supplierName) => {
@@ -27,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   const logout = (supplierName) => {
     setLoginStatuses((prevStatuses) => ({
       ...prevStatuses,
-      [supplierName]: false,
+      [findShortName(supplierName)]: false,
     }));
   };
 

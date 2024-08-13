@@ -40,3 +40,13 @@ export const SUPPLIERS = [
   { name: 'Armtek', shortName: 'AR', color: 'primary' },
   { name: 'Orion', shortName: 'OR', color: 'warning' },
 ];
+
+export const INITIAL_STATUSES = {
+  ЮГ: false,
+  TC: false,
+  ПТ: false,
+  AR: false,
+  OR: false,
+};
+
+Object.seal(INITIAL_STATUSES);

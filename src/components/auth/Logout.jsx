@@ -17,7 +17,7 @@ export const Logout = () => {
     );
     setMessages((prevMessages) => ({
       ...prevMessages,
-      [supplierName]: result.message,
+      [supplierName]: result.message + ' from ' + supplierName,
     }));
 
     if (result.success) {
@@ -27,7 +27,7 @@ export const Logout = () => {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         Logout from
       </Typography>
       <ButtonGroup
