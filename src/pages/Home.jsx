@@ -1,4 +1,4 @@
-import { SearchComponent } from '../components/SearchUg';
+import { SearchComponent } from '@components/SearchUg';
 
 export const Home = () => {
   return (

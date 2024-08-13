@@ -1,6 +1,6 @@
+import { useAuth } from '@hooks/useAuth';
 import { Avatar, Box } from '@mui/material';
-import { SUPPLIERS } from '../../utils/constants';
-import { useAuth } from '../../hooks/useAuth';
+import { SUPPLIERS } from '@utils/constants';
 
 export const LoginStatusIndicator = () => {
   const { loginStatuses } = useAuth();

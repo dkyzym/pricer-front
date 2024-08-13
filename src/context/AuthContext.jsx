@@ -1,7 +1,7 @@
+import useLocalStorage from '@hooks/useLocalStorage';
+import { INITIAL_STATUSES } from '@utils/constants';
+import { findShortName } from '@utils/findShortName';
 import { createContext } from 'react';
-import useLocalStorage from '../hooks/useLocalStorage';
-import { findShortName } from '../utils/findShortName';
-import { INITIAL_STATUSES } from '../utils/constants';
 
 const AuthContext = createContext();
 

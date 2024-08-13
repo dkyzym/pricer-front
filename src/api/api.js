@@ -9,27 +9,25 @@ export const loginToSupplier = async (url, username, password) => {
     );
     return response.data;
   } catch (error) {
-    throw new Error('Login failed');
+    console.error(
+      `Login failed: ${error.response?.data?.message || error.message}`
+    );
+    throw new Error(
+      `Login failed: ${error.response?.data?.message || error.message}`
+    );
   }
 };
 
-/**
- * Logs out from a specified supplier.
- *
- * @param {string} url - The URL endpoint for the logout request.
- * @returns {Promise<{success: boolean, message: string}>} - The result of the logout operation.
- */
 export const logoutFromSupplier = async (url) => {
   try {
     const response = await axios.get(url, { withCredentials: true });
-    return {
-      success: response.data.success,
-      message: response.data.success ? 'Logout successful' : 'Logout failed',
-    };
+    return response.data;
   } catch (error) {
-    return {
-      success: false,
-      message: 'Logout failed',
-    };
+    console.error(
+      `Logout failed: ${error.response?.data?.message || error.message}`
+    );
+    throw new Error(
+      `Logout failed: ${error.response?.data?.message || error.message}`
+    );
   }
 };

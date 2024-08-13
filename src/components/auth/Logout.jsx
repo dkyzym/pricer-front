@@ -1,27 +1,30 @@
-import { useState } from 'react';
+import { logoutFromSupplier } from '@api/api';
+import { useAuth } from '@hooks/useAuth';
 import { Button, ButtonGroup, Container, Typography } from '@mui/material';
-import { logoutFromSupplier } from '../../api/api';
-import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
-import { useAuth } from '../../hooks/useAuth';
+import { CREDENTIALS, SUPPLIERS } from '@utils/constants';
+import { hasSupplierCookie } from '@utils/hasSupplierCookie';
+import { toast } from 'react-toastify';
 
 export const Logout = () => {
-  const [messages, setMessages] = useState(
-    SUPPLIERS.reduce((acc, supplier) => ({ ...acc, [supplier.name]: '' }), {})
-  );
-
   const { logout } = useAuth();
 
   const handleLogout = async (supplierName) => {
-    const result = await logoutFromSupplier(
-      CREDENTIALS[supplierName].logoutUrl
-    );
-    setMessages((prevMessages) => ({
-      ...prevMessages,
-      [supplierName]: result.message + ' from ' + supplierName,
-    }));
+    if (!hasSupplierCookie(supplierName)) {
+      toast.error(`You are not logged in to ${supplierName}`);
+      return;
+    }
 
-    if (result.success) {
+    try {
+      const response = await logoutFromSupplier(
+        CREDENTIALS[supplierName].logoutUrl
+      );
+
       logout(supplierName);
+      toast.success(response.message);
+    } catch (error) {
+      console.error(error);
+
+      toast.error(`Logout failed`);
     }
   };
 
@@ -52,16 +55,6 @@ export const Logout = () => {
           </Button>
         ))}
       </ButtonGroup>
-      {SUPPLIERS.map((supplier) => (
-        <Typography
-          key={supplier.name}
-          variant="body2"
-          color="textSecondary"
-          sx={{ marginBottom: '8px' }}
-        >
-          {messages[supplier.name]}
-        </Typography>
-      ))}
     </Container>
   );
 };

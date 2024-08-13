@@ -1,3 +1,5 @@
+import { loginToSupplier } from '@api/api';
+import { useAuth } from '@hooks/useAuth';
 import {
   Button,
   Container,
@@ -6,11 +8,10 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
+import { CREDENTIALS, SUPPLIERS } from '@utils/constants';
+import { findShortName } from '@utils/findShortName';
 import { useState } from 'react';
-import { loginToSupplier } from '../../api/api';
-import { CREDENTIALS, SUPPLIERS } from '../../utils/constants';
-import { useAuth } from '../../hooks/useAuth';
-import { findShortName } from '../../utils/findShortName';
+import { toast } from 'react-toastify';
 
 export const Login = () => {
   const initialSupplier = SUPPLIERS[0].name;
@@ -22,7 +23,7 @@ export const Login = () => {
     username: initialCredentials.username,
     password: initialCredentials.password,
   });
-  const [message, setMessage] = useState('');
+
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const { login } = useAuth();
@@ -30,12 +31,13 @@ export const Login = () => {
   const handleSupplierChange = (_e, newSupplier) => {
     if (newSupplier !== null) {
       const newCredentials = CREDENTIALS[newSupplier];
+
       setSelectedSupplier(newSupplier);
+
       setLoginData({
         username: newCredentials.username,
         password: newCredentials.password,
       });
-      setMessage('');
     }
   };
 
@@ -56,12 +58,11 @@ export const Login = () => {
         loginData.username,
         loginData.password
       );
-
-      setMessage(response.message);
-
+      toast.success(response.message);
       login(findShortName(selectedSupplier));
     } catch (error) {
-      setMessage(`Login to ${selectedSupplier} failed`);
+      console.error(error);
+      toast.error(`Login to ${selectedSupplier} failed`);
     } finally {
       setIsLoggingIn(false);
     }
@@ -120,9 +121,6 @@ export const Login = () => {
           Login - {selectedSupplier}
         </Button>
       </form>
-      <Typography variant="body1" color="textSecondary">
-        {message}
-      </Typography>
     </Container>
   );
 };
