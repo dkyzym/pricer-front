@@ -20,10 +20,10 @@ export const CREDENTIALS = {
     logoutUrl: `${BASE_URL}logout/pt`,
   },
   Armtek: {
-    username: '',
-    password: '',
-    loginUrl: '',
-    logoutUrl: '',
+    username: 'automir.lg@gmail.com',
+    password: '296942',
+    loginUrl: `${BASE_URL}login/ar`,
+    logoutUrl: `${BASE_URL}logout/ar`,
   },
   Orion: {
     username: '',
