@@ -19,12 +19,17 @@ export const CREDENTIALS = {
     loginUrl: `${BASE_URL}login/pt`,
     logoutUrl: `${BASE_URL}logout/pt`,
   },
-
   Orion: {
-    username: '',
-    password: '',
-    loginUrl: '',
-    logoutUrl: '',
+    username: 'automir.19@yandex.ru',
+    password: '101599',
+    loginUrl: `${BASE_URL}login/or`,
+    logoutUrl: `${BASE_URL}logout/or`,
+  },
+  Armtek: {
+    username: 'automir.lg@gmail.com',
+    password: '296942',
+    loginUrl: `${BASE_URL}login/ar`,
+    logoutUrl: `${BASE_URL}logout/ar`,
   },
 };
 
@@ -33,6 +38,7 @@ export const SUPPLIERS = [
   { name: 'TurboCars', shortName: 'TC', color: 'secondary' },
   { name: 'Патриот', shortName: 'ПТ', color: 'success' },
   { name: 'Orion', shortName: 'OR', color: 'warning' },
+  { name: 'Armtek', shortName: 'AR', color: 'info' },
 ];
 
 export const INITIAL_STATUSES = {

@@ -39,7 +39,11 @@ export const SearchComponent = () => {
       );
 
       if (response.data.success) {
-        console.log('Search completed: ' + response.data);
+        console.log(
+          'Search completed:',
+          JSON.stringify(response.data, null, 2)
+        );
+        console.log(response.data.data[0]);
       }
     } catch (error) {
       console.log('Search failed: ' + error.message);
