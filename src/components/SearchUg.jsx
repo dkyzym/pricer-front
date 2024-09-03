@@ -1,3 +1,5 @@
+import { handleSearchBtnClick } from '@api/api';
+import { socket } from '@api/ws/socket';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import {
   Autocomplete,
@@ -5,179 +7,143 @@ import {
   CircularProgress,
   Container,
   InputAdornment,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
+  styled,
 } from '@mui/material';
-import axios from 'axios';
 import debounce from 'lodash.debounce';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+const ZebraListItem = styled(ListItem)(({ theme, 'data-own': own }) => ({
+  backgroundColor:
+    own === 'true'
+      ? theme.palette.primary.light
+      : theme.palette.background.paper,
+  '&:nth-of-type(odd)': {
+    backgroundColor:
+      own === 'true' ? theme.palette.success.light : theme.palette.action.hover,
+  },
+}));
 
 export const SearchComponent = () => {
   const [inputValue, setInputValue] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [deepSearchResults, setDeepSearchResults] = useState([]);
 
-  const handleDeepSearch = async () => {
-    if (!inputValue) {
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('WebSocket connected');
+      setInputValue('');
       setResults([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(false);
-    setErrorMessage('');
-
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/search-ug/deep?pcode=${inputValue}`,
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (response.data.success) {
-        console.log(
-          'Search completed:',
-          JSON.stringify(response.data, null, 2)
-        );
-        console.log(response.data.data[0]);
-      }
-    } catch (error) {
-      console.log('Search failed: ' + error.message);
-      setError(true);
-      setErrorMessage('Search failed: ' + error.message);
-    } finally {
       setLoading(false);
-    }
-  };
+    });
 
-  const handleFastSearch = async (searchQuery) => {
-    if (!searchQuery) {
-      setResults([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(false);
-    setErrorMessage('');
-
-    try {
-      const response = await axios.get(`http://localhost:3000/search-ug`, {
-        params: {
-          term: searchQuery,
-          locale: 'ru_RU',
-        },
-        withCredentials: true,
-      });
-
-      setResults(response.data.success ? response.data.data : []);
-      console.log(
-        response.data.success ? 'Search successful' : response.data.message
-      );
-    } catch (error) {
-      console.log('Fast search failed: ', error.message);
-      setError(true);
-      setErrorMessage('Fast search failed: ' + error.message);
-      setResults([]);
-    } finally {
+    socket.on('autocompleteResults', ({ results }) => {
+      console.log('autocompleteResults', results);
+      setResults(results?.data || []);
       setLoading(false);
-    }
+    });
+
+    socket.on('autocompleteError', (error) => {
+      console.error('Autocomplete error:', error);
+      setResults([]);
+      setLoading(false);
+    });
+
+    socket.on('getItemResultsData', ({ ugSearchResult }) => {
+      console.log('Item Results:', ugSearchResult);
+      setDeepSearchResults(ugSearchResult?.data || []);
+      setLoading(false);
+    });
+
+    socket.on('startLoading', () => {
+      setLoading(true);
+    });
+
+    return () => {
+      socket.off('autocompleteResults');
+      socket.off('autocompleteError');
+      socket.off('connect');
+      socket.off('getItemResultsData');
+      socket.off('startLoading');
+    };
+  }, []);
+
+  const handleFastSearch = (searchQuery) => {
+    socket.emit('autocomplete', searchQuery);
   };
 
   const debouncedSearch = useMemo(
-    () => debounce((searchQuery) => handleFastSearch(searchQuery), 1200),
+    () => debounce((searchQuery) => handleFastSearch(searchQuery), 300),
     []
   );
 
-  const handleOnClose = () => {
-    setOpen(false);
-    setResults([]);
-  };
-
   const handleInputChange = (_e, value, reason) => {
-    if (reason === 'clear') {
-      handleOnClose();
-      setInputValue('');
-      return;
-    }
-
-    if (reason === 'reset') {
-      setInputValue('');
-      return;
-    }
-
     if (reason === 'input') {
       setInputValue(value);
-      if (value === '') {
-        setResults([]);
-      } else {
-        debouncedSearch(value);
-      }
-      return;
+      debouncedSearch(value);
     }
   };
 
-  const handleItemClick = (_e, value) => {
+  const handleOptionSelect = (_event, value) => {
     if (value) {
-      console.log(
-        `Selected item: ${value.brand} - ${value.number} - ${value.descr}`
-      );
-      handleOnClose();
+      socket.emit('getItemResults', value);
+      setLoading(false);
+    }
+  };
+
+  const handleDeepSearch = async (inputValue) => {
+    try {
+      const data = await handleSearchBtnClick(inputValue);
+      console.log('Response Data:', data);
+      setDeepSearchResults(data || []);
+    } catch (error) {
+      console.error('Error during deep search:', error);
+      setDeepSearchResults([]);
     }
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 3 }}>
+    <Container maxWidth="lg" sx={{ mt: 3 }}>
       <h2>Search</h2>
       <Stack direction="row" spacing={1}>
         <Autocomplete
           sx={{ width: '100%' }}
           freeSolo
-          open={open}
-          onOpen={() => setOpen(true)}
-          onClose={handleOnClose}
           inputValue={inputValue}
           options={results}
           filterOptions={(x) => x}
           getOptionLabel={(option) =>
-            `${option.brand} - ${option.number} - ${option.descr}`
+            `${option.brand} - ${option.article} - ${option.description}`
           }
           onInputChange={handleInputChange}
-          renderOption={(props, option) => (
-            <li
-              {...props}
-              key={option.id}
-              onClick={(e) => {
-                props.onClick(e);
-                handleItemClick(e, option);
-              }}
-            >
-              {option.brand} - {option.number} - {option.descr}
-            </li>
-          )}
+          onChange={handleOptionSelect}
           renderInput={(params) => (
             <TextField
               {...params}
               label="Enter search term"
               variant="outlined"
-              error={error}
-              helperText={error ? errorMessage : ''}
-              slotprops={{
-                input: {
-                  ...params.InputProps,
-                  autoComplete: 'off',
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {loading ? (
-                        <CircularProgress color="inherit" size={20} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </InputAdornment>
-                  ),
-                },
+              InputProps={{
+                ...params.InputProps,
+                autoComplete: 'off',
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {loading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                  </InputAdornment>
+                ),
               }}
             />
           )}
@@ -185,12 +151,72 @@ export const SearchComponent = () => {
         <Button
           variant="outlined"
           color="primary"
-          onClick={handleDeepSearch}
+          onClick={() => handleDeepSearch(inputValue)}
           disabled={loading}
         >
           <SearchOutlinedIcon fontSize="large" />
         </Button>
       </Stack>
+
+      {loading && <CircularProgress sx={{ mt: 3 }} />}
+
+      {!loading && deepSearchResults.length > 0 && (
+        <TableContainer component={Paper} sx={{ mt: 3 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Image</TableCell>
+                <TableCell>Brand</TableCell>
+                <TableCell>Article</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Availability</TableCell>
+                <TableCell>Warehouse</TableCell>
+                <TableCell>Probability</TableCell>
+                <TableCell>Price</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {deepSearchResults.map((product, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    backgroundColor: index % 2 === 0 ? '#e0f7fa' : '#fff',
+                  }}
+                >
+                  <TableCell>
+                    <img
+                      src={product?.imageUrl}
+                      alt={product?.article}
+                      style={{ width: '50px', height: '50px' }}
+                    />
+                  </TableCell>
+                  <TableCell>{product?.brand}</TableCell>
+                  <TableCell>{product?.article}</TableCell>
+                  <TableCell>{product?.description}</TableCell>
+                  <TableCell>{product?.availability}</TableCell>
+                  <TableCell>{product?.warehouse}</TableCell>
+                  <TableCell>{product?.probability}</TableCell>
+                  <TableCell>{product?.price} ₽</TableCell>
+                  <TableCell>{product?.deadline} </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* Список результатов (возвращаемый функционал) */}
+      <List sx={{ mt: 3 }}>
+        {deepSearchResults.length > 0 &&
+          deepSearchResults.map(({ own, article, brand }, index) => (
+            <ZebraListItem key={index} data-own={own?.toString()}>
+              <Stack role="li" direction={'row'} gap={2}>
+                <ListItemText primary={`${article?.toUpperCase()} `} />
+                <ListItemText primary={`${brand?.toUpperCase()}`} />
+              </Stack>
+            </ZebraListItem>
+          ))}
+      </List>
     </Container>
   );
 };
