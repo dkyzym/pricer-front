@@ -32,7 +32,7 @@ export const logoutFromSupplier = async (url) => {
   }
 };
 
-export const handleSearchBtnClick = async (inputValue) => {
+export const searchBtnClick = async (inputValue) => {
   try {
     const response = await axios.get(
       `http://localhost:3000/getItemsListByArticle`,

@@ -8,7 +8,7 @@ const App = () => {
     <>
       <Header />
       <Outlet />
-      <ToastContainer autoClose={1500} closeOnClick />
+      <ToastContainer autoClose={1500} />
     </>
   );
 };

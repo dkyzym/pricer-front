@@ -1,4 +1,4 @@
-import { handleSearchBtnClick } from '@api/api';
+import { searchBtnClick } from '@api/api';
 import { socket } from '@api/ws/socket';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import {
@@ -8,7 +8,6 @@ import {
   Container,
   InputAdornment,
   List,
-  ListItem,
   ListItemText,
   Paper,
   Stack,
@@ -19,50 +18,44 @@ import {
   TableHead,
   TableRow,
   TextField,
-  styled,
 } from '@mui/material';
 import debounce from 'lodash.debounce';
 import { useEffect, useMemo, useState } from 'react';
-
-const ZebraListItem = styled(ListItem)(({ theme, 'data-own': own }) => ({
-  backgroundColor:
-    own === 'true'
-      ? theme.palette.primary.light
-      : theme.palette.background.paper,
-  '&:nth-of-type(odd)': {
-    backgroundColor:
-      own === 'true' ? theme.palette.success.light : theme.palette.action.hover,
-  },
-}));
+import { toast } from 'react-toastify';
+import { ZebraListItem } from './search/ZebraListItem';
 
 export const SearchComponent = () => {
   const [inputValue, setInputValue] = useState('');
-  const [results, setResults] = useState([]);
+  const [autocompleteResults, setAutocompleteResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [deepSearchResults, setDeepSearchResults] = useState([]);
+  const [buttonClickSearchResult, setButtonClickSearchResult] = useState([]);
 
   useEffect(() => {
     socket.on('connect', () => {
+      toast.info('WebSocket connected');
       console.log('WebSocket connected');
       setInputValue('');
-      setResults([]);
+      setAutocompleteResults([]);
       setLoading(false);
     });
 
     socket.on('autocompleteResults', ({ results }) => {
       console.log('autocompleteResults', results);
-      setResults(results?.data || []);
+      setAutocompleteResults(results?.data || []);
       setLoading(false);
     });
 
     socket.on('autocompleteError', (error) => {
+      toast.error(error.message);
       console.error('Autocomplete error:', error);
-      setResults([]);
+      setAutocompleteResults([]);
       setLoading(false);
     });
 
     socket.on('getItemResultsData', ({ ugSearchResult }) => {
       console.log('Item Results:', ugSearchResult);
+
       setDeepSearchResults(ugSearchResult?.data || []);
       setLoading(false);
     });
@@ -103,14 +96,14 @@ export const SearchComponent = () => {
     }
   };
 
-  const handleDeepSearch = async (inputValue) => {
+  const handleSearchItemButtonClick = async (inputValue) => {
     try {
-      const data = await handleSearchBtnClick(inputValue);
-      console.log('Response Data:', data);
-      setDeepSearchResults(data || []);
+      const data = await searchBtnClick(inputValue);
+      console.log('Items to choose after Button Search:', data);
+      setButtonClickSearchResult(data || []);
     } catch (error) {
       console.error('Error during deep search:', error);
-      setDeepSearchResults([]);
+      setButtonClickSearchResult([]);
     }
   };
 
@@ -122,7 +115,7 @@ export const SearchComponent = () => {
           sx={{ width: '100%' }}
           freeSolo
           inputValue={inputValue}
-          options={results}
+          options={autocompleteResults}
           filterOptions={(x) => x}
           getOptionLabel={(option) =>
             `${option.brand} - ${option.article} - ${option.description}`
@@ -151,14 +144,12 @@ export const SearchComponent = () => {
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => handleDeepSearch(inputValue)}
+          onClick={() => handleSearchItemButtonClick(inputValue)}
           disabled={loading}
         >
           <SearchOutlinedIcon fontSize="large" />
         </Button>
       </Stack>
-
-      {loading && <CircularProgress sx={{ mt: 3 }} />}
 
       {!loading && deepSearchResults.length > 0 && (
         <TableContainer component={Paper} sx={{ mt: 3 }}>
@@ -196,8 +187,11 @@ export const SearchComponent = () => {
                   <TableCell>{product?.availability}</TableCell>
                   <TableCell>{product?.warehouse}</TableCell>
                   <TableCell>{product?.probability}</TableCell>
-                  <TableCell>{product?.price} ₽</TableCell>
-                  <TableCell>{product?.deadline} </TableCell>
+                  <TableCell>{product?.price}</TableCell>
+                  <TableCell>
+                    {product?.deadline} {' min'}{' '}
+                  </TableCell>
+                  <TableCell>{product?.supplier} </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -205,10 +199,10 @@ export const SearchComponent = () => {
         </TableContainer>
       )}
 
-      {/* Список результатов (возвращаемый функционал) */}
+      {/* List after search by button */}
       <List sx={{ mt: 3 }}>
-        {deepSearchResults.length > 0 &&
-          deepSearchResults.map(({ own, article, brand }, index) => (
+        {buttonClickSearchResult.length > 0 &&
+          buttonClickSearchResult.map(({ own, article, brand }, index) => (
             <ZebraListItem key={index} data-own={own?.toString()}>
               <Stack role="li" direction={'row'} gap={2}>
                 <ListItemText primary={`${article?.toUpperCase()} `} />
