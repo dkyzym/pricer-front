@@ -2,7 +2,7 @@ import CottageOutlinedIcon from '@mui/icons-material/CottageOutlined';
 import FollowTheSignsOutlinedIcon from '@mui/icons-material/FollowTheSignsOutlined';
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { LoginStatusIndicator } from './auth/LoginStatusIndicator';
+import { LoginStatusIndicator } from '../auth/LoginStatusIndicator';
 
 export const Header = () => {
   return (
