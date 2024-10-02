@@ -12,18 +12,23 @@ import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
+import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
+import { columns } from './dataGrid/searchResultsTableColumns';
+
 export const SearchComponent = () => {
   const [inputValue, setInputValue] = useState('');
   const [autocompleteResults, setAutocompleteResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [detailedSearchResults, setDetailedSearchResults] = useState([]);
-
-  useEffect(() => console.log(detailedSearchResults), [detailedSearchResults]);
+  const [brandClarifications, setBrandClarifications] = useState([]);
+  const [isClarifying, setIsClarifying] = useState(false);
 
   const handleSocketConnect = useCallback(() => {
     toast.info('WebSocket connected');
     setInputValue('');
     setAutocompleteResults([]);
+    setBrandClarifications([]);
+    setIsClarifying(false);
     setLoading(false);
   }, []);
 
@@ -39,11 +44,22 @@ export const SearchComponent = () => {
   }, []);
 
   const handleGetItemResultsData = useCallback(({ result }) => {
-    console.log('Item Results:', result);
     setDetailedSearchResults((prevResults) => [
       ...prevResults,
       ...(result?.data || []),
     ]);
+    setLoading(false);
+  }, []);
+
+  const handleBrandClarificationResults = useCallback((data) => {
+    setBrandClarifications(data.brands);
+    setIsClarifying(true);
+    setLoading(false);
+  }, []);
+
+  const handleBrandClarificationError = useCallback((error) => {
+    console.error(error.message);
+    setIsClarifying(false);
     setLoading(false);
   }, []);
 
@@ -52,18 +68,24 @@ export const SearchComponent = () => {
     socket.on('autocompleteResults', handleAutocompleteResults);
     socket.on('autocompleteError', handleAutocompleteError);
     socket.on('getItemResultsData', handleGetItemResultsData);
+    socket.on('brandClarificationResults', handleBrandClarificationResults);
+    socket.on('brandClarificationError', handleBrandClarificationError);
 
     return () => {
       socket.off('connect', handleSocketConnect);
       socket.off('autocompleteResults', handleAutocompleteResults);
       socket.off('autocompleteError', handleAutocompleteError);
       socket.off('getItemResultsData', handleGetItemResultsData);
+      socket.off('brandClarificationResults', handleBrandClarificationResults);
+      socket.off('brandClarificationError', handleBrandClarificationError);
     };
   }, [
     handleSocketConnect,
     handleAutocompleteResults,
     handleAutocompleteError,
     handleGetItemResultsData,
+    handleBrandClarificationResults,
+    handleBrandClarificationError,
   ]);
 
   const handleFastSearch = useCallback((searchQuery) => {
@@ -95,37 +117,23 @@ export const SearchComponent = () => {
   );
 
   const handleOptionSelect = useCallback((_event, value) => {
-    if (value) {
+    if (value?.brand.trim().includes('Найти') && !value.description) {
+      const { article } = value;
+
+      socket.emit('getBrandClarification', article);
+      setLoading(true);
+    } else if (value) {
       setDetailedSearchResults([]);
       setLoading(true);
       socket.emit('getItemResults', value);
     }
   }, []);
 
-  const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    {
-      field: 'imageUrl',
-      headerName: 'Image',
-      width: 100,
-      renderCell: (params) => (
-        <img
-          src={params.value}
-          alt={params.row.article}
-          style={{ width: '50px', height: '50px' }}
-        />
-      ),
-    },
-    { field: 'brand', headerName: 'Brand', width: 120 },
-    { field: 'article', headerName: 'Article', width: 120 },
-    { field: 'description', headerName: 'Description', width: 200 },
-    { field: 'availability', headerName: 'Availability', width: 130 },
-    { field: 'warehouse', headerName: 'Warehouse', width: 130 },
-    { field: 'probability', headerName: 'Probability', width: 130 },
-    { field: 'price', headerName: 'Price', width: 100 },
-    { field: 'deadline', headerName: 'Deadline (min)', width: 150 },
-    { field: 'supplier', headerName: 'Supplier', width: 150 },
-  ];
+  const handleBrandSelect = useCallback((selectedItem) => {
+    socket.emit('getItemResults', selectedItem);
+    setBrandClarifications([]);
+    setIsClarifying(false);
+  }, []);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
@@ -173,6 +181,13 @@ export const SearchComponent = () => {
             aria-hidden="true"
           />
         </div>
+      )}
+
+      {isClarifying && brandClarifications.length > 0 && (
+        <BrandClarificationTable
+          items={brandClarifications}
+          onSelect={handleBrandSelect}
+        />
       )}
     </Container>
   );
