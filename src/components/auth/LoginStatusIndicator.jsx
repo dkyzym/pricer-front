@@ -1,14 +1,15 @@
-import { useAuth } from '@hooks/useAuth';
+// import { useAuth } from '@hooks/useAuth';
 import { Avatar, Box } from '@mui/material';
 import { SUPPLIERS } from '@utils/constants';
 
 export const LoginStatusIndicator = () => {
-  const { loginStatuses } = useAuth();
+  // const { loginStatuses } = useAuth();
+  const isLoggedIn = false;
 
   return (
     <Box sx={{ display: 'flex', flex: 1, columnGap: 1 }}>
       {SUPPLIERS.map((supplier) => {
-        const isLoggedIn = loginStatuses[supplier.shortName];
+        // const isLoggedIn = loginStatuses[supplier.shortName];
 
         return (
           <Avatar
