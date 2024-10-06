@@ -37,8 +37,9 @@ export const SUPPLIERS = [
   { name: 'ЮГ', shortName: 'ЮГ', color: 'error' },
   { name: 'TurboCars', shortName: 'TC', color: 'secondary' },
   { name: 'Патриот', shortName: 'ПТ', color: 'success' },
-  { name: 'Orion', shortName: 'OR', color: 'warning' },
-  { name: 'Armtek', shortName: 'AR', color: 'info' },
+  // { name: 'Orion', shortName: 'OR', color: 'warning' },
+  // { name: 'Armtek', shortName: 'AR', color: 'info' },
+  { name: 'Profit', shortName: 'PR', color: 'info' },
 ];
 
 export const INITIAL_STATUSES = {

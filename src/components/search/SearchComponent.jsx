@@ -1,6 +1,7 @@
 import { socket, SOCKET_EVENTS } from '@api/ws/socket';
 import {
   Autocomplete,
+  Box,
   CircularProgress,
   Container,
   InputAdornment,
@@ -12,18 +13,25 @@ import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
+import { SupplierStatusIndicator } from '@components/StatusIndicator';
 import { useSocket } from '@hooks/useSocket';
 import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
 import { columns } from './dataGrid/searchResultsTableColumns';
 
 export const SearchComponent = () => {
+  const initialSupplierState = {
+    profit: { loading: false, results: [], error: null },
+    turboCars: { loading: false, results: [], error: null },
+    ug: { loading: false, results: [], error: null },
+    patriot: { loading: false, results: [], error: null },
+  };
+
   const [inputValue, setInputValue] = useState('');
   const [autocompleteResults, setAutocompleteResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [detailedSearchResults, setDetailedSearchResults] = useState([]);
   const [brandClarifications, setBrandClarifications] = useState([]);
   const [isClarifying, setIsClarifying] = useState(false);
   const [isAutocompleteLoading, setIsAutocompleteLoading] = useState(false);
+  const [supplierStatus, setSupplierStatus] = useState(initialSupplierState);
 
   const handleSocketConnect = useCallback(() => {
     toast.info('WebSocket connected');
@@ -31,7 +39,6 @@ export const SearchComponent = () => {
     setAutocompleteResults([]);
     setBrandClarifications([]);
     setIsClarifying(false);
-    setLoading(false);
   }, []);
 
   const handleAutocompleteResults = useCallback(({ results }) => {
@@ -45,31 +52,53 @@ export const SearchComponent = () => {
     setIsAutocompleteLoading(false);
   }, []);
 
-  const handleGetItemResultsData = useCallback(({ result }) => {
-    setDetailedSearchResults((prevResults) => [
-      ...prevResults,
-      ...(result?.data || []),
-    ]);
-    setLoading(false);
+  const handleSupplierDataFetchStarted = useCallback(({ supplier }) => {
+    setSupplierStatus((prevStatus) => ({
+      ...prevStatus,
+      [supplier]: { ...prevStatus[supplier], loading: true, error: null },
+    }));
+  }, []);
+
+  const handleSupplierDataFetchSuccess = useCallback(({ supplier, result }) => {
+    setSupplierStatus((prevStatus) => ({
+      ...prevStatus,
+      [supplier]: {
+        ...prevStatus[supplier],
+        loading: false,
+        results: result?.data || [],
+        error: null,
+      },
+    }));
+  }, []);
+
+  const handleSupplierDataFetchError = useCallback(({ supplier, error }) => {
+    setSupplierStatus((prevStatus) => ({
+      ...prevStatus,
+      [supplier]: {
+        ...prevStatus[supplier],
+        loading: false,
+        error,
+      },
+    }));
   }, []);
 
   const handleBrandClarificationResults = useCallback((data) => {
     setBrandClarifications(data.brands);
     setIsClarifying(true);
-    setLoading(false);
   }, []);
 
   const handleBrandClarificationError = useCallback((error) => {
     toast.error(error.message);
     setIsClarifying(false);
-    setLoading(false);
   }, []);
 
   useSocket(socket, {
     [SOCKET_EVENTS.CONNECT]: handleSocketConnect,
     [SOCKET_EVENTS.AUTOCOMPLETE_RESULTS]: handleAutocompleteResults,
     [SOCKET_EVENTS.AUTOCOMPLETE_ERROR]: handleAutocompleteError,
-    [SOCKET_EVENTS.GET_ITEM_RESULTS_DATA]: handleGetItemResultsData,
+    [SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED]: handleSupplierDataFetchStarted,
+    [SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS]: handleSupplierDataFetchSuccess,
+    [SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR]: handleSupplierDataFetchError,
     [SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS]:
       handleBrandClarificationResults,
     [SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR]: handleBrandClarificationError,
@@ -106,7 +135,6 @@ export const SearchComponent = () => {
 
   const handleOptionSelect = useCallback((_event, value) => {
     if (value) {
-      setDetailedSearchResults([]);
       if (value.brand.trim().includes('Найти') && !value.description) {
         handleBrandClarification(value);
       } else {
@@ -118,11 +146,9 @@ export const SearchComponent = () => {
   const handleBrandClarification = (value) => {
     const { article } = value;
     socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, article);
-    setLoading(true);
   };
 
   const handleDetailedSearch = (value) => {
-    setLoading(true);
     socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, value);
   };
 
@@ -131,6 +157,10 @@ export const SearchComponent = () => {
     setBrandClarifications([]);
     setIsClarifying(false);
   }, []);
+
+  const allResults = Object.values(supplierStatus).flatMap(
+    (status) => status.results
+  );
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
@@ -157,7 +187,7 @@ export const SearchComponent = () => {
                 autoComplete: 'off',
                 endAdornment: (
                   <InputAdornment position="end">
-                    {loading || isAutocompleteLoading ? (
+                    {isAutocompleteLoading ? (
                       <CircularProgress color="inherit" size={20} />
                     ) : null}
                   </InputAdornment>
@@ -168,15 +198,29 @@ export const SearchComponent = () => {
         />
       </Stack>
 
-      {detailedSearchResults.length > 0 && (
-        <div style={{ height: '400px', width: '100%', marginTop: '20px' }}>
-          <DataGrid
-            rows={detailedSearchResults}
-            columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[10, 25, 50]}
-            aria-hidden="true"
-          />
+      {allResults.length > 0 && (
+        <div>
+          <Box sx={{ display: 'flex', mt: 2 }}>
+            {Object.entries(supplierStatus).map(([supplier, status]) => (
+              <SupplierStatusIndicator
+                key={supplier}
+                supplier={supplier}
+                status={status}
+              />
+            ))}
+          </Box>
+
+          {allResults.length > 0 && (
+            <div style={{ height: '400px', width: '100%', marginTop: '20px' }}>
+              <DataGrid
+                rows={allResults}
+                columns={columns}
+                pageSize={10}
+                rowsPerPageOptions={[10, 25, 50]}
+                aria-hidden="true"
+              />
+            </div>
+          )}
         </div>
       )}
 

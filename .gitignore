@@ -25,7 +25,7 @@ dist-ssr
 *.sw?
 
 # Else
-todo.txt
+todo*
 SearchUg copy.jsx
 SearchUgcopy* 
 some*
