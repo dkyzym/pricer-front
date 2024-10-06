@@ -4,17 +4,18 @@ import {
   Box,
   CircularProgress,
   Container,
-  InputAdornment,
+  IconButton,
   Stack,
   TextField,
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import debounce from 'lodash.debounce';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import { SupplierStatusIndicator } from '@components/StatusIndicator';
 import { useSocket } from '@hooks/useSocket';
+import ClearIcon from '@mui/icons-material/Clear';
 import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
 import { columns } from './dataGrid/searchResultsTableColumns';
 
@@ -32,6 +33,7 @@ export const SearchComponent = () => {
   const [isClarifying, setIsClarifying] = useState(false);
   const [isAutocompleteLoading, setIsAutocompleteLoading] = useState(false);
   const [supplierStatus, setSupplierStatus] = useState(initialSupplierState);
+  const inputRef = useRef(null);
 
   const handleSocketConnect = useCallback(() => {
     toast.info('WebSocket connected');
@@ -51,6 +53,16 @@ export const SearchComponent = () => {
     setAutocompleteResults([]);
     setIsAutocompleteLoading(false);
   }, []);
+
+  const handleClearInput = () => {
+    setInputValue('');
+    setAutocompleteResults([]);
+    setIsAutocompleteLoading(false);
+
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
 
   const handleSupplierDataFetchStarted = useCallback(({ supplier }) => {
     setSupplierStatus((prevStatus) => ({
@@ -173,17 +185,27 @@ export const SearchComponent = () => {
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Enter search term"
+              label="Введите запрос"
               variant="outlined"
+              inputRef={inputRef}
               InputProps={{
                 ...params.InputProps,
                 autoComplete: 'off',
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <>
                     {isAutocompleteLoading ? (
                       <CircularProgress color="inherit" size={20} />
                     ) : null}
-                  </InputAdornment>
+                    {inputValue && (
+                      <IconButton
+                        onClick={handleClearInput}
+                        size="small"
+                        sx={{ visibility: inputValue ? 'visible' : 'hidden' }}
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    )}
+                  </>
                 ),
               }}
             />
