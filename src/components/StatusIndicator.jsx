@@ -1,21 +1,20 @@
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { CircularProgress, Stack, Typography } from '@mui/material';
 
 export const SupplierStatusIndicator = ({ supplier, status }) => {
   return (
-    <Box sx={{ display: 'flex', width: '100%' }}>
-      {status.loading && (
-        <CircularProgress size={24} style={{ marginLeft: '10px' }} />
-      )}
+    <Stack direction="row" alignItems="center" spacing={1}>
+      <Typography variant="subtitle1" fontWeight="bold">
+        {supplier}:
+      </Typography>
+      {status.loading && <CircularProgress size={16} />}
       {!status.loading && status.error && (
-        <Typography color="error" sx={{ marginLeft: '10px' }}>
+        <Typography color="error" noWrap>
           Error: {status.error}
         </Typography>
       )}
       {!status.loading && !status.error && (
-        <Typography sx={{ marginLeft: '10px' }}>
-          {supplier}: {status.results.length}
-        </Typography>
+        <Typography>{status.results.length}</Typography>
       )}
-    </Box>
+    </Stack>
   );
 };

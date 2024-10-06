@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import debounce from 'lodash.debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import { SupplierStatusIndicator } from '@components/StatusIndicator';
@@ -35,7 +35,7 @@ export const SearchComponent = () => {
 
   const handleSocketConnect = useCallback(() => {
     toast.info('WebSocket connected');
-    setInputValue('');
+
     setAutocompleteResults([]);
     setBrandClarifications([]);
     setIsClarifying(false);
@@ -104,34 +104,27 @@ export const SearchComponent = () => {
     [SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR]: handleBrandClarificationError,
   });
 
-  const handleFastSearch = useCallback((searchQuery) => {
+  const debouncedEmitAutocomplete = useMemo(
+    () =>
+      debounce((query) => {
+        socket.emit(SOCKET_EVENTS.AUTOCOMPLETE, query);
+      }, 300),
+    [socket]
+  );
+
+  const handleInputChange = (event, newValue) => {
+    setInputValue(newValue);
+    if (newValue.trim() === '') {
+      setAutocompleteResults([]);
+      setIsAutocompleteLoading(false);
+
+      return;
+    }
+
     setIsAutocompleteLoading(true);
-    socket.emit(SOCKET_EVENTS.AUTOCOMPLETE, searchQuery);
-  }, []);
 
-  const debouncedSearch = useCallback(
-    debounce((searchQuery) => {
-      handleFastSearch(searchQuery);
-    }, 300),
-    [handleFastSearch]
-  );
-
-  useEffect(() => {
-    return () => {
-      debouncedSearch.cancel();
-    };
-  }, [debouncedSearch]);
-
-  const handleInputChange = useCallback(
-    (_e, value, reason) => {
-      if (reason === 'input') {
-        setInputValue(value);
-        setIsAutocompleteLoading(true);
-        debouncedSearch(value);
-      }
-    },
-    [debouncedSearch]
-  );
+    debouncedEmitAutocomplete(newValue);
+  };
 
   const handleOptionSelect = useCallback((_event, value) => {
     if (value) {
@@ -200,7 +193,7 @@ export const SearchComponent = () => {
 
       {allResults.length > 0 && (
         <div>
-          <Box sx={{ display: 'flex', mt: 2 }}>
+          <Box sx={{ display: 'flex', mt: 2, gap: 3 }}>
             {Object.entries(supplierStatus).map(([supplier, status]) => (
               <SupplierStatusIndicator
                 key={supplier}
