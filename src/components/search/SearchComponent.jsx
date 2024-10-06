@@ -1,4 +1,4 @@
-import { socket } from '@api/ws/socket';
+import { socket, SOCKET_EVENTS } from '@api/ws/socket';
 import {
   Autocomplete,
   CircularProgress,
@@ -12,6 +12,7 @@ import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
+import { useSocket } from '@hooks/useSocket';
 import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
 import { columns } from './dataGrid/searchResultsTableColumns';
 
@@ -22,6 +23,7 @@ export const SearchComponent = () => {
   const [detailedSearchResults, setDetailedSearchResults] = useState([]);
   const [brandClarifications, setBrandClarifications] = useState([]);
   const [isClarifying, setIsClarifying] = useState(false);
+  const [isAutocompleteLoading, setIsAutocompleteLoading] = useState(false);
 
   const handleSocketConnect = useCallback(() => {
     toast.info('WebSocket connected');
@@ -34,13 +36,13 @@ export const SearchComponent = () => {
 
   const handleAutocompleteResults = useCallback(({ results }) => {
     setAutocompleteResults(results?.data || []);
-    setLoading(false);
+    setIsAutocompleteLoading(false);
   }, []);
 
   const handleAutocompleteError = useCallback((error) => {
     toast.error(error.message);
     setAutocompleteResults([]);
-    setLoading(false);
+    setIsAutocompleteLoading(false);
   }, []);
 
   const handleGetItemResultsData = useCallback(({ result }) => {
@@ -58,39 +60,24 @@ export const SearchComponent = () => {
   }, []);
 
   const handleBrandClarificationError = useCallback((error) => {
-    console.error(error.message);
+    toast.error(error.message);
     setIsClarifying(false);
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    socket.on('connect', handleSocketConnect);
-    socket.on('autocompleteResults', handleAutocompleteResults);
-    socket.on('autocompleteError', handleAutocompleteError);
-    socket.on('getItemResultsData', handleGetItemResultsData);
-    socket.on('brandClarificationResults', handleBrandClarificationResults);
-    socket.on('brandClarificationError', handleBrandClarificationError);
-
-    return () => {
-      socket.off('connect', handleSocketConnect);
-      socket.off('autocompleteResults', handleAutocompleteResults);
-      socket.off('autocompleteError', handleAutocompleteError);
-      socket.off('getItemResultsData', handleGetItemResultsData);
-      socket.off('brandClarificationResults', handleBrandClarificationResults);
-      socket.off('brandClarificationError', handleBrandClarificationError);
-    };
-  }, [
-    handleSocketConnect,
-    handleAutocompleteResults,
-    handleAutocompleteError,
-    handleGetItemResultsData,
-    handleBrandClarificationResults,
-    handleBrandClarificationError,
-  ]);
+  useSocket(socket, {
+    [SOCKET_EVENTS.CONNECT]: handleSocketConnect,
+    [SOCKET_EVENTS.AUTOCOMPLETE_RESULTS]: handleAutocompleteResults,
+    [SOCKET_EVENTS.AUTOCOMPLETE_ERROR]: handleAutocompleteError,
+    [SOCKET_EVENTS.GET_ITEM_RESULTS_DATA]: handleGetItemResultsData,
+    [SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS]:
+      handleBrandClarificationResults,
+    [SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR]: handleBrandClarificationError,
+  });
 
   const handleFastSearch = useCallback((searchQuery) => {
-    setLoading(true);
-    socket.emit('autocomplete', searchQuery);
+    setIsAutocompleteLoading(true);
+    socket.emit(SOCKET_EVENTS.AUTOCOMPLETE, searchQuery);
   }, []);
 
   const debouncedSearch = useCallback(
@@ -110,6 +97,7 @@ export const SearchComponent = () => {
     (_e, value, reason) => {
       if (reason === 'input') {
         setInputValue(value);
+        setIsAutocompleteLoading(true);
         debouncedSearch(value);
       }
     },
@@ -117,20 +105,29 @@ export const SearchComponent = () => {
   );
 
   const handleOptionSelect = useCallback((_event, value) => {
-    if (value?.brand.trim().includes('Найти') && !value.description) {
-      const { article } = value;
-
-      socket.emit('getBrandClarification', article);
-      setLoading(true);
-    } else if (value) {
+    if (value) {
       setDetailedSearchResults([]);
-      setLoading(true);
-      socket.emit('getItemResults', value);
+      if (value.brand.trim().includes('Найти') && !value.description) {
+        handleBrandClarification(value);
+      } else {
+        handleDetailedSearch(value);
+      }
     }
   }, []);
 
+  const handleBrandClarification = (value) => {
+    const { article } = value;
+    socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, article);
+    setLoading(true);
+  };
+
+  const handleDetailedSearch = (value) => {
+    setLoading(true);
+    socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, value);
+  };
+
   const handleBrandSelect = useCallback((selectedItem) => {
-    socket.emit('getItemResults', selectedItem);
+    socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, selectedItem);
     setBrandClarifications([]);
     setIsClarifying(false);
   }, []);
@@ -160,7 +157,7 @@ export const SearchComponent = () => {
                 autoComplete: 'off',
                 endAdornment: (
                   <InputAdornment position="end">
-                    {loading ? (
+                    {loading || isAutocompleteLoading ? (
                       <CircularProgress color="inherit" size={20} />
                     ) : null}
                   </InputAdornment>
@@ -171,8 +168,8 @@ export const SearchComponent = () => {
         />
       </Stack>
 
-      {!loading && detailedSearchResults.length > 0 && (
-        <div style={{ height: '80', width: '100%', marginTop: '20px' }}>
+      {detailedSearchResults.length > 0 && (
+        <div style={{ height: '400px', width: '100%', marginTop: '20px' }}>
           <DataGrid
             rows={detailedSearchResults}
             columns={columns}
