@@ -13,7 +13,8 @@ import debounce from 'lodash.debounce';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
-import { SupplierStatusIndicator } from '@components/StatusIndicator';
+import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
+import { SupplierStatusIndicator } from '@components/indicators/StatusIndicator';
 import { useSocket } from '@hooks/useSocket';
 import ClearIcon from '@mui/icons-material/Clear';
 import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
@@ -104,7 +105,7 @@ export const SearchComponent = () => {
     setIsClarifying(false);
   }, []);
 
-  useSocket(socket, {
+  const eventHandlers = {
     [SOCKET_EVENTS.CONNECT]: handleSocketConnect,
     [SOCKET_EVENTS.AUTOCOMPLETE_RESULTS]: handleAutocompleteResults,
     [SOCKET_EVENTS.AUTOCOMPLETE_ERROR]: handleAutocompleteError,
@@ -114,7 +115,9 @@ export const SearchComponent = () => {
     [SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS]:
       handleBrandClarificationResults,
     [SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR]: handleBrandClarificationError,
-  });
+  };
+
+  const socketStatus = useSocket(socket, eventHandlers);
 
   const debouncedEmitAutocomplete = useMemo(
     () =>
@@ -169,7 +172,7 @@ export const SearchComponent = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
-      <h2>Search</h2>
+      <SocketStatusIndicator socketStatus={socketStatus} />
       <Stack direction="row" spacing={1}>
         <Autocomplete
           sx={{ width: '100%' }}
