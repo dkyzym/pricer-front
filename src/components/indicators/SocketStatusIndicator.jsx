@@ -21,7 +21,7 @@ export const SocketStatusIndicator = ({ socketStatus }) => {
   }
 
   return (
-    <Tooltip title={tooltipText}>
+    <Tooltip title={tooltipText} sx={{ fontSize: 25 }}>
       <Box
         sx={{
           width: 14,

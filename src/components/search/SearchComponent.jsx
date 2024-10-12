@@ -229,7 +229,14 @@ export const SearchComponent = () => {
           </Box>
 
           {allResults.length > 0 && (
-            <div style={{ height: '400px', width: '100%', marginTop: '20px' }}>
+            <div
+              style={{
+                height: '400px',
+                maxHeight: '70vH',
+                width: '100%',
+                marginTop: '20px',
+              }}
+            >
               <DataGrid
                 rows={allResults}
                 columns={columns}

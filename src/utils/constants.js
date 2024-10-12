@@ -39,14 +39,14 @@ export const SUPPLIERS = [
   { name: 'Патриот', shortName: 'ПТ', color: 'success' },
   // { name: 'Orion', shortName: 'OR', color: 'warning' },
   // { name: 'Armtek', shortName: 'AR', color: 'info' },
-  { name: 'Profit', shortName: 'PR', color: 'info' },
+  // { name: 'Profit', shortName: 'PR', color: 'info' },
 ];
 
 export const INITIAL_STATUSES = {
   ЮГ: false,
   TC: false,
   ПТ: false,
-  OR: false,
+  // OR: false,
 };
 
 Object.seal(INITIAL_STATUSES);

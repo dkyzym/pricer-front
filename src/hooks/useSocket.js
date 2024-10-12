@@ -1,30 +1,38 @@
+// useSocket.js
 import { useEffect, useState } from 'react';
 
 export const useSocket = (socket, eventHandlers) => {
-  const [socketStatus, setSocketStatus] = useState('connecting');
+  const [socketStatus, setSocketStatus] = useState(() => {
+    // Инициализируем состояние из localStorage или по умолчанию 'connecting'
+    return localStorage.getItem('socketStatus') || 'connecting';
+  });
 
   useEffect(() => {
+    const updateStatus = (status) => {
+      setSocketStatus(status);
+      localStorage.setItem('socketStatus', status);
+    };
+
     const onConnect = () => {
-      setSocketStatus('connected');
+      updateStatus('connected');
       if (eventHandlers.connect) eventHandlers.connect();
     };
 
     const onDisconnect = () => {
-      setSocketStatus('disconnected');
+      updateStatus('disconnected');
       if (eventHandlers.disconnect) eventHandlers.disconnect();
     };
 
     const onConnecting = () => {
-      setSocketStatus('connecting');
+      updateStatus('connecting');
     };
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('connecting', onConnecting);
 
-    // Регистрация пользовательских обработчиков
     Object.keys(eventHandlers).forEach((event) => {
-      if (event !== 'connect' && event !== 'disconnect') {
+      if (!['connect', 'disconnect', 'connecting'].includes(event)) {
         socket.on(event, eventHandlers[event]);
       }
     });
@@ -34,7 +42,7 @@ export const useSocket = (socket, eventHandlers) => {
       socket.off('disconnect', onDisconnect);
       socket.off('connecting', onConnecting);
       Object.keys(eventHandlers).forEach((event) => {
-        if (event !== 'connect' && event !== 'disconnect') {
+        if (!['connect', 'disconnect', 'connecting'].includes(event)) {
           socket.off(event, eventHandlers[event]);
         }
       });
