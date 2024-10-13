@@ -8,9 +8,8 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
 import debounce from 'lodash.debounce';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
@@ -18,7 +17,7 @@ import { SupplierStatusIndicator } from '@components/indicators/StatusIndicator'
 import { useSocket } from '@hooks/useSocket';
 import ClearIcon from '@mui/icons-material/Clear';
 import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
-import { columns } from './dataGrid/searchResultsTableColumns';
+import ResultsTable from './dataGrid/searchResultsTableColumns';
 
 export const SearchComponent = () => {
   const initialSupplierState = {
@@ -35,6 +34,9 @@ export const SearchComponent = () => {
   const [isAutocompleteLoading, setIsAutocompleteLoading] = useState(false);
   const [supplierStatus, setSupplierStatus] = useState(initialSupplierState);
   const inputRef = useRef(null);
+  const [selectedSuppliers, setSelectedSuppliers] = useState(() =>
+    Object.keys(supplierStatus)
+  );
 
   const handleSocketConnect = useCallback(() => {
     toast.info('WebSocket connected');
@@ -169,6 +171,20 @@ export const SearchComponent = () => {
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results
   );
+  useEffect(() => console.log(allResults), [allResults]);
+
+  const handleSupplierChange = (supplier) => {
+    setSelectedSuppliers((prev) =>
+      prev.includes(supplier)
+        ? prev.filter((s) => s !== supplier)
+        : [...prev, supplier]
+    );
+  };
+
+  // Фильтруем данные в соответствии с выбранными поставщиками
+  const filteredResults = allResults.filter((item) =>
+    selectedSuppliers.includes(item.supplier)
+  );
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
@@ -216,38 +232,21 @@ export const SearchComponent = () => {
         />
       </Stack>
 
-      {allResults.length > 0 && (
-        <div>
-          <Box sx={{ display: 'flex', mt: 2, gap: 3 }}>
-            {Object.entries(supplierStatus).map(([supplier, status]) => (
-              <SupplierStatusIndicator
-                key={supplier}
-                supplier={supplier}
-                status={status}
-              />
-            ))}
-          </Box>
+      <div>
+        <Box sx={{ display: 'flex', mt: 2, gap: 3 }}>
+          {Object.entries(supplierStatus).map(([supplier, status]) => (
+            <SupplierStatusIndicator
+              key={supplier}
+              supplier={supplier}
+              status={status}
+              checked={selectedSuppliers.includes(supplier)}
+              onChange={handleSupplierChange}
+            />
+          ))}
+        </Box>
 
-          {allResults.length > 0 && (
-            <div
-              style={{
-                height: '400px',
-                maxHeight: '70vH',
-                width: '100%',
-                marginTop: '20px',
-              }}
-            >
-              <DataGrid
-                rows={allResults}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10, 25, 50]}
-                aria-hidden="true"
-              />
-            </div>
-          )}
-        </div>
-      )}
+        <ResultsTable allResults={filteredResults} />
+      </div>
 
       {isClarifying && brandClarifications.length > 0 && (
         <BrandClarificationTable
