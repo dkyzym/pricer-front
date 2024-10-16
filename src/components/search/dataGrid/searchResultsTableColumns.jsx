@@ -38,6 +38,7 @@ const ResultsTable = ({ allResults }) => {
     );
   }, [filteredData]);
 
+  // Добавляем флаги для иконок
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => ({
       ...item,
@@ -47,7 +48,7 @@ const ResultsTable = ({ allResults }) => {
     }));
   }, [filteredData, minPrice, minDeadline]);
 
-  // Определение столбцов с условным форматированием
+  // Определение столбцов с условным форматированием и иконками
   const columns = [
     {
       field: 'brand',
@@ -153,7 +154,6 @@ const ResultsTable = ({ allResults }) => {
       {/* Таблица с результатами */}
       <div
         style={{
-          height: '600px',
           width: '100%',
           marginTop: '20px',
         }}
@@ -169,6 +169,7 @@ const ResultsTable = ({ allResults }) => {
           sortModel={defaultSortModel}
           filterMode="client"
           disableSelectionOnClick
+          cellSelection
           autoHeight
           localeText={{
             noRowsLabel: 'Нет доступных данных',

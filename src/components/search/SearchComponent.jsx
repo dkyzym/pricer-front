@@ -121,6 +121,21 @@ export const SearchComponent = () => {
 
   const socketStatus = useSocket(socket, eventHandlers);
 
+  const resetSupplierStatus = useCallback(() => {
+    setSupplierStatus((prevStatus) => {
+      const newStatus = { ...prevStatus };
+      Object.keys(newStatus).forEach((supplier) => {
+        newStatus[supplier] = {
+          ...newStatus[supplier],
+          results: [],
+          loading: false,
+          error: null,
+        };
+      });
+      return newStatus;
+    });
+  }, []);
+
   const debouncedEmitAutocomplete = useMemo(
     () =>
       debounce((query) => {
@@ -143,16 +158,6 @@ export const SearchComponent = () => {
     debouncedEmitAutocomplete(newValue);
   };
 
-  const handleOptionSelect = useCallback((_event, value) => {
-    if (value) {
-      if (value.brand.trim().includes('Найти') && !value.description) {
-        handleBrandClarification(value);
-      } else {
-        handleDetailedSearch(value);
-      }
-    }
-  }, []);
-
   const handleBrandClarification = (value) => {
     const { article } = value;
     socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, article);
@@ -162,11 +167,31 @@ export const SearchComponent = () => {
     socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, value);
   };
 
-  const handleBrandSelect = useCallback((selectedItem) => {
-    socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, selectedItem);
-    setBrandClarifications([]);
-    setIsClarifying(false);
-  }, []);
+  const handleOptionSelect = useCallback(
+    (_event, value) => {
+      if (value) {
+        resetSupplierStatus();
+
+        if (value.brand.trim().includes('Найти') && !value.description) {
+          handleBrandClarification(value);
+        } else {
+          handleDetailedSearch(value);
+        }
+      }
+    },
+    [handleBrandClarification, handleDetailedSearch, resetSupplierStatus]
+  );
+  const handleBrandSelect = useCallback(
+    (selectedItem) => {
+      // Reset supplierStatus results
+      resetSupplierStatus();
+
+      socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, selectedItem);
+      setBrandClarifications([]);
+      setIsClarifying(false);
+    },
+    [resetSupplierStatus]
+  );
 
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results
