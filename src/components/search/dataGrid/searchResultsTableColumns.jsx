@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 
 const ResultsTable = ({ allResults }) => {
   // Состояния для максимального срока и цены
-  const [maxDeadline, setMaxDeadline] = useState('');
+  const [maxDeadline, setMaxDeadline] = useState(48);
   const [maxPrice, setMaxPrice] = useState('');
 
   // Фильтрация данных на основе максимального срока и цены
@@ -126,10 +126,6 @@ const ResultsTable = ({ allResults }) => {
       field: 'price',
       sort: 'asc',
     },
-    {
-      field: 'deadline',
-      sort: 'asc',
-    },
   ];
 
   return (
@@ -167,9 +163,9 @@ const ResultsTable = ({ allResults }) => {
           sx={customStyles}
           sortingOrder={['desc', 'asc']}
           sortModel={defaultSortModel}
+          ignoreValueFormatterDuringExport
           filterMode="client"
           disableSelectionOnClick
-          cellSelection
           autoHeight
           localeText={{
             noRowsLabel: 'Нет доступных данных',
