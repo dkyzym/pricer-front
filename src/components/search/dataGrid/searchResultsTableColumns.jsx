@@ -1,14 +1,17 @@
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StarIcon from '@mui/icons-material/Star';
-import { TextField } from '@mui/material';
+import { TextField, Tooltip, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
+import { customStyles } from './styles/searchResultsTableStyles';
 
 const ResultsTable = ({ allResults }) => {
   // Состояния для максимального срока и цены
   const [maxDeadline, setMaxDeadline] = useState(48);
   const [maxPrice, setMaxPrice] = useState('');
+  const [sortModel, setSortModel] = useState([{ field: 'price', sort: 'asc' }]);
 
   // Фильтрация данных на основе максимального срока и цены
   const filteredData = useMemo(() => {
@@ -53,7 +56,7 @@ const ResultsTable = ({ allResults }) => {
     {
       field: 'brand',
       headerName: 'Brand',
-      width: 120,
+      width: 100,
       cellClassName: (params) =>
         params.row.needToCheckBrand ? 'highlightBrand' : '',
     },
@@ -61,9 +64,9 @@ const ResultsTable = ({ allResults }) => {
     {
       field: 'description',
       headerName: 'Описание',
-      width: 200,
+      width: 230,
       renderCell: (params) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
           {params.row.isBestOverall && (
             <StarIcon style={{ color: '#FFD700', marginRight: '5px' }} />
           )}
@@ -75,16 +78,28 @@ const ResultsTable = ({ allResults }) => {
             !params.row.isBestPrice && (
               <SpeedIcon style={{ color: 'blue', marginRight: '5px' }} />
             )}
-          <span>{params.value}</span>
+          <Tooltip title={params.value || ''} arrow>
+            <Typography
+              sx={{
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                flexGrow: 1,
+                display: 'inline-block',
+              }}
+            >
+              {params.value}
+            </Typography>
+          </Tooltip>
         </div>
       ),
     },
     { field: 'availability', headerName: 'Наличие', width: 90 },
-    { field: 'warehouse', headerName: 'Склад', width: 130 },
+    { field: 'warehouse', headerName: 'Склад', width: 90 },
     {
       field: 'probability',
-      headerName: 'Вероятность',
-      width: 130,
+      headerName: '%',
+      width: 50,
       cellClassName: (params) =>
         params.value === maxProbability ? 'bestProbability' : '',
     },
@@ -96,36 +111,47 @@ const ResultsTable = ({ allResults }) => {
     },
     {
       field: 'deadline',
-      headerName: 'Сроки от',
-      width: 80,
+      headerName: 'Ч',
+      width: 60,
       cellClassName: (params) =>
         params.value === minDeadline ? 'bestDeadline' : '',
     },
-    { field: 'supplier', headerName: 'Поставщик', width: 150 },
-  ];
-
-  // Настройка стилей для условного форматирования
-  const customStyles = {
-    '& .bestPrice': {
-      backgroundColor: '#d0f0c0', // Светло-зеленый для лучшей цены
-    },
-    '& .bestDeadline': {
-      backgroundColor: '#c0d0f0', // Светло-синий для лучшего срока
-    },
-    '& .bestProbability': {
-      backgroundColor: '#f0d0f0', // Светло-розовый для лучшей вероятности
-    },
-    '& .highlightBrand': {
-      backgroundColor: '#fff3cd', // Светло-желтый для брендов, требующих проверки
-    },
-  };
-
-  // Опции сортировки по умолчанию
-  const defaultSortModel = [
     {
-      field: 'price',
-      sort: 'asc',
+      field: 'deliveryDate',
+      headerName: 'Доставка',
+      width: 120,
+      type: 'string',
+      cellClassName: (params) =>
+        params.value === minDeadline ? 'bestDeliveryDate' : '',
+      renderCell: (params) => {
+        const dateStr = params.value;
+        const today = DateTime.local().startOf('day');
+
+        if (dateStr?.toLowerCase() === 'сегодня') {
+          return 'сегодня';
+        }
+
+        const date = DateTime.fromISO(dateStr);
+
+        if (!date.isValid) {
+          return dateStr;
+        }
+
+        const diffDays = date.startOf('day').diff(today, 'days').days;
+
+        if (diffDays === 0) {
+          return 'сегодня';
+        } else if (diffDays === 1) {
+          return 'завтра';
+        } else if (diffDays === 2) {
+          return 'послезавтра';
+        } else {
+          return date.setLocale('ru').toFormat('dd LLL');
+        }
+      },
     },
+
+    { field: 'supplier', headerName: 'Поставщик', width: 100 },
   ];
 
   return (
@@ -162,13 +188,14 @@ const ResultsTable = ({ allResults }) => {
           getRowClassName={() => 'dataGridRow'}
           sx={customStyles}
           sortingOrder={['desc', 'asc']}
-          sortModel={defaultSortModel}
+          sortModel={sortModel}
+          onSortModelChange={(newModel) => setSortModel(newModel)}
           ignoreValueFormatterDuringExport
           filterMode="client"
           disableSelectionOnClick
           autoHeight
           localeText={{
-            noRowsLabel: 'Нет доступных данных',
+            noRowsLabel: 'Тут пока ничего нет',
           }}
         />
       </div>
