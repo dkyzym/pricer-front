@@ -2,7 +2,7 @@ export const customStyles = {
   '& .bestPrice': {
     backgroundColor: '#d0f0c0', // Светло-зеленый для лучшей цены
   },
-  '& .bestDeadline': {
+  '& .bestDeadline, .bestDeliveryDate': {
     backgroundColor: '#c0d0f0', // Светло-синий для лучшего срока
   },
   '& .bestProbability': {

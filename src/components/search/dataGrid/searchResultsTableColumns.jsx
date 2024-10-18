@@ -5,24 +5,31 @@ import { TextField, Tooltip, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
+import { MaxDeadlineSelector } from './MaxDeadlineSelector/MaxDeadlineSelector';
 import { customStyles } from './styles/searchResultsTableStyles';
 
 const ResultsTable = ({ allResults }) => {
-  // Состояния для максимального срока и цены
-  const [maxDeadline, setMaxDeadline] = useState(48);
+  const [maxDeadline, setMaxDeadline] = useState('');
+
   const [maxPrice, setMaxPrice] = useState('');
   const [sortModel, setSortModel] = useState([{ field: 'price', sort: 'asc' }]);
 
-  // Фильтрация данных на основе максимального срока и цены
+  const maxDeadlineInHours = useMemo(() => {
+    if (maxDeadline === '' || isNaN(maxDeadline)) return null; // Пустое значение означает отсутствие ограничения
+    return parseFloat(maxDeadline) * 24; // Преобразуем дни в часы
+  }, [maxDeadline]);
+
+  // Обновляем функцию фильтрации данных
   const filteredData = useMemo(() => {
     return allResults.filter((item) => {
       const isDeadlineValid =
-        maxDeadline === '' || item.deadline <= parseFloat(maxDeadline);
+        maxDeadlineInHours === null || // Если нет ограничения, принимаем все значения
+        item.deadline <= maxDeadlineInHours;
       const isPriceValid =
         maxPrice === '' || item.price <= parseFloat(maxPrice);
       return isDeadlineValid && isPriceValid;
     });
-  }, [allResults, maxDeadline, maxPrice]);
+  }, [allResults, maxDeadlineInHours, maxPrice]);
 
   // Находим минимальные и максимальные значения для условного форматирования
   const minPrice = useMemo(() => {
@@ -39,6 +46,28 @@ const ResultsTable = ({ allResults }) => {
         .filter((item) => item.probability !== '')
         .map((item) => item.probability)
     );
+  }, [filteredData]);
+
+  const minDeliveryDate = useMemo(() => {
+    const dates = filteredData
+      .map((item) => {
+        const dateStr = item.deliveryDate;
+        if (!dateStr) return null;
+
+        if (dateStr.toLowerCase() === 'сегодня') {
+          return DateTime.local().startOf('day');
+        }
+
+        const date = DateTime.fromISO(dateStr);
+        if (!date.isValid) return null;
+
+        return date.startOf('day');
+      })
+      .filter((date) => date !== null);
+
+    if (dates.length === 0) return null;
+
+    return DateTime.min(...dates);
   }, [filteredData]);
 
   // Добавляем флаги для иконок
@@ -121,8 +150,25 @@ const ResultsTable = ({ allResults }) => {
       headerName: 'Доставка',
       width: 120,
       type: 'string',
-      cellClassName: (params) =>
-        params.value === minDeadline ? 'bestDeliveryDate' : '',
+      cellClassName: (params) => {
+        const dateStr = params.value;
+        if (!dateStr) return '';
+
+        let cellDate;
+        if (dateStr.toLowerCase() === 'сегодня') {
+          cellDate = DateTime.local().startOf('day');
+        } else {
+          const date = DateTime.fromISO(dateStr);
+          if (!date.isValid) return '';
+          cellDate = date.startOf('day');
+        }
+
+        if (minDeliveryDate && cellDate.equals(minDeliveryDate)) {
+          return 'bestDeliveryDate';
+        } else {
+          return '';
+        }
+      },
       renderCell: (params) => {
         const dateStr = params.value;
         const today = DateTime.local().startOf('day');
@@ -158,12 +204,9 @@ const ResultsTable = ({ allResults }) => {
     <div>
       {/* Поля для ввода максимального срока и цены */}
       <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
-        <TextField
-          label="Максимальный срок (часы)"
-          variant="outlined"
+        <MaxDeadlineSelector
           value={maxDeadline}
-          onChange={(e) => setMaxDeadline(e.target.value)}
-          type="number"
+          onChange={(newValue) => setMaxDeadline(newValue)}
         />
         <TextField
           label="Максимальная цена"
