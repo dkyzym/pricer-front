@@ -17,7 +17,7 @@ import { SupplierStatusIndicator } from '@components/indicators/StatusIndicator'
 import { useSocket } from '@hooks/useSocket';
 import ClearIcon from '@mui/icons-material/Clear';
 import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
-import ResultsTable from './dataGrid/searchResultsTableColumns';
+import { ResultsTable } from './dataGrid/searchResultsTableColumns';
 
 export const SearchComponent = () => {
   const initialSupplierState = {
