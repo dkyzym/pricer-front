@@ -50,20 +50,6 @@ export const ResultsTable = ({ allResults }) => {
     });
   }, [allResults, maxDeadline, maxDeliveryDate, maxPrice]);
 
-  const minDaysUntilDelivery = useMemo(() => {
-    const now = DateTime.now();
-
-    return Math.min(
-      ...filteredData.map((item) => {
-        const deliveryDate = DateTime.fromISO(item.deliveryDate);
-        if (!deliveryDate.isValid) {
-          return Infinity;
-        }
-        return deliveryDate.diff(now, 'days').days;
-      })
-    );
-  }, [filteredData]);
-
   // Находим минимальные и максимальные значения для условного форматирования
   const minPrice = useMemo(() => {
     return Math.min(...filteredData.map((item) => item.price));
