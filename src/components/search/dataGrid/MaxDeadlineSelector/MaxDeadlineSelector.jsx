@@ -1,6 +1,6 @@
-// MaxDeadlineSelector.jsx
 import { Autocomplete, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const options = [
   { label: '1', value: 1 },
@@ -17,32 +17,53 @@ export const MaxDeadlineSelector = ({ value, onChange }) => {
     setInputValue(value !== '' ? String(value) : '');
   }, [value]);
 
+  const handleInputChange = (_event, newInputValue) => {
+    // Позволяем пустую строку
+    if (newInputValue === '') {
+      setInputValue('');
+      onChange('');
+      return;
+    }
+
+    // Проверяем, что введено число
+    const numericValue = Number(newInputValue);
+
+    // Проверяем, что число целое и неотрицательное
+    if (Number.isInteger(numericValue) && numericValue >= 0) {
+      setInputValue(String(numericValue));
+      onChange(numericValue);
+    } else {
+      toast.warn('Вчерашний день выберем позавчера');
+    }
+  };
+
   return (
     <Autocomplete
       sx={{ width: 150 }}
       freeSolo
-      options={options.map((option) => option.label)}
+      options={options}
       inputValue={inputValue}
-      onInputChange={(_event, newInputValue) => {
-        setInputValue(newInputValue);
-        // Обновляем значение при вводе пользователем
-        if (newInputValue === '') {
-          onChange(''); // Пустое значение означает отсутствие ограничения
-        } else {
-          const numericValue = parseFloat(newInputValue);
-          if (!isNaN(numericValue)) {
-            onChange(numericValue);
-          } else {
-            onChange(''); // Сбрасываем значение, если ввод некорректен
-          }
-        }
-      }}
+      onInputChange={handleInputChange}
       renderInput={(params) => (
         <TextField
           {...params}
           label="Макс. (дни)"
           variant="outlined"
           type="number"
+          inputProps={{
+            ...params.inputProps,
+            min: 0,
+            step: 1,
+          }}
+          sx={{
+            ...(inputValue !== '' && {
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: '2px solid green',
+                },
+              },
+            }),
+          }}
         />
       )}
     />

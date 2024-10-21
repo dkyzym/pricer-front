@@ -8,17 +8,17 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
 import { MaxDeadlineSelector } from './MaxDeadlineSelector/MaxDeadlineSelector';
 import { customStyles } from './styles/searchResultsTableStyles';
 
 export const ResultsTable = ({ allResults }) => {
   const [maxDeadline, setMaxDeadline] = useState('');
   const [maxDeliveryDate, setMaxDeliveryDate] = useState(null);
-
   const [maxPrice, setMaxPrice] = useState('');
+
   const [sortModel, setSortModel] = useState([{ field: 'price', sort: 'asc' }]);
 
-  // Обновляем функцию фильтрации данных
   const filteredData = useMemo(() => {
     const now = DateTime.now();
 
@@ -26,10 +26,16 @@ export const ResultsTable = ({ allResults }) => {
       const deliveryDate = DateTime.fromISO(item.deliveryDate);
 
       if (!deliveryDate.isValid) {
+        toast.warn('Дата - что-то пошло не так.');
         return false;
       }
 
       const daysUntilDelivery = deliveryDate.diff(now, 'days').days;
+
+      if (deliveryDate.startOf('day') < now.startOf('day')) {
+        toast.warn('Смотреть в завтрашний день могут не только лишь все...');
+        return false;
+      }
 
       let isDeadlineValid = true;
 
@@ -227,13 +233,40 @@ export const ResultsTable = ({ allResults }) => {
             value={maxDeliveryDate}
             onChange={(newValue) => setMaxDeliveryDate(newValue)}
             slotProps={{ field: { clearable: true } }}
+            disablePast={true}
+            sx={{
+              ...(maxDeliveryDate && {
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    border: '2px solid green',
+                  },
+                },
+              }),
+            }}
           />
           <TextField
             label="Максимальная цена"
             variant="outlined"
             value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '' || (Number(value) >= 0 && !isNaN(value))) {
+                setMaxPrice(value);
+              } else {
+                // Игнорируем отрицательные значения
+              }
+            }}
             type="number"
+            inputProps={{ min: 0 }}
+            sx={{
+              ...(maxPrice !== '' && {
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    border: '2px solid green',
+                  },
+                },
+              }),
+            }}
           />
         </div>
       </LocalizationProvider>
