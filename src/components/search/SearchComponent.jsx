@@ -98,7 +98,9 @@ export const SearchComponent = () => {
   }, []);
 
   const handleBrandClarificationResults = useCallback((data) => {
-    setBrandClarifications(data.brands);
+    toast.success(data?.message);
+
+    setBrandClarifications(data?.brands);
     setIsClarifying(true);
   }, []);
 
@@ -160,6 +162,7 @@ export const SearchComponent = () => {
 
   const handleBrandClarification = (value) => {
     const { article } = value;
+    console.log(`handleBrandClarification ${article}`);
     socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, article);
   };
 
