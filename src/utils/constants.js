@@ -21,7 +21,7 @@ export const CREDENTIALS = {
   },
   Orion: {
     username: 'automir.19@yandex.ru',
-    password: '101599',
+    password: '296942',
     loginUrl: `${BASE_URL}login/or`,
     logoutUrl: `${BASE_URL}logout/or`,
   },
