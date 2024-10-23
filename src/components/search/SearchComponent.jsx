@@ -1,4 +1,3 @@
-import { socket } from '@api/ws/socket';
 import {
   Autocomplete,
   Box,
@@ -10,6 +9,7 @@ import {
 } from '@mui/material';
 import { useRef } from 'react';
 
+import { socket } from '@api/ws/socket';
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
 import { SupplierStatusIndicator } from '@components/indicators/StatusIndicator';
 import useAutocomplete from '@hooks/useAutocomplete';

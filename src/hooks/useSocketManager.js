@@ -1,10 +1,6 @@
 import { SOCKET_EVENTS } from '@api/ws/socket';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import {
-  handleAutocompleteError,
-  handleBrandClarificationError,
-} from './handlers';
 
 const useSocketManager = (
   socket,
@@ -29,15 +25,11 @@ const useSocketManager = (
     [setAutocompleteResults, setIsAutocompleteLoading]
   );
 
-  const handleAutocompleteErrorWrapper = useCallback(
-    (error) =>
-      handleAutocompleteError(
-        error,
-        setAutocompleteResults,
-        setIsAutocompleteLoading
-      ),
-    []
-  );
+  const handleAutocompleteErrorWrapper = useCallback((error) => {
+    toast.error(error.message);
+    setAutocompleteResults([]);
+    setIsAutocompleteLoading(false);
+  }, []);
 
   const handleBrandClarificationResults = useCallback((data) => {
     toast.success(data?.message);
@@ -47,7 +39,10 @@ const useSocketManager = (
   }, []);
 
   const handleBrandClarificationErrorWrapper = useCallback(
-    (error) => handleBrandClarificationError(error, setIsClarifying),
+    (error) => {
+      toast.error(error.message);
+      setIsClarifying(false);
+    },
     [setIsClarifying]
   );
 

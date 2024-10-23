@@ -6,17 +6,14 @@ export const useSocket = (socket) => {
   useEffect(() => {
     const updateStatus = (status) => {
       setSocketStatus(status);
-      // localStorage.setItem('socketStatus', status);
     };
 
     const onConnect = () => {
       updateStatus('connected');
-      // if (eventHandlers.connect) eventHandlers.connect();
     };
 
     const onDisconnect = () => {
       updateStatus('disconnected');
-      // if (eventHandlers.disconnect) eventHandlers.disconnect();
     };
 
     socket.on('connect', onConnect);
