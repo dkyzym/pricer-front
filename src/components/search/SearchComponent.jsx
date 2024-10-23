@@ -1,4 +1,4 @@
-import { socket, SOCKET_EVENTS } from '@api/ws/socket';
+import { socket } from '@api/ws/socket';
 import {
   Autocomplete,
   Box,
@@ -8,211 +8,70 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import debounce from 'lodash.debounce';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useRef } from 'react';
 
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
 import { SupplierStatusIndicator } from '@components/indicators/StatusIndicator';
+import useAutocomplete from '@hooks/useAutocomplete';
+import useFilteredResults from '@hooks/useFilteredResults';
+import useSearchHandlers from '@hooks/useSearchHandlers';
 import { useSocket } from '@hooks/useSocket';
+import useSocketManager from '@hooks/useSocketManager';
+import useSupplierSelection from '@hooks/useSupplierSelection';
+import useSupplierStatus from '@hooks/useSupplierStatus';
 import ClearIcon from '@mui/icons-material/Clear';
 import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
 import { ResultsTable } from './dataGrid/searchResultsTableColumns';
 
 export const SearchComponent = () => {
-  const initialSupplierState = {
-    profit: { loading: false, results: [], error: null },
-    turboCars: { loading: false, results: [], error: null },
-    ug: { loading: false, results: [], error: null },
-    patriot: { loading: false, results: [], error: null },
-  };
+  const { resetSupplierStatus, setSupplierStatus, supplierStatus } =
+    useSupplierStatus();
 
-  const [inputValue, setInputValue] = useState('');
-  const [autocompleteResults, setAutocompleteResults] = useState([]);
-  const [brandClarifications, setBrandClarifications] = useState([]);
-  const [isClarifying, setIsClarifying] = useState(false);
-  const [isAutocompleteLoading, setIsAutocompleteLoading] = useState(false);
-  const [supplierStatus, setSupplierStatus] = useState(initialSupplierState);
+  const {
+    autocompleteResults,
+    handleInputChange,
+    inputValue,
+    isAutocompleteLoading,
+    setInputValue,
+    setIsAutocompleteLoading,
+    setAutocompleteResults,
+  } = useAutocomplete(socket);
+
+  const {
+    brandClarifications,
+    isClarifying,
+    setBrandClarifications,
+    setIsClarifying,
+  } = useSocketManager(socket, {
+    setAutocompleteResults,
+    setIsAutocompleteLoading,
+    setSupplierStatus,
+  });
+
+  const socketStatus = useSocket(socket);
+
   const inputRef = useRef(null);
-  const [selectedSuppliers, setSelectedSuppliers] = useState(() =>
-    Object.keys(supplierStatus)
-  );
 
-  const handleSocketConnect = useCallback(() => {
-    toast.info('WebSocket connected');
+  const { selectedSuppliers, handleSupplierChange } =
+    useSupplierSelection(supplierStatus);
 
-    setAutocompleteResults([]);
-    setBrandClarifications([]);
-    setIsClarifying(false);
-  }, []);
-
-  const handleAutocompleteResults = useCallback(({ results }) => {
-    setAutocompleteResults(results?.data || []);
-    setIsAutocompleteLoading(false);
-  }, []);
-
-  const handleAutocompleteError = useCallback((error) => {
-    toast.error(error.message);
-    setAutocompleteResults([]);
-    setIsAutocompleteLoading(false);
-  }, []);
-
-  const handleClearInput = () => {
-    setInputValue('');
-    setAutocompleteResults([]);
-    setIsAutocompleteLoading(false);
-
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  const handleSupplierDataFetchStarted = useCallback(({ supplier }) => {
-    setSupplierStatus((prevStatus) => ({
-      ...prevStatus,
-      [supplier]: { ...prevStatus[supplier], loading: true, error: null },
-    }));
-  }, []);
-
-  const handleSupplierDataFetchSuccess = useCallback(({ supplier, result }) => {
-    setSupplierStatus((prevStatus) => ({
-      ...prevStatus,
-      [supplier]: {
-        ...prevStatus[supplier],
-        loading: false,
-        results: result?.data || [],
-        error: null,
-      },
-    }));
-  }, []);
-
-  const handleSupplierDataFetchError = useCallback(({ supplier, error }) => {
-    setSupplierStatus((prevStatus) => ({
-      ...prevStatus,
-      [supplier]: {
-        ...prevStatus[supplier],
-        loading: false,
-        error,
-      },
-    }));
-  }, []);
-
-  const handleBrandClarificationResults = useCallback((data) => {
-    toast.success(data?.message);
-
-    setBrandClarifications(data?.brands);
-    setIsClarifying(true);
-  }, []);
-
-  const handleBrandClarificationError = useCallback((error) => {
-    toast.error(error.message);
-    setIsClarifying(false);
-  }, []);
-
-  const eventHandlers = {
-    [SOCKET_EVENTS.CONNECT]: handleSocketConnect,
-    [SOCKET_EVENTS.AUTOCOMPLETE_RESULTS]: handleAutocompleteResults,
-    [SOCKET_EVENTS.AUTOCOMPLETE_ERROR]: handleAutocompleteError,
-    [SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED]: handleSupplierDataFetchStarted,
-    [SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS]: handleSupplierDataFetchSuccess,
-    [SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR]: handleSupplierDataFetchError,
-    [SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS]:
-      handleBrandClarificationResults,
-    [SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR]: handleBrandClarificationError,
-  };
-
-  const socketStatus = useSocket(socket, eventHandlers);
-
-  const resetSupplierStatus = useCallback(() => {
-    setSupplierStatus((prevStatus) => {
-      const newStatus = { ...prevStatus };
-      Object.keys(newStatus).forEach((supplier) => {
-        newStatus[supplier] = {
-          ...newStatus[supplier],
-          results: [],
-          loading: false,
-          error: null,
-        };
-      });
-      return newStatus;
+  const { handleClearInput, handleOptionSelect, handleBrandSelect } =
+    useSearchHandlers({
+      socket,
+      resetSupplierStatus,
+      setBrandClarifications,
+      setIsClarifying,
+      inputRef,
+      setInputValue,
+      setAutocompleteResults,
+      setIsAutocompleteLoading,
     });
-  }, []);
-
-  const debouncedEmitAutocomplete = useMemo(
-    () =>
-      debounce((query) => {
-        socket.emit(SOCKET_EVENTS.AUTOCOMPLETE, query);
-      }, 300),
-    [socket]
-  );
-
-  const handleInputChange = (event, newValue) => {
-    setInputValue(newValue);
-    if (newValue.trim() === '') {
-      setAutocompleteResults([]);
-      setIsAutocompleteLoading(false);
-
-      return;
-    }
-
-    setIsAutocompleteLoading(true);
-
-    debouncedEmitAutocomplete(newValue);
-  };
-
-  const handleBrandClarification = (value) => {
-    const { article } = value;
-    console.log(`handleBrandClarification ${article}`);
-    socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, article);
-  };
-
-  const handleDetailedSearch = (value) => {
-    socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, value);
-  };
-
-  const handleOptionSelect = useCallback(
-    (_event, value) => {
-      if (value) {
-        resetSupplierStatus();
-
-        if (value.brand.trim().includes('Найти') && !value.description) {
-          handleBrandClarification(value);
-        } else {
-          handleDetailedSearch(value);
-        }
-      }
-    },
-    [handleBrandClarification, handleDetailedSearch, resetSupplierStatus]
-  );
-  const handleBrandSelect = useCallback(
-    (selectedItem) => {
-      // Reset supplierStatus results
-      resetSupplierStatus();
-
-      socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, selectedItem);
-      setBrandClarifications([]);
-      setIsClarifying(false);
-    },
-    [resetSupplierStatus]
-  );
 
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results
   );
-  useEffect(() => console.log(allResults), [allResults]);
 
-  const handleSupplierChange = (supplier) => {
-    setSelectedSuppliers((prev) =>
-      prev.includes(supplier)
-        ? prev.filter((s) => s !== supplier)
-        : [...prev, supplier]
-    );
-  };
-
-  // Фильтруем данные в соответствии с выбранными поставщиками
-  const filteredResults = allResults.filter((item) =>
-    selectedSuppliers.includes(item.supplier)
-  );
+  const filteredResults = useFilteredResults(allResults, selectedSuppliers);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
