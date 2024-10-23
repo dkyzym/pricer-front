@@ -10,7 +10,7 @@ import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { MaxDeadlineSelector } from './MaxDeadlineSelector/MaxDeadlineSelector';
-import { customStyles } from './styles/searchResultsTableStyles';
+import { customStyles } from './searchResultsTableStyles';
 
 export const ResultsTable = ({ allResults }) => {
   const [maxDeadline, setMaxDeadline] = useState('');

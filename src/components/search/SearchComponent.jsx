@@ -3,13 +3,12 @@ import {
   Box,
   CircularProgress,
   Container,
+  Grid,
   IconButton,
-  Stack,
   TextField,
 } from '@mui/material';
 import { useContext, useRef } from 'react';
 
-// import { socket } from '@api/ws/socket';
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
 import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
 import { SocketContext } from '@context/SocketContext';
@@ -53,8 +52,6 @@ export const SearchComponent = () => {
     setSupplierStatus,
   });
 
-  // const socketStatus = useSocket(socket);
-
   const inputRef = useRef(null);
 
   const { selectedSuppliers, handleSupplierChange } =
@@ -78,74 +75,79 @@ export const SearchComponent = () => {
 
   const filteredResults = useFilteredResults(allResults, selectedSuppliers);
 
+  const AutocompleteInput = (params) => (
+    <TextField
+      {...params}
+      label="Введите запрос"
+      variant="outlined"
+      inputRef={inputRef}
+      InputProps={{
+        ...params.InputProps,
+        autoComplete: 'off',
+        endAdornment: (
+          <>
+            {isAutocompleteLoading && (
+              <CircularProgress color="inherit" size={20} />
+            )}
+            {inputValue && (
+              <IconButton
+                onClick={handleClearInput}
+                size="small"
+                sx={{ visibility: inputValue ? 'visible' : 'hidden' }}
+              >
+                <ClearIcon />
+              </IconButton>
+            )}
+          </>
+        ),
+      }}
+    />
+  );
+
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
       <SocketStatusIndicator />
-      <Stack direction="row" spacing={1}>
-        <Autocomplete
-          sx={{ width: '100%' }}
-          freeSolo
-          inputValue={inputValue}
-          options={autocompleteResults}
-          filterOptions={(x) => x}
-          getOptionLabel={(option) =>
-            `${option.brand} - ${option.article} - ${option.description}`
-          }
-          onInputChange={handleInputChange}
-          onChange={handleOptionSelect}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Введите запрос"
-              variant="outlined"
-              inputRef={inputRef}
-              InputProps={{
-                ...params.InputProps,
-                autoComplete: 'off',
-                endAdornment: (
-                  <>
-                    {isAutocompleteLoading ? (
-                      <CircularProgress color="inherit" size={20} />
-                    ) : null}
-                    {inputValue && (
-                      <IconButton
-                        onClick={handleClearInput}
-                        size="small"
-                        sx={{ visibility: inputValue ? 'visible' : 'hidden' }}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    )}
-                  </>
-                ),
-              }}
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Autocomplete
+            sx={{ width: '100%' }}
+            freeSolo
+            inputValue={inputValue}
+            options={autocompleteResults}
+            filterOptions={(x) => x}
+            getOptionLabel={(option) =>
+              `${option.brand} - ${option.article} - ${option.description}`
+            }
+            onInputChange={handleInputChange}
+            onChange={handleOptionSelect}
+            renderInput={AutocompleteInput}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', gap: 3 }}>
+            {Object.entries(supplierStatus).map(([supplier, status]) => (
+              <SupplierStatusIndicator
+                key={supplier}
+                supplier={supplier}
+                status={status}
+                checked={selectedSuppliers.includes(supplier)}
+                onChange={handleSupplierChange}
+              />
+            ))}
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <ResultsTable allResults={filteredResults} />
+        </Grid>
+        {isClarifying && brandClarifications.length > 0 && (
+          <Grid item xs={12}>
+            <BrandClarificationTable
+              items={brandClarifications}
+              onSelect={handleBrandSelect}
             />
-          )}
-        />
-      </Stack>
-
-      <div>
-        <Box sx={{ display: 'flex', mt: 2, gap: 3 }}>
-          {Object.entries(supplierStatus).map(([supplier, status]) => (
-            <SupplierStatusIndicator
-              key={supplier}
-              supplier={supplier}
-              status={status}
-              checked={selectedSuppliers.includes(supplier)}
-              onChange={handleSupplierChange}
-            />
-          ))}
-        </Box>
-
-        <ResultsTable allResults={filteredResults} />
-      </div>
-
-      {isClarifying && brandClarifications.length > 0 && (
-        <BrandClarificationTable
-          items={brandClarifications}
-          onSelect={handleBrandSelect}
-        />
-      )}
+          </Grid>
+        )}
+      </Grid>
     </Container>
   );
 };
