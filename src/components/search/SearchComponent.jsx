@@ -11,7 +11,7 @@ import { useContext, useRef } from 'react';
 
 // import { socket } from '@api/ws/socket';
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
-import { SupplierStatusIndicator } from '@components/indicators/StatusIndicator';
+import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
 import { SocketContext } from '@context/SocketContext';
 import useAutocomplete from '@hooks/useAutocomplete';
 import useFilteredResults from '@hooks/useFilteredResults';

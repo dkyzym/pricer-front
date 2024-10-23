@@ -31,16 +31,3 @@ export const logoutFromSupplier = async (url) => {
     );
   }
 };
-
-export const searchBtnClick = async (inputValue) => {
-  try {
-    const response = await axios.get(
-      `http://localhost:3000/getItemsListByArticle`,
-      { params: { article: inputValue } }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error during deep search:', error.message);
-    return null;
-  }
-};
