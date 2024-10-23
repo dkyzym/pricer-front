@@ -1,8 +1,11 @@
+import { SocketStatusContext } from '@context/SocketStatusContext';
 import { Box, Tooltip } from '@mui/material';
+import { useContext } from 'react';
 
-export const SocketStatusIndicator = ({ socketStatus }) => {
+export const SocketStatusIndicator = () => {
   let color;
   let tooltipText;
+  const socketStatus = useContext(SocketStatusContext);
 
   switch (socketStatus) {
     case 'connected':

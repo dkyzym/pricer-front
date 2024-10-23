@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react';
+import { SocketContext } from '@context/SocketContext';
+import { useContext, useEffect, useState } from 'react';
 
-export const useSocket = (socket) => {
+export const useSocketStatus = () => {
+  const socket = useContext(SocketContext);
   const [socketStatus, setSocketStatus] = useState('connecting');
 
   useEffect(() => {
+    if (!socket) return;
+
     const updateStatus = (status) => {
       setSocketStatus(status);
     };

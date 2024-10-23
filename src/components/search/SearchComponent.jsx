@@ -7,15 +7,15 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 
-import { socket } from '@api/ws/socket';
+// import { socket } from '@api/ws/socket';
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
 import { SupplierStatusIndicator } from '@components/indicators/StatusIndicator';
+import { SocketContext } from '@context/SocketContext';
 import useAutocomplete from '@hooks/useAutocomplete';
 import useFilteredResults from '@hooks/useFilteredResults';
 import useSearchHandlers from '@hooks/useSearchHandlers';
-import { useSocket } from '@hooks/useSocket';
 import useSocketManager from '@hooks/useSocketManager';
 import useSupplierSelection from '@hooks/useSupplierSelection';
 import useSupplierStatus from '@hooks/useSupplierStatus';
@@ -24,6 +24,11 @@ import { BrandClarificationTable } from './brandClarificationTable/BrandClarific
 import { ResultsTable } from './dataGrid/searchResultsTableColumns';
 
 export const SearchComponent = () => {
+  const useSocket = () => {
+    return useContext(SocketContext);
+  };
+  const socket = useSocket();
+
   const { resetSupplierStatus, setSupplierStatus, supplierStatus } =
     useSupplierStatus();
 
@@ -48,7 +53,7 @@ export const SearchComponent = () => {
     setSupplierStatus,
   });
 
-  const socketStatus = useSocket(socket);
+  // const socketStatus = useSocket(socket);
 
   const inputRef = useRef(null);
 
@@ -75,7 +80,7 @@ export const SearchComponent = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
-      <SocketStatusIndicator socketStatus={socketStatus} />
+      <SocketStatusIndicator />
       <Stack direction="row" spacing={1}>
         <Autocomplete
           sx={{ width: '100%' }}
