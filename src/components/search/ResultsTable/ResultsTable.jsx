@@ -27,7 +27,6 @@ export const ResultsTable = ({ allResults }) => {
     minPrice,
     minDeliveryDate,
   });
-
   // Определение столбцов с условным форматированием и иконками
   const columns = useMemo(
     () =>

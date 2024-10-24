@@ -31,6 +31,9 @@ export const CREDENTIALS = {
     loginUrl: `${BASE_URL}login/ar`,
     logoutUrl: `${BASE_URL}logout/ar`,
   },
+  profit: {
+    addToCartURL: `${BASE_URL}addToCart`,
+  },
 };
 
 export const SUPPLIERS = [

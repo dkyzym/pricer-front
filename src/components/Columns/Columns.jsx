@@ -3,6 +3,7 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import StarIcon from '@mui/icons-material/Star';
 import { Tooltip, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
+import { AddToCartCell } from './AddToCartCell';
 
 export const getColumns = ({
   minPrice,
@@ -52,7 +53,7 @@ export const getColumns = ({
         </div>
       ),
     },
-    { field: 'availability', headerName: 'Наличие', width: 90 },
+
     { field: 'warehouse', headerName: 'Склад', width: 90 },
     {
       field: 'probability',
@@ -125,6 +126,15 @@ export const getColumns = ({
         }
       },
     },
-    { field: 'supplier', headerName: 'Поставщик', width: 100 },
+    { field: 'availability', headerName: 'Наличие', width: 90 },
+    {
+      field: 'addToCart',
+      headerName: 'Корзина',
+      width: 85,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => <AddToCartCell {...params} />,
+    },
+    { field: 'supplier', headerName: 'Поставщик', width: 75 },
   ];
 };
