@@ -19,8 +19,8 @@ import useSocketManager from '@hooks/useSocketManager';
 import useSupplierSelection from '@hooks/useSupplierSelection';
 import useSupplierStatus from '@hooks/useSupplierStatus';
 import ClearIcon from '@mui/icons-material/Clear';
-import { BrandClarificationTable } from './brandClarificationTable/BrandClarificationTable';
-import { ResultsTable } from './dataGrid/searchResultsTableColumns';
+import { BrandClarificationTable } from './BrandClarificationTable/BrandClarificationTable';
+import { ResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
   const useSocket = () => {
