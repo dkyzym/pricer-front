@@ -33,6 +33,7 @@ export const SocketStatusIndicator = () => {
           borderRadius: '50%',
           display: 'inline-block',
           border: '2px solid white',
+          mr: 1,
         }}
       />
     </Tooltip>
