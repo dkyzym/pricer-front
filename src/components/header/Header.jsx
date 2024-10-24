@@ -28,18 +28,18 @@ export const Header = () => {
         <Button
           color="inherit"
           component={Link}
-          to="/auth"
-          startIcon={<FollowTheSignsOutlinedIcon />}
-        >
-          Авторизация
-        </Button>
-        <Button
-          color="inherit"
-          component={Link}
           to="/cart"
           startIcon={<ShoppingCartCheckoutIcon />}
         >
           Корзина
+        </Button>
+        <Button
+          color="inherit"
+          component={Link}
+          to="/auth"
+          startIcon={<FollowTheSignsOutlinedIcon />}
+        >
+          Авторизация
         </Button>
       </Toolbar>
     </AppBar>
