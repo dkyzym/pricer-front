@@ -27,11 +27,12 @@ export const SocketStatusIndicator = () => {
     <Tooltip title={tooltipText} sx={{ fontSize: 25 }}>
       <Box
         sx={{
-          width: 14,
-          height: 14,
+          width: 18,
+          height: 18,
           bgcolor: color,
           borderRadius: '50%',
           display: 'inline-block',
+          border: '2px solid white',
         }}
       />
     </Tooltip>

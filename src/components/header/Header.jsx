@@ -1,3 +1,4 @@
+import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
 import CottageOutlinedIcon from '@mui/icons-material/CottageOutlined';
 import FollowTheSignsOutlinedIcon from '@mui/icons-material/FollowTheSignsOutlined';
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
@@ -9,18 +10,19 @@ export const Header = () => {
     <AppBar position="static">
       <Toolbar sx={{ width: '100%' }}>
         <Typography variant="h6" component={Link} to="/" sx={{ flex: 1 }}>
-          Pricer
+          Шикарное название
         </Typography>
 
         <LoginStatusIndicator />
 
+        <SocketStatusIndicator />
         <Button
           color="inherit"
           component={Link}
           to="/"
           startIcon={<CottageOutlinedIcon />}
         >
-          Home
+          Поиск
         </Button>
         <Button
           color="inherit"
@@ -28,7 +30,7 @@ export const Header = () => {
           to="/auth"
           startIcon={<FollowTheSignsOutlinedIcon />}
         >
-          Auth
+          Авторизация
         </Button>
       </Toolbar>
     </AppBar>

@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import { useContext, useRef } from 'react';
 
-import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
 import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
 import { SocketContext } from '@context/SocketContext';
 import useAutocomplete from '@hooks/useAutocomplete';
@@ -106,7 +105,6 @@ export const SearchComponent = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
-      <SocketStatusIndicator />
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Autocomplete
