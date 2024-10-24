@@ -1,12 +1,13 @@
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import { Home } from '@pages/Home';
+import { HomePage } from '@pages/Home';
 
 import './index.css';
 
 import AppProviders from '@context/AppProviders';
-import { Auth } from '@pages/Auth';
+import { AuthPage } from '@pages/AuthCage';
+import { CartPage } from '@pages/CartPage';
 import { ErrorPage } from '@pages/ErrorPage';
 import App from './App';
 
@@ -18,11 +19,15 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home />,
+        element: <HomePage />,
       },
       {
         path: 'auth',
-        element: <Auth />,
+        element: <AuthPage />,
+      },
+      {
+        path: 'cart',
+        element: <CartPage />,
       },
     ],
   },

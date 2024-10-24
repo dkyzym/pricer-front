@@ -1,6 +1,7 @@
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
 import CottageOutlinedIcon from '@mui/icons-material/CottageOutlined';
 import FollowTheSignsOutlinedIcon from '@mui/icons-material/FollowTheSignsOutlined';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { LoginStatusIndicator } from '../auth/LoginStatusIndicator';
@@ -31,6 +32,14 @@ export const Header = () => {
           startIcon={<FollowTheSignsOutlinedIcon />}
         >
           Авторизация
+        </Button>
+        <Button
+          color="inherit"
+          component={Link}
+          to="/cart"
+          startIcon={<ShoppingCartCheckoutIcon />}
+        >
+          Корзина
         </Button>
       </Toolbar>
     </AppBar>

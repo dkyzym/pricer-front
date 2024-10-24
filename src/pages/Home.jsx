@@ -1,9 +1,9 @@
 import { SearchComponent } from '@components/search/SearchComponent';
 
-export const Home = () => {
+export const HomePage = () => {
   return (
-    <div>
+    <>
       <SearchComponent />
-    </div>
+    </>
   );
 };
