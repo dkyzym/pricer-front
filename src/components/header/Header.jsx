@@ -1,6 +1,6 @@
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
-import CottageOutlinedIcon from '@mui/icons-material/CottageOutlined';
 import FollowTheSignsOutlinedIcon from '@mui/icons-material/FollowTheSignsOutlined';
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -21,7 +21,7 @@ export const Header = () => {
           color="inherit"
           component={Link}
           to="/"
-          startIcon={<CottageOutlinedIcon />}
+          startIcon={<ManageSearchIcon />}
         >
           Поиск
         </Button>
