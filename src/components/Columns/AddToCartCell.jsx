@@ -4,6 +4,7 @@ import { Box, CircularProgress, IconButton, TextField } from '@mui/material';
 import { CREDENTIALS } from '@utils/constants';
 import axios from 'axios';
 import React from 'react';
+import { toast } from 'react-toastify';
 
 export const AddToCartCell = (props) => {
   const { row } = props;
@@ -13,15 +14,18 @@ export const AddToCartCell = (props) => {
 
   const handleQuantityChange = (event) => {
     const value = event.target.value;
-    // Разрешаем только положительные целые числа
     if (value === '' || /^[1-9]\d*$/.test(value)) {
       setQuantity(value);
     }
   };
 
   const handleAddToCart = async () => {
-    if (!quantity || parseInt(quantity, 10) <= 0) {
-      // Опционально можно добавить обработку ошибок
+    if (
+      !quantity ||
+      parseInt(quantity, 10) <= 0 ||
+      parseInt(quantity, 10) > Number(row.availability)
+    ) {
+      toast.info('нужно проверить количество');
       return;
     }
 
@@ -38,7 +42,7 @@ export const AddToCartCell = (props) => {
         const url = CREDENTIALS['profit'].addToCartURL;
 
         const res = await axios.post(url, data);
-        console.log(res.data);
+        res.success ?? setQuantity('');
       }
       // Здесь добавим обработку  других suppliers
       setAdded(true);
@@ -52,10 +56,11 @@ export const AddToCartCell = (props) => {
 
   return (
     <Box
-      style={{
+      sx={{
         display: 'flex',
         alignItems: 'center',
-        p: 1,
+        p: 0.1,
+        // backgroundColor: 'red',
       }}
     >
       <TextField
@@ -65,7 +70,6 @@ export const AddToCartCell = (props) => {
           inputMode: 'numeric',
           pattern: '[0-9]*',
           min: 1,
-          style: { MozAppearance: 'textfield' },
         }}
         sx={{ ml: 1, minWidth: 35 }}
         variant="standard"

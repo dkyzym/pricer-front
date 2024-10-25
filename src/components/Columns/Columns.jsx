@@ -1,7 +1,7 @@
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StarIcon from '@mui/icons-material/Star';
-import { Tooltip, Typography } from '@mui/material';
+import { Box, Tooltip, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
 import { AddToCartCell } from './AddToCartCell';
 
@@ -25,7 +25,13 @@ export const getColumns = ({
       headerName: 'Описание',
       width: 230,
       renderCell: (params) => (
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        <Box
+          display="flex"
+          alignItems="center"
+          height="100%"
+          width="100%"
+          padding="0 8px" // Добавьте отступы по необходимости
+        >
           {params.row.isBestOverall && (
             <StarIcon style={{ color: '#FFD700', marginRight: '5px' }} />
           )}
@@ -39,18 +45,19 @@ export const getColumns = ({
             )}
           <Tooltip title={params.value || ''} arrow>
             <Typography
+              variant="body2"
+              noWrap
               sx={{
                 overflow: 'hidden',
                 whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis',
                 flexGrow: 1,
-                display: 'inline-block',
               }}
             >
               {params.value}
             </Typography>
           </Tooltip>
-        </div>
+        </Box>
       ),
     },
 
@@ -130,7 +137,7 @@ export const getColumns = ({
     {
       field: 'addToCart',
       headerName: 'Корзина',
-      width: 85,
+      width: 100,
       sortable: false,
       filterable: false,
       renderCell: (params) => <AddToCartCell {...params} />,
