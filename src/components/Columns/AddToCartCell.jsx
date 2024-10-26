@@ -8,7 +8,8 @@ import { toast } from 'react-toastify';
 
 export const AddToCartCell = (props) => {
   const { row } = props;
-  const [quantity, setQuantity] = React.useState('');
+
+  const [quantity, setQuantity] = React.useState(row?.multi);
   const [loading, setLoading] = React.useState(false);
   const [added, setAdded] = React.useState(false);
 

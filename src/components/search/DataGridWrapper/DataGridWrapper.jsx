@@ -1,4 +1,4 @@
-import { DataGrid } from '@mui/x-data-grid';
+import { StyledDataGrid } from './StyledDataGrid';
 
 export const DataGridWrapper = ({
   rows,
@@ -9,12 +9,14 @@ export const DataGridWrapper = ({
 }) => {
   return (
     <div style={{ width: '100%', marginTop: '20px' }}>
-      <DataGrid
+      <StyledDataGrid
         rows={rows}
         columns={columns}
         pageSize={25}
         rowsPerPageOptions={[10, 25, 50]}
-        getRowClassName={() => 'dataGridRow'}
+        getRowClassName={(params) =>
+          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+        }
         sx={customStyles}
         sortingOrder={['desc', 'asc']}
         sortModel={sortModel}
