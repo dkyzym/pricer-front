@@ -85,7 +85,7 @@ export const getColumns = ({
     {
       field: 'deliveryDate',
       headerName: 'Доставка',
-      width: 120,
+      width: 110,
       type: 'string',
       cellClassName: (params) => {
         const dateStr = params.value;
@@ -133,11 +133,11 @@ export const getColumns = ({
         }
       },
     },
-    { field: 'availability', headerName: 'Наличие', width: 90 },
+    { field: 'availability', headerName: 'Наличие', width: 60 },
     {
       field: 'addToCart',
       headerName: 'Корзина',
-      width: 100,
+      width: 120,
       sortable: false,
       filterable: false,
       renderCell: (params) => <AddToCartCell {...params} />,

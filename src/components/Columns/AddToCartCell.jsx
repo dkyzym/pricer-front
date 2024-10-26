@@ -1,6 +1,5 @@
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-import CheckIcon from '@mui/icons-material/Check';
-import { Box, CircularProgress, IconButton, TextField } from '@mui/material';
+import { QuantitySelector } from '@components/QuantitySelector/QuantitySelector';
+import { Box } from '@mui/material';
 import { CREDENTIALS } from '@utils/constants';
 import axios from 'axios';
 import React from 'react';
@@ -9,24 +8,13 @@ import { toast } from 'react-toastify';
 export const AddToCartCell = (props) => {
   const { row } = props;
 
-  const [quantity, setQuantity] = React.useState(row?.multi);
   const [loading, setLoading] = React.useState(false);
   const [added, setAdded] = React.useState(false);
 
-  const handleQuantityChange = (event) => {
-    const value = event.target.value;
-    if (value === '' || /^[1-9]\d*$/.test(value)) {
-      setQuantity(value);
-    }
-  };
-
-  const handleAddToCart = async () => {
-    if (
-      !quantity ||
-      parseInt(quantity, 10) <= 0 ||
-      parseInt(quantity, 10) > Number(row.availability)
-    ) {
-      toast.info('нужно проверить количество');
+  const handleAddToCart = async (count) => {
+    // Валидация количества
+    if (count > Number(row.availability)) {
+      toast.info('Нужно проверить количество');
       return;
     }
 
@@ -36,54 +24,37 @@ export const AddToCartCell = (props) => {
         const data = {
           id: row.innerId,
           warehouse: row.warehouse_id,
-          quantity: parseInt(quantity, 10),
+          quantity: parseInt(count, 10),
           code: row.inner_product_code,
           supplier: row.supplier,
         };
         const url = CREDENTIALS['profit'].addToCartURL;
 
         const res = await axios.post(url, data);
-        res.success ?? setQuantity('');
+        if (res.data.success) {
+          setAdded(true);
+          toast.success('Товар добавлен в корзину');
+        } else {
+          toast.error('Ошибка добавления в корзину');
+        }
       }
-      // Здесь добавим обработку  других suppliers
-      setAdded(true);
+      // Здесь добавьте обработку других поставщиков, если необходимо
     } catch (error) {
       console.error(error);
-      // Опционально можно добавить отображение ошибки пользователю
+      toast.error('Произошла ошибка при добавлении в корзину');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        p: 0.1,
-        // backgroundColor: 'red',
-      }}
-    >
-      <TextField
-        value={quantity}
-        onChange={handleQuantityChange}
-        inputProps={{
-          inputMode: 'numeric',
-          pattern: '[0-9]*',
-          min: 1,
-        }}
-        sx={{ ml: 1, minWidth: 35 }}
-        variant="standard"
+    <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+      <QuantitySelector
+        multi={row?.multi || 1}
+        loading={loading}
+        added={added}
+        onAddToCart={handleAddToCart}
       />
-      <IconButton onClick={handleAddToCart} disabled={loading || !quantity}>
-        {loading ? (
-          <CircularProgress size={24} />
-        ) : added ? (
-          <CheckIcon />
-        ) : (
-          <AddShoppingCartIcon />
-        )}
-      </IconButton>
     </Box>
   );
 };
