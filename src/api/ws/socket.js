@@ -17,4 +17,7 @@ export const SOCKET_EVENTS = {
   SUPPLIER_DATA_FETCH_STARTED: 'supplierDataFetchStarted',
   SUPPLIER_DATA_FETCH_SUCCESS: 'supplierDataFetchSuccess',
   SUPPLIER_DATA_FETCH_ERROR: 'supplierDataFetchError',
+  ADD_TO_CART_REQUEST: 'addToCartRequest',
+  ADD_TO_CART_SUCCESS: 'addToCartSuccess',
+  ADD_TO_CART_ERROR: 'addToCartError',
 };
