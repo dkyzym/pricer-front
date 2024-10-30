@@ -3,20 +3,21 @@ import useAddToCart from '@hooks/useAddToCart';
 import { Box } from '@mui/material';
 import { CREDENTIALS } from '@utils/constants';
 import axios from 'axios';
-import React from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 export const AddToCartCell = (props) => {
   const { row } = props;
-  console.log(row);
-  const [loading, setLoading] = React.useState(false);
-  const [added, setAdded] = React.useState(false);
 
-  const { addToCart, isAddingToCart } = useAddToCart();
+  const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  const { addToCart } = useAddToCart();
 
   const handleAddToCart = async (count) => {
-    // Validation of quantity
-    if (count > Number(row.availability)) {
+    const numericCount = parseInt(count, 10); // Преобразование строки в число
+
+    if (numericCount > Number(row.availability)) {
       toast.info('Нужно проверить количество');
       return;
     }
@@ -27,7 +28,7 @@ export const AddToCartCell = (props) => {
         const data = {
           id: row.innerId,
           warehouse: row.warehouse_id,
-          quantity: parseInt(count, 10),
+          quantity: numericCount,
           code: row.inner_product_code,
           supplier: row.supplier,
         };
@@ -41,12 +42,13 @@ export const AddToCartCell = (props) => {
           toast.error('Ошибка добавления в корзину');
         }
       } else if (row.supplier === 'turboCars') {
-        // Use the addToCart function from useAddToCart hook
-        addToCart(count, row);
-
+        await addToCart(numericCount, row);
         setAdded(true);
+        toast.success('Товар добавлен в корзину');
+      } else {
+        // Обработка других поставщиков или сообщение об ошибке
+        toast.error('Неизвестный поставщик');
       }
-      // Handle other suppliers if necessary
     } catch (error) {
       console.error(error);
       toast.error('Произошла ошибка при добавлении в корзину');
@@ -58,8 +60,8 @@ export const AddToCartCell = (props) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
       <QuantitySelector
-        multi={row?.multi || 1}
-        loading={loading || isAddingToCart}
+        multi={row?.multi ?? 1}
+        loading={loading}
         added={added}
         onAddToCart={handleAddToCart}
       />
