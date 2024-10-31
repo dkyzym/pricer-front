@@ -41,10 +41,12 @@ export const AddToCartCell = (props) => {
         } else {
           toast.error('Ошибка добавления в корзину');
         }
-      } else if (row.supplier === 'turboCars') {
-        await addToCart(numericCount, row);
+      } else if (row.supplier !== 'profit') {
+        console.log(row);
+        const res = await addToCart(numericCount, row);
+
         setAdded(true);
-        toast.success('Товар добавлен в корзину');
+        toast.success(res.message);
       } else {
         // Обработка других поставщиков или сообщение об ошибке
         toast.error('Неизвестный поставщик');
