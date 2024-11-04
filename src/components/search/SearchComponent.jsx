@@ -1,14 +1,7 @@
-import {
-  Autocomplete,
-  Box,
-  CircularProgress,
-  Container,
-  Grid,
-  IconButton,
-  TextField,
-} from '@mui/material';
+import { Autocomplete, Box, Container, Grid } from '@mui/material';
 import { useContext, useRef } from 'react';
 
+import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
 import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
 import { SocketContext } from '@context/SocketContext';
 import useAutocomplete from '@hooks/useAutocomplete';
@@ -17,9 +10,8 @@ import useSearchHandlers from '@hooks/useSearchHandlers';
 import useSocketManager from '@hooks/useSocketManager';
 import useSupplierSelection from '@hooks/useSupplierSelection';
 import useSupplierStatus from '@hooks/useSupplierStatus';
-import ClearIcon from '@mui/icons-material/Clear';
 import { BrandClarificationTable } from './BrandClarificationTable/BrandClarificationTable';
-import { ResultsTable } from './ResultsTable/ResultsTable';
+import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
   const useSocket = () => {
@@ -71,37 +63,9 @@ export const SearchComponent = () => {
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results
   );
+  console.log(allResults.filter((res) => res.supplier === 'patriot'));
 
   const filteredResults = useFilteredResults(allResults, selectedSuppliers);
-
-  const AutocompleteInput = (params) => (
-    <TextField
-      {...params}
-      label="Введите запрос"
-      variant="outlined"
-      inputRef={inputRef}
-      InputProps={{
-        ...params.InputProps,
-        autoComplete: 'off',
-        endAdornment: (
-          <>
-            {isAutocompleteLoading && (
-              <CircularProgress color="inherit" size={20} />
-            )}
-            {inputValue && (
-              <IconButton
-                onClick={handleClearInput}
-                size="small"
-                sx={{ visibility: inputValue ? 'visible' : 'hidden' }}
-              >
-                <ClearIcon />
-              </IconButton>
-            )}
-          </>
-        ),
-      }}
-    />
-  );
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
@@ -118,7 +82,15 @@ export const SearchComponent = () => {
             }
             onInputChange={handleInputChange}
             onChange={handleOptionSelect}
-            renderInput={AutocompleteInput}
+            renderInput={(params) => (
+              <AutocompleteInput
+                params={params}
+                inputRef={inputRef}
+                isAutocompleteLoading={isAutocompleteLoading}
+                inputValue={inputValue}
+                handleClearInput={handleClearInput}
+              />
+            )}
           />
         </Grid>
         <Grid item xs={12}>
@@ -135,7 +107,7 @@ export const SearchComponent = () => {
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <ResultsTable allResults={filteredResults} />
+          <MemoizedResultsTable allResults={filteredResults} />
         </Grid>
         {isClarifying && brandClarifications.length > 0 && (
           <Grid item xs={12}>

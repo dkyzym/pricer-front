@@ -6,7 +6,8 @@ export const useFilteredData = (
   allResults,
   maxDeadline,
   maxDeliveryDate,
-  maxPrice
+  maxPrice,
+  minQuantity
 ) => {
   return useMemo(() => {
     const now = DateTime.now();
@@ -39,7 +40,24 @@ export const useFilteredData = (
         isNaN(maxPrice) ||
         item.price <= parseFloat(maxPrice);
 
-      return isDeadlineValid && isPriceValid;
+      // Получаем доступность и преобразуем в число
+      const availability = parseFloat(item.availability);
+      const isAvailabilityValid = !isNaN(availability);
+
+      const isMinQuantityValid =
+        minQuantity === '' ||
+        isNaN(minQuantity) ||
+        (isAvailabilityValid && availability >= parseFloat(minQuantity));
+
+      const isMultiValid =
+        item &&
+        item?.multi &&
+        isAvailabilityValid &&
+        availability % item.multi === 0;
+
+      return (
+        isDeadlineValid && isPriceValid && isMinQuantityValid && isMultiValid
+      );
     });
-  }, [allResults, maxDeadline, maxDeliveryDate, maxPrice]);
+  }, [allResults, maxDeadline, maxDeliveryDate, maxPrice, minQuantity]); // Добавляем minQuantity в зависимости
 };

@@ -10,6 +10,8 @@ export const FilterControls = ({
   setMaxDeliveryDate,
   maxPrice,
   setMaxPrice,
+  minQuantity,
+  setMinQuantity,
 }) => {
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="ru">
@@ -45,6 +47,28 @@ export const FilterControls = ({
           inputProps={{ min: 0 }}
           sx={{
             ...(maxPrice !== '' && {
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: '2px solid green',
+                },
+              },
+            }),
+          }}
+        />
+        <TextField
+          label="Минимальное количество"
+          variant="outlined"
+          value={minQuantity}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === '' || (!isNaN(value) && Number(value) >= 0)) {
+              setMinQuantity(value);
+            }
+          }}
+          type="number"
+          inputProps={{ min: 0 }}
+          sx={{
+            ...(minQuantity !== '' && {
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
                   border: '2px solid green',
