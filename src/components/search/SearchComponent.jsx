@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Container, Grid } from '@mui/material';
-import { useContext, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 
 import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
 import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
@@ -9,63 +9,72 @@ import useFilteredResults from '@hooks/useFilteredResults';
 import useSearchHandlers from '@hooks/useSearchHandlers';
 import useSocketManager from '@hooks/useSocketManager';
 import useSupplierSelection from '@hooks/useSupplierSelection';
-import useSupplierStatus from '@hooks/useSupplierStatus';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setAutocompleteLoading,
+  setAutocompleteResults,
+  setInputValue,
+} from '../../redux/autocompleteSlice';
+import { clearBrandClarifications } from '../../redux/brandClarificationSlice';
+import { resetSupplierStatus } from '../../redux/supplierSlice';
 import { BrandClarificationTable } from './BrandClarificationTable/BrandClarificationTable';
 import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
-  const useSocket = () => {
-    return useContext(SocketContext);
-  };
-  const socket = useSocket();
+  const socket = useContext(SocketContext);
+  const dispatch = useDispatch();
 
-  const { resetSupplierStatus, setSupplierStatus, supplierStatus } =
-    useSupplierStatus();
+  useSocketManager(socket);
 
+  const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
   const {
-    autocompleteResults,
-    handleInputChange,
     inputValue,
+    handleInputChange,
+    autocompleteResults,
     isAutocompleteLoading,
-    setInputValue,
-    setIsAutocompleteLoading,
-    setAutocompleteResults,
   } = useAutocomplete(socket);
 
-  const {
-    brandClarifications,
-    isClarifying,
-    setBrandClarifications,
-    setIsClarifying,
-  } = useSocketManager(socket, {
-    setAutocompleteResults,
-    setIsAutocompleteLoading,
-    setSupplierStatus,
-  });
+  const brandClarifications = useSelector(
+    (state) => state.brandClarification.brands
+  );
+  const isClarifying = useSelector(
+    (state) => state.brandClarification.isClarifying
+  );
 
   const inputRef = useRef(null);
 
-  const { selectedSuppliers, handleSupplierChange } =
-    useSupplierSelection(supplierStatus);
+  const { selectedSuppliers, handleSupplierChange } = useSupplierSelection();
 
   const { handleClearInput, handleOptionSelect, handleBrandSelect } =
     useSearchHandlers({
       socket,
-      resetSupplierStatus,
-      setBrandClarifications,
-      setIsClarifying,
+      resetSupplierStatus: () => dispatch(resetSupplierStatus()),
+      clearBrandClarifications: () => dispatch(clearBrandClarifications()),
       inputRef,
-      setInputValue,
-      setAutocompleteResults,
-      setIsAutocompleteLoading,
+      setInputValue: (value) => dispatch(setInputValue(value)),
+      setAutocompleteResults: (results) =>
+        dispatch(setAutocompleteResults(results)),
+      setIsAutocompleteLoading: (loading) =>
+        dispatch(setAutocompleteLoading(loading)),
+      selectedSuppliers,
     });
 
   const allResults = Object.values(supplierStatus).flatMap(
-    (status) => status.results
+    (status) => status.results || []
   );
-  console.log(allResults.filter((res) => res.supplier === 'patriot'));
-
   const filteredResults = useFilteredResults(allResults, selectedSuppliers);
+
+  useEffect(() => {
+    console.log('Input Value:', inputValue);
+    console.log('Autocomplete Results:', autocompleteResults);
+    console.log('Is Loading:', isAutocompleteLoading);
+    console.log('Selected Suppliers:', selectedSuppliers);
+  }, [
+    inputValue,
+    autocompleteResults,
+    isAutocompleteLoading,
+    selectedSuppliers,
+  ]);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
@@ -107,9 +116,9 @@ export const SearchComponent = () => {
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <MemoizedResultsTable allResults={filteredResults} />
+          {<MemoizedResultsTable allResults={filteredResults} />}
         </Grid>
-        {isClarifying && brandClarifications.length > 0 && (
+        {isClarifying && brandClarifications?.length > 0 && (
           <Grid item xs={12}>
             <BrandClarificationTable
               items={brandClarifications}

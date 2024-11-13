@@ -1,70 +1,117 @@
 import { SOCKET_EVENTS } from '@api/ws/socket';
 import { useCallback } from 'react';
-
-const useSearchHandlers = ({
-  socket,
-  resetSupplierStatus,
-  setBrandClarifications,
-  setIsClarifying,
-  inputRef,
-  setInputValue,
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setAutocompleteLoading,
   setAutocompleteResults,
-  setIsAutocompleteLoading,
-}) => {
-  const handleClearInput = useCallback(() => {
-    setInputValue('');
-    setAutocompleteResults([]);
-    setIsAutocompleteLoading(false);
+} from '../../src/redux/autocompleteSlice';
+import { clearAutocomplete } from '../redux/autocompleteSlice';
+import { clearBrandClarifications } from '../redux/brandClarificationSlice';
+import { resetSupplierStatus } from '../redux/supplierSlice';
 
+const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
+  const dispatch = useDispatch();
+  const sessions = useSelector((state) => state.session.sessions);
+
+  const getSessionIDForSupplier = useCallback(
+    (supplier) => {
+      const session = sessions.find((s) => s.supplier === supplier);
+      const sessionID = session ? session.sessionID : null;
+      console.log(
+        `getSessionIDForSupplier: supplier=${supplier}, sessionID=${sessionID}`
+      );
+      return sessionID;
+    },
+    [sessions]
+  );
+
+  const handleClearInput = useCallback(() => {
+    dispatch(setAutocompleteResults([]));
+    dispatch(setAutocompleteLoading(false));
+    dispatch(clearAutocomplete(''));
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [
-    setInputValue,
-    setAutocompleteResults,
-    setIsAutocompleteLoading,
-    inputRef,
-  ]);
+  }, [dispatch, inputRef]);
 
   const handleBrandClarification = useCallback(
     (value) => {
       const { article } = value;
-      socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, article);
+      selectedSuppliers.forEach((supplier) => {
+        const sessionID = getSessionIDForSupplier(supplier);
+        if (sessionID) {
+          socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, {
+            sessionID,
+            article,
+            supplier,
+          });
+        } else {
+          console.error(`Session for supplier "${supplier}" not found`);
+        }
+      });
     },
-    [socket]
+    [socket, selectedSuppliers, getSessionIDForSupplier]
   );
 
   const handleDetailedSearch = useCallback(
     (value) => {
-      socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, value);
+      console.log('handleDetailedSearch called with value:', value);
+
+      selectedSuppliers.forEach((supplier) => {
+        const sessionID = getSessionIDForSupplier(supplier);
+        console.log(
+          `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, sessionID: ${sessionID}`
+        );
+
+        // Proceed even if sessionID is null (e.g., for 'profit')
+        socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
+          sessionID,
+          item: value,
+          supplier,
+        });
+      });
     },
-    [socket]
+    [socket, selectedSuppliers, getSessionIDForSupplier]
   );
 
   const handleOptionSelect = useCallback(
     (_event, value) => {
+      console.log('handleOptionSelect called with value:', value);
       if (value) {
-        resetSupplierStatus();
-
+        dispatch(resetSupplierStatus());
         if (value.brand.trim().includes('Найти') && !value.description) {
+          console.log('Triggering handleBrandClarification');
           handleBrandClarification(value);
         } else {
+          console.log('Triggering handleDetailedSearch');
           handleDetailedSearch(value);
         }
       }
     },
-    [resetSupplierStatus, handleBrandClarification, handleDetailedSearch]
+    [dispatch, handleBrandClarification, handleDetailedSearch]
   );
 
   const handleBrandSelect = useCallback(
     (selectedItem) => {
-      resetSupplierStatus();
+      console.log('handleBrandSelect called with selectedItem:', selectedItem);
+      dispatch(resetSupplierStatus());
 
-      socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, selectedItem);
-      setBrandClarifications([]);
-      setIsClarifying(false);
+      selectedSuppliers.forEach((supplier) => {
+        const sessionID = getSessionIDForSupplier(supplier);
+        console.log(
+          `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, sessionID: ${sessionID}`
+        );
+
+        socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
+          sessionID,
+          item: selectedItem,
+          supplier,
+        });
+      });
+
+      dispatch(clearBrandClarifications());
     },
-    [resetSupplierStatus, socket, setBrandClarifications, setIsClarifying]
+    [dispatch, socket, selectedSuppliers, getSessionIDForSupplier]
   );
 
   return {

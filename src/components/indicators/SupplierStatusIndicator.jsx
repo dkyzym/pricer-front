@@ -36,7 +36,7 @@ export const SupplierStatusIndicator = ({
           </Typography>
         )}
         {!status.loading && !status.error && (
-          <Typography>{status.results.length}</Typography>
+          <Typography>{status.results?.length}</Typography>
         )}
       </Stack>
     </FormGroup>

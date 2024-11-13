@@ -19,7 +19,7 @@ export const BrandClarificationTable = ({ items, onSelect }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {items.length > 0 &&
+          {items?.length > 0 &&
             items.map((item) => (
               <TableRow
                 key={item.id}
