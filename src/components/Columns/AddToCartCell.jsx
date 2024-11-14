@@ -1,10 +1,10 @@
-import { useSelector } from 'react-redux';
 import { QuantitySelector } from '@components/QuantitySelector/QuantitySelector';
 import useAddToCart from '@hooks/useAddToCart';
 import { Box } from '@mui/material';
 import { CREDENTIALS } from '@utils/constants';
 import axios from 'axios';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
 export const AddToCartCell = (props) => {

@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Container, Grid } from '@mui/material';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useRef } from 'react';
 
 import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
 import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
@@ -63,18 +63,6 @@ export const SearchComponent = () => {
     (status) => status.results || []
   );
   const filteredResults = useFilteredResults(allResults, selectedSuppliers);
-
-  useEffect(() => {
-    console.log('Input Value:', inputValue);
-    console.log('Autocomplete Results:', autocompleteResults);
-    console.log('Is Loading:', isAutocompleteLoading);
-    console.log('Selected Suppliers:', selectedSuppliers);
-  }, [
-    inputValue,
-    autocompleteResults,
-    isAutocompleteLoading,
-    selectedSuppliers,
-  ]);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
