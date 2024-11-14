@@ -6,14 +6,13 @@ const useAddToCart = () => {
   const socket = useContext(SocketContext);
 
   const addToCart = useCallback(
-    (count, item) => {
+    (count, item, sessionID, accountAlias) => {
       return new Promise((resolve, reject) => {
         const handleSuccess = (data) => {
           socket.off(SOCKET_EVENTS.ADD_TO_CART_SUCCESS, handleSuccess);
           socket.off(SOCKET_EVENTS.ADD_TO_CART_ERROR, handleError);
           resolve(data);
         };
-
         const handleError = (error) => {
           socket.off(SOCKET_EVENTS.ADD_TO_CART_SUCCESS, handleSuccess);
           socket.off(SOCKET_EVENTS.ADD_TO_CART_ERROR, handleError);
@@ -23,7 +22,12 @@ const useAddToCart = () => {
         socket.on(SOCKET_EVENTS.ADD_TO_CART_SUCCESS, handleSuccess);
         socket.on(SOCKET_EVENTS.ADD_TO_CART_ERROR, handleError);
 
-        socket.emit(SOCKET_EVENTS.ADD_TO_CART_REQUEST, { count, item });
+        socket.emit(SOCKET_EVENTS.ADD_TO_CART_REQUEST, {
+          count,
+          item,
+          sessionID,
+          accountAlias,
+        });
       });
     },
     [socket]
