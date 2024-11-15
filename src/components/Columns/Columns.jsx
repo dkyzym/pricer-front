@@ -61,24 +61,18 @@ export const getColumns = ({
       ),
     },
 
-    { field: 'warehouse', headerName: 'Склад', width: 90 },
+    { field: 'warehouse', headerName: 'Склад', width: 85 },
     {
       field: 'probability',
       headerName: '%',
-      width: 50,
+      width: 40,
       cellClassName: (params) =>
         params.value === maxProbability ? 'bestProbability' : '',
     },
     {
-      field: 'price',
-      headerName: 'Цена',
-      width: 100,
-      cellClassName: (params) => (params.value === minPrice ? 'bestPrice' : ''),
-    },
-    {
       field: 'deadline',
       headerName: 'Ч',
-      width: 60,
+      width: 20,
       cellClassName: (params) =>
         params.value === minDeadline ? 'bestDeadline' : '',
     },
@@ -135,12 +129,30 @@ export const getColumns = ({
     },
     { field: 'availability', headerName: 'Наличие', width: 60 },
     {
+      field: 'price',
+      headerName: 'Цена',
+      width: 100,
+      cellClassName: (params) => (params.value === minPrice ? 'bestPrice' : ''),
+    },
+    {
       field: 'addToCart',
       headerName: 'Корзина',
       width: 120,
       sortable: false,
       filterable: false,
       renderCell: (params) => <AddToCartCell {...params} />,
+    },
+    {
+      field: 'accountAlias',
+      headerName: '',
+      width: 40,
+      cellClassName: (params) => {
+        return params.row.accountAlias === 'nal' ? 'nal-cell' : 'beznal-cell';
+      },
+      renderCell: (params) => {
+        const { value } = params;
+        return <span>{value === 'nal' ? 'Н' : 'Б/н'}</span>;
+      },
     },
     { field: 'supplier', headerName: 'Поставщик', width: 75 },
   ];

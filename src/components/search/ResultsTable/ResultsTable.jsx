@@ -5,7 +5,6 @@ import { useFilteredData } from '@hooks/useFilteredData';
 import { memo, useMemo, useState } from 'react';
 import { DataGridWrapper } from '../DataGridWrapper/DataGridWrapper';
 import { FilterControls } from '../FilterControls/FilterControls';
-import { customStyles } from './ResultsStyles';
 
 const ResultsTable = ({ allResults }) => {
   const [maxDeadline, setMaxDeadline] = useState('');
@@ -54,7 +53,6 @@ const ResultsTable = ({ allResults }) => {
         columns={columns}
         sortModel={sortModel}
         setSortModel={setSortModel}
-        customStyles={customStyles}
       />
     </div>
   );

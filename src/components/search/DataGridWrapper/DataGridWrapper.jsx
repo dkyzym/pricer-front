@@ -7,6 +7,10 @@ export const DataGridWrapper = ({
   setSortModel,
   customStyles,
 }) => {
+  const getRowClassName = (params) => {
+    return params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd';
+  };
+
   return (
     <div style={{ width: '100%', marginTop: '20px' }}>
       <StyledDataGrid
@@ -14,9 +18,7 @@ export const DataGridWrapper = ({
         columns={columns}
         pageSize={25}
         rowsPerPageOptions={[10, 25, 50]}
-        getRowClassName={(params) =>
-          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-        }
+        getRowClassName={getRowClassName}
         sx={customStyles}
         sortingOrder={['desc', 'asc']}
         sortModel={sortModel}
