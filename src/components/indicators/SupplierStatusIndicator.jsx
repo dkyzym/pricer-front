@@ -8,11 +8,15 @@ import {
 } from '@mui/material';
 
 export const SupplierStatusIndicator = ({
-  supplier,
+  supplierKey,
   status,
   checked,
   onChange,
 }) => {
+  const [supplier, accountAlias] = supplierKey.includes('_')
+    ? supplierKey.split('_')
+    : [supplierKey, null];
+
   return (
     <FormGroup>
       <Stack direction="row" alignItems="center" spacing={1}>
@@ -20,15 +24,12 @@ export const SupplierStatusIndicator = ({
           control={
             <Checkbox
               checked={checked}
-              onChange={() => onChange(supplier)}
+              onChange={() => onChange(supplierKey)}
               color="primary"
             />
           }
-          label={supplier}
+          label={accountAlias ? `${supplier} (${accountAlias})` : supplier}
         />
-        {/* <Typography variant="subtitle1" fontWeight="bold">
-          {supplier}:
-        </Typography> */}
         {status.loading && <CircularProgress size={16} />}
         {!status.loading && status.error && (
           <Typography color="error" noWrap>

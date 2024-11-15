@@ -14,11 +14,18 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
   const sessions = useSelector((state) => state.session.sessions);
 
   const getSessionIDForSupplier = useCallback(
-    (supplier) => {
-      const session = sessions.find((s) => s.supplier === supplier);
+    (supplier, accountAlias) => {
+      if (!supplier) {
+        console.error('Supplier is undefined in getSessionIDForSupplier');
+        return null;
+      }
+
+      const session = sessions.find(
+        (s) => s.supplier === supplier && s.accountAlias === accountAlias
+      );
       const sessionID = session ? session.sessionID : null;
       console.log(
-        `getSessionIDForSupplier: supplier=${supplier}, sessionID=${sessionID}`
+        `getSessionIDForSupplier: supplier=${supplier}, accountAlias=${accountAlias}, sessionID=${sessionID}`
       );
       return sessionID;
     },
@@ -37,8 +44,8 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
   const handleBrandClarification = useCallback(
     (value) => {
       const { article } = value;
-      selectedSuppliers.forEach((supplier) => {
-        const sessionID = getSessionIDForSupplier(supplier);
+      selectedSuppliers.forEach((supplier, accountAlias) => {
+        const sessionID = getSessionIDForSupplier(supplier, accountAlias);
         if (sessionID) {
           socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, {
             sessionID,
@@ -57,21 +64,63 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
     (value) => {
       console.log('handleDetailedSearch called with value:', value);
 
-      selectedSuppliers.forEach((supplier) => {
-        const sessionID = getSessionIDForSupplier(supplier);
-        console.log(
-          `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, sessionID: ${sessionID}`
-        );
+      selectedSuppliers.forEach((supplierKey) => {
+        if (!supplierKey) {
+          console.error('Invalid supplierKey:', supplierKey);
+          return; // Skip invalid supplierKey
+        }
 
-        // Proceed even if sessionID is null (e.g., for 'profit')
+        let supplier, accountAlias;
+        if (supplierKey.includes('_')) {
+          [supplier, accountAlias] = supplierKey.split('_');
+        } else {
+          supplier = supplierKey;
+          accountAlias = null;
+        }
+
+        if (!supplier) {
+          console.error('Supplier is undefined for supplierKey:', supplierKey);
+          return; // Skip if supplier is undefined
+        }
+
+        const sessionID = getSessionIDForSupplier(supplier, accountAlias);
+        console.log(
+          `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, accountAlias: ${accountAlias}, sessionID: ${sessionID}`
+        );
         socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
           sessionID,
           item: value,
           supplier,
+          accountAlias,
         });
       });
     },
     [socket, selectedSuppliers, getSessionIDForSupplier]
+  );
+
+  const handleBrandSelect = useCallback(
+    (selectedItem) => {
+      console.log('handleBrandSelect called with selectedItem:', selectedItem);
+      dispatch(resetSupplierStatus());
+
+      selectedSuppliers.forEach((supplierKey) => {
+        const [supplier, accountAlias] = supplierKey.split('_');
+        const sessionID = getSessionIDForSupplier(supplier, accountAlias);
+        console.log(
+          `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, accountAlias: ${accountAlias}, sessionID: ${sessionID}`
+        );
+
+        socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
+          sessionID,
+          item: selectedItem,
+          supplier,
+          accountAlias,
+        });
+      });
+
+      dispatch(clearBrandClarifications());
+    },
+    [dispatch, socket, selectedSuppliers, getSessionIDForSupplier]
   );
 
   const handleOptionSelect = useCallback(
@@ -89,29 +138,6 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
       }
     },
     [dispatch, handleBrandClarification, handleDetailedSearch]
-  );
-
-  const handleBrandSelect = useCallback(
-    (selectedItem) => {
-      console.log('handleBrandSelect called with selectedItem:', selectedItem);
-      dispatch(resetSupplierStatus());
-
-      selectedSuppliers.forEach((supplier) => {
-        const sessionID = getSessionIDForSupplier(supplier);
-        console.log(
-          `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, sessionID: ${sessionID}`
-        );
-
-        socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
-          sessionID,
-          item: selectedItem,
-          supplier,
-        });
-      });
-
-      dispatch(clearBrandClarifications());
-    },
-    [dispatch, socket, selectedSuppliers, getSessionIDForSupplier]
   );
 
   return {

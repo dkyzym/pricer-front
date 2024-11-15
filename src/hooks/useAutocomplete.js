@@ -22,8 +22,11 @@ const useAutocomplete = (socket) => {
 
   // Получаем сессии из Redux
   const sessions = useSelector((state) => state.session.sessions);
+
   // Находим сессию для поставщика 'ug'
-  const ugSession = sessions.find((session) => session.supplier === 'ug');
+  const ugSession = sessions.find(
+    (session) => session.supplier === 'ug' && session.accountAlias === 'nal'
+  );
 
   const sessionID = ugSession ? ugSession.sessionID : null;
 
@@ -42,6 +45,7 @@ const useAutocomplete = (socket) => {
           socket.emit(SOCKET_EVENTS.AUTOCOMPLETE, {
             sessionID: currentSessionID,
             query,
+            accountAlias: 'nal',
           });
         } else {
           toast.error('Session for supplier "ug" not found');

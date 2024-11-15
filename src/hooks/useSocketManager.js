@@ -40,17 +40,21 @@ const useSocketManager = (socket) => {
 
       const supplierStatusData = {};
       sessions.forEach((session) => {
-        const supplier = session.supplier;
-        if (supplier) {
-          supplierStatusData[supplier] = {
-            loading: false,
-            results: [],
-            error: null,
-          };
+        const { supplier, accountAlias } = session;
+        if (!supplier) {
+          console.error('Session has undefined supplier:', session);
+          return; // Skip this session
         }
+
+        const key = accountAlias ? `${supplier}_${accountAlias}` : supplier;
+        supplierStatusData[key] = {
+          loading: false,
+          results: [],
+          error: null,
+        };
       });
 
-      // Include 'profit' in supplierStatusData
+      // Include 'profit' in supplierStatusData if applicable
       supplierStatusData['profit'] = {
         loading: false,
         results: [],
@@ -105,32 +109,57 @@ const useSocketManager = (socket) => {
   );
 
   const handleSupplierDataFetchStarted = useCallback(
-    ({ supplier, article }) => {
+    ({ supplier, accountAlias, article }) => {
+      if (!supplier) {
+        console.error(
+          'Supplier is undefined in handleSupplierDataFetchStarted'
+        );
+        return;
+      }
       console.log(
-        `Fetching data started for supplier: ${supplier}, article: ${article}`
+        `Fetching data started for supplier: ${supplier}, accountAlias: ${accountAlias}, article: ${article}`
       );
-      dispatch(setSupplierStatusLoading(supplier));
+      const supplierKey = accountAlias
+        ? `${supplier}_${accountAlias}`
+        : supplier;
+      dispatch(setSupplierStatusLoading(supplierKey));
       if (supplier === 'profit' && article) {
-        dispatch(setSupplierArticle({ supplier, article }));
+        dispatch(setSupplierArticle({ supplier: supplierKey, article }));
       }
     },
     [dispatch]
   );
 
   const handleSupplierDataFetchSuccess = useCallback(
-    ({ supplier, result }) => {
+    ({ supplier, accountAlias, result }) => {
+      if (!supplier) {
+        console.error(
+          'Supplier is undefined in handleSupplierDataFetchSuccess'
+        );
+        return;
+      }
+
+      const supplierKey = accountAlias
+        ? `${supplier}_${accountAlias}`
+        : supplier;
       console.log(`Fetching data succeeded for supplier: ${supplier}`, result);
       dispatch(
-        setSupplierStatusSuccess({ supplier, results: result?.data || [] })
+        setSupplierStatusSuccess({
+          supplier: supplierKey,
+          results: result?.data || [],
+        })
       );
     },
     [dispatch]
   );
 
   const handleSupplierDataFetchError = useCallback(
-    ({ supplier, error }) => {
+    ({ supplier, accountAlias, error }) => {
       console.error(`Error fetching data for supplier: ${supplier}`, error);
-      dispatch(setSupplierStatusError({ supplier, error }));
+      const supplierKey = accountAlias
+        ? `${supplier}_${accountAlias}`
+        : supplier;
+      dispatch(setSupplierStatusError({ supplier: supplierKey, error }));
     },
     [dispatch]
   );

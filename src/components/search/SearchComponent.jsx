@@ -92,12 +92,12 @@ export const SearchComponent = () => {
         </Grid>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', gap: 3 }}>
-            {Object.entries(supplierStatus).map(([supplier, status]) => (
+            {Object.entries(supplierStatus).map(([supplierKey, status]) => (
               <SupplierStatusIndicator
-                key={supplier}
-                supplier={supplier}
+                key={supplierKey}
+                supplierKey={supplierKey}
                 status={status}
-                checked={selectedSuppliers.includes(supplier)}
+                checked={selectedSuppliers.includes(supplierKey)}
                 onChange={handleSupplierChange}
               />
             ))}

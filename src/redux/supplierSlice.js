@@ -12,9 +12,9 @@ const supplierSlice = createSlice({
       state.supplierStatus = action.payload;
     },
     resetSupplierStatus(state) {
-      Object.keys(state.supplierStatus).forEach((supplier) => {
-        state.supplierStatus[supplier] = {
-          ...state.supplierStatus[supplier],
+      Object.keys(state.supplierStatus).forEach((supplierKey) => {
+        state.supplierStatus[supplierKey] = {
+          ...state.supplierStatus[supplierKey],
           results: [],
           loading: false,
           error: null,
@@ -31,6 +31,13 @@ const supplierSlice = createSlice({
     },
     setSupplierStatusSuccess(state, action) {
       const { supplier, results } = action.payload;
+
+      console.log('setSupplierStatusSuccess called with supplier:', supplier);
+      if (!supplier) {
+        console.error('Supplier is undefined in setSupplierStatusSuccess');
+        return;
+      }
+
       state.supplierStatus[supplier] = {
         ...(state.supplierStatus[supplier] || {}),
         loading: false,

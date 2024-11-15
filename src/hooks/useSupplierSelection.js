@@ -9,8 +9,8 @@ const useSupplierSelection = () => {
   );
 
   // Initialize selectedSuppliers with all suppliers, including 'profit'
-  const [selectedSuppliers, setSelectedSuppliers] = useState(
-    () => supplierKeys
+  const [selectedSuppliers, setSelectedSuppliers] = useState(() =>
+    supplierKeys.filter((key) => key !== 'undefined' && key)
   );
 
   useEffect(() => {
@@ -25,11 +25,11 @@ const useSupplierSelection = () => {
     });
   }, [supplierKeys]);
 
-  const handleSupplierChange = useCallback((supplier) => {
+  const handleSupplierChange = useCallback((supplierKey) => {
     setSelectedSuppliers((prev) =>
-      prev.includes(supplier)
-        ? prev.filter((s) => s !== supplier)
-        : [...prev, supplier]
+      prev.includes(supplierKey)
+        ? prev.filter((s) => s !== supplierKey)
+        : [...prev, supplierKey]
     );
   }, []);
 
