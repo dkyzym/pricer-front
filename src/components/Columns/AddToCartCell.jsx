@@ -13,27 +13,23 @@ export const AddToCartCell = (props) => {
   const [added, setAdded] = useState(false);
   const { addToCart } = useAddToCart();
 
-  // Get sessions from Redux store
   const sessions = useSelector((state) => state.session.sessions);
 
   // Helper functions to get sessionID and accountAlias for the supplier
-  const getSessionIDForSupplier = (supplier) => {
-    const session = sessions.find((s) => s.supplier === supplier);
-    return session ? session.sessionID : null;
-  };
-
-  const getAccountAliasForSupplier = (supplier) => {
-    const session = sessions.find((s) => s.supplier === supplier);
-    return session ? session.accountAlias : null;
-  };
+  const getSessionIDForSupplier = (supplier, accountAlias) =>
+    sessions.find(
+      (s) => s.supplier === supplier && s.accountAlias === accountAlias
+    )?.sessionID || null;
 
   const handleAddToCart = async (count) => {
     const numericCount = parseInt(count, 10);
+
     if (numericCount > Number(row.availability)) {
       toast.info('Нужно проверить количество');
       return;
     }
     setLoading(true);
+
     try {
       if (row.supplier === 'profit') {
         const data = {
@@ -52,18 +48,28 @@ export const AddToCartCell = (props) => {
           toast.error('Ошибка добавления в корзину');
         }
       } else {
-        // For other suppliers
-        const sessionID = getSessionIDForSupplier(row.supplier);
-        const accountAlias = getAccountAliasForSupplier(row.supplier);
+        const sessionID = getSessionIDForSupplier(
+          row.supplier,
+          row.accountAlias
+        );
+
         if (!sessionID) {
-          toast.error('Session not found for supplier');
+          toast.error(
+            'Сессия не найдена для данного поставщика и accountAlias'
+          );
           setLoading(false);
           return;
         }
 
-        const res = await addToCart(numericCount, row, sessionID, accountAlias);
+        const res = await addToCart(
+          numericCount,
+          row,
+          sessionID,
+          row.accountAlias
+        );
         setAdded(true);
-        toast.success(res.message);
+
+        toast.success(res.result.message);
       }
     } catch (error) {
       console.error(error);

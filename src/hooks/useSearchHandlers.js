@@ -24,9 +24,9 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
         (s) => s.supplier === supplier && s.accountAlias === accountAlias
       );
       const sessionID = session ? session.sessionID : null;
-      console.log(
-        `getSessionIDForSupplier: supplier=${supplier}, accountAlias=${accountAlias}, sessionID=${sessionID}`
-      );
+      // console.log(
+      //   `getSessionIDForSupplier: supplier=${supplier}, accountAlias=${accountAlias}, sessionID=${sessionID}`
+      // );
       return sessionID;
     },
     [sessions]
@@ -62,7 +62,7 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
 
   const handleDetailedSearch = useCallback(
     (value) => {
-      console.log('handleDetailedSearch called with value:', value);
+      // console.log('handleDetailedSearch called with value:', value);
 
       selectedSuppliers.forEach((supplierKey) => {
         if (!supplierKey) {
@@ -84,9 +84,9 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
         }
 
         const sessionID = getSessionIDForSupplier(supplier, accountAlias);
-        console.log(
-          `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, accountAlias: ${accountAlias}, sessionID: ${sessionID}`
-        );
+        // console.log(
+        //   `Emitting GET_ITEM_RESULTS for supplier: ${supplier}, accountAlias: ${accountAlias}, sessionID: ${sessionID}`
+        // );
         socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
           sessionID,
           item: value,

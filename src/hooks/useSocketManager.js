@@ -34,7 +34,6 @@ const useSocketManager = (socket) => {
 
   const handleSessionsCreated = useCallback(
     (sessions) => {
-      console.log('sessions ', sessions);
       dispatch(setSessions(sessions));
       toast.success('Sessions created successfully');
 
@@ -116,9 +115,9 @@ const useSocketManager = (socket) => {
         );
         return;
       }
-      console.log(
-        `Fetching data started for supplier: ${supplier}, accountAlias: ${accountAlias}, article: ${article}`
-      );
+      // console.log(
+      //   `Fetching data started for supplier: ${supplier}, accountAlias: ${accountAlias}, article: ${article}`
+      // );
       const supplierKey =
         supplier === 'profit' ? supplier : `${supplier}_${accountAlias}`;
       dispatch(setSupplierStatusLoading(supplierKey));
