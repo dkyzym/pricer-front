@@ -66,22 +66,6 @@ const useAutocomplete = (socket) => {
     debouncedEmitAutocomplete(newValue);
   };
 
-  // useEffect(() => {
-  //   const handleAutocompleteResponse = (data) => {
-  //     dispatch(setAutocompleteResults(data));
-  //     dispatch(setAutocompleteLoading(false));
-  //   };
-
-  //   socket.on(SOCKET_EVENTS.AUTOCOMPLETE_RESPONSE, handleAutocompleteResponse);
-
-  //   return () => {
-  //     socket.off(
-  //       SOCKET_EVENTS.AUTOCOMPLETE_RESPONSE,
-  //       handleAutocompleteResponse
-  //     );
-  //   };
-  // }, [socket, dispatch]);
-
   return {
     inputValue,
     handleInputChange,

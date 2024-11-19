@@ -44,18 +44,23 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
   const handleBrandClarification = useCallback(
     (value) => {
       const { article } = value;
-      selectedSuppliers.forEach((supplier, accountAlias) => {
-        const sessionID = getSessionIDForSupplier(supplier, accountAlias);
-        if (sessionID) {
-          socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, {
-            sessionID,
-            article,
-            supplier,
-          });
-        } else {
-          console.error(`Session for supplier "${supplier}" not found`);
-        }
-      });
+
+      const ugSession = sessions.find(
+        (session) => session.supplier === 'ug' && session.accountAlias === 'nal'
+      );
+
+      const sessionID = ugSession ? ugSession.sessionID : null;
+
+      if (sessionID) {
+        socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, {
+          sessionID,
+          query: article,
+          supplier: 'ug',
+          accountAlias: 'nal',
+        });
+      } else {
+        console.error(`Error inside handleBrandClarification`);
+      }
     },
     [socket, selectedSuppliers, getSessionIDForSupplier]
   );
@@ -125,14 +130,16 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
 
   const handleOptionSelect = useCallback(
     (_event, value) => {
-      console.log('handleOptionSelect called with value:', value);
       if (value) {
         dispatch(resetSupplierStatus());
-        if (value.brand.trim().includes('Найти') && !value.description) {
-          console.log('Triggering handleBrandClarification');
+
+        const brand = typeof value === 'object' ? value.brand : value;
+        const description = value.description;
+
+        if (brand.trim().includes('Найти') && !description) {
+          console.log('called brandClarification');
           handleBrandClarification(value);
         } else {
-          console.log('Triggering handleDetailedSearch');
           handleDetailedSearch(value);
         }
       }
