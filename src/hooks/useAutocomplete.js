@@ -55,15 +55,19 @@ const useAutocomplete = (socket) => {
     [socket]
   );
 
-  const handleInputChange = (_event, newValue) => {
-    dispatch(setInputValue(newValue));
-    if (newValue.trim() === '') {
-      dispatch(setAutocompleteResults([]));
-      dispatch(setAutocompleteLoading(false));
-      return;
+  const handleInputChange = (_event, newValue, reason) => {
+    if (reason === 'input') {
+      dispatch(setInputValue(newValue));
+
+      if (newValue.trim() === '') {
+        dispatch(setAutocompleteResults([]));
+        dispatch(setAutocompleteLoading(false));
+        return;
+      }
+
+      dispatch(setAutocompleteLoading(true));
+      debouncedEmitAutocomplete(newValue);
     }
-    dispatch(setAutocompleteLoading(true));
-    debouncedEmitAutocomplete(newValue);
   };
 
   return {
