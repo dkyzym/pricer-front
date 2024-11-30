@@ -1,68 +1,75 @@
-import { Autocomplete, Box, Container, Grid } from '@mui/material';
-import { useContext, useRef } from 'react';
+import {
+  Autocomplete,
+  // Box,
+  Container,
+  Grid,
+} from '@mui/material';
+// import { useContext, useEffect, useRef } from 'react';
 
 import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
-import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
-import { SocketContext } from '@context/SocketContext';
+// import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
+// import { SocketContext } from '@context/SocketContext';
 import useAutocomplete from '@hooks/useAutocomplete';
-import useFilteredResults from '@hooks/useFilteredResults';
-import useSearchHandlers from '@hooks/useSearchHandlers';
-import useSocketManager from '@hooks/useSocketManager';
-import useSupplierSelection from '@hooks/useSupplierSelection';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  setAutocompleteLoading,
-  setAutocompleteResults,
-  setInputValue,
-} from '../../redux/autocompleteSlice';
-import { clearBrandClarifications } from '../../redux/brandClarificationSlice';
-import { resetSupplierStatus } from '../../redux/supplierSlice';
-import { BrandClarificationTable } from './BrandClarificationTable/BrandClarificationTable';
-import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
+import { useRef } from 'react';
+// import useFilteredResults from '@hooks/useFilteredResults';
+// import useSearchHandlers from '@hooks/useSearchHandlers';
+// import useSocketManager from '@hooks/useSocketManager';
+// import useSupplierSelection from '@hooks/useSupplierSelection';
+// import { useDispatch, useSelector } from 'react-redux';
+// import {
+//   setAutocompleteLoading,
+//   setAutocompleteResults,
+//   setInputValue,
+// } from '../../redux/autocompleteSlice';
+// import { clearBrandClarifications } from '../../redux/brandClarificationSlice';
+// import { resetSupplierStatus } from '../../redux/supplierSlice';
+// import { BrandClarificationTable } from './BrandClarificationTable/BrandClarificationTable';
+// import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
-  const socket = useContext(SocketContext);
-  const dispatch = useDispatch();
+  // const socket = useContext(SocketContext);
+  // const dispatch = useDispatch();
 
-  useSocketManager(socket);
+  // useSocketManager(socket);
 
-  const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
+  // const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
   const {
     inputValue,
     handleInputChange,
     autocompleteResults,
     isAutocompleteLoading,
-  } = useAutocomplete(socket);
+    handleClearInput,
+  } = useAutocomplete();
 
-  const brandClarifications = useSelector(
-    (state) => state.brandClarification.brands
-  );
-  const isClarifying = useSelector(
-    (state) => state.brandClarification.isClarifying
-  );
+  // const brandClarifications = useSelector(
+  //   (state) => state.brandClarification.brands
+  // );
+  // const isClarifying = useSelector(
+  //   (state) => state.brandClarification.isClarifying
+  // );
 
   const inputRef = useRef(null);
 
-  const { selectedSuppliers, handleSupplierChange } = useSupplierSelection();
+  // const { selectedSuppliers, handleSupplierChange } = useSupplierSelection();
 
-  const { handleClearInput, handleOptionSelect, handleBrandSelect } =
-    useSearchHandlers({
-      socket,
-      resetSupplierStatus: () => dispatch(resetSupplierStatus()),
-      clearBrandClarifications: () => dispatch(clearBrandClarifications()),
-      inputRef,
-      setInputValue: (value) => dispatch(setInputValue(value)),
-      setAutocompleteResults: (results) =>
-        dispatch(setAutocompleteResults(results)),
-      setIsAutocompleteLoading: (loading) =>
-        dispatch(setAutocompleteLoading(loading)),
-      selectedSuppliers,
-    });
+  // const { handleClearInput, handleOptionSelect, handleBrandSelect } =
+  //   useSearchHandlers({
+  //     socket,
+  //     resetSupplierStatus: () => dispatch(resetSupplierStatus()),
+  //     clearBrandClarifications: () => dispatch(clearBrandClarifications()),
+  //     inputRef,
+  //     setInputValue: (value) => dispatch(setInputValue(value)),
+  //     setAutocompleteResults: (results) =>
+  //       dispatch(setAutocompleteResults(results)),
+  //     setIsAutocompleteLoading: (loading) =>
+  //       dispatch(setAutocompleteLoading(loading)),
+  //     selectedSuppliers,
+  //   });
 
-  const allResults = Object.values(supplierStatus).flatMap(
-    (status) => status.results || []
-  );
-  const filteredResults = useFilteredResults(allResults, selectedSuppliers);
+  // const allResults = Object.values(supplierStatus).flatMap(
+  //   (status) => status.results || []
+  // );
+  // const filteredResults = useFilteredResults(allResults, selectedSuppliers);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
@@ -75,10 +82,11 @@ export const SearchComponent = () => {
             options={autocompleteResults}
             filterOptions={(x) => x}
             getOptionLabel={(option) =>
-              `${option.brand} - ${option.article} - ${option.description}`
+              `${option.brand} - ${option.number} - ${option.descr}`
             }
             onInputChange={handleInputChange}
-            onChange={handleOptionSelect}
+            getOptionKey={(option) => option.key}
+            // onChange={handleOptionSelect}
             renderInput={(params) => (
               <AutocompleteInput
                 params={params}
@@ -90,7 +98,7 @@ export const SearchComponent = () => {
             )}
           />
         </Grid>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Box sx={{ display: 'flex', gap: 3 }}>
             {Object.entries(supplierStatus).map(([supplierKey, status]) => (
               <SupplierStatusIndicator
@@ -113,7 +121,7 @@ export const SearchComponent = () => {
               onSelect={handleBrandSelect}
             />
           </Grid>
-        )}
+        )} */}
       </Grid>
     </Container>
   );

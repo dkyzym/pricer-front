@@ -1,17 +1,15 @@
-import { SOCKET_EVENTS } from '@api/ws/socket';
+import axios from 'axios';
 import debounce from 'lodash/debounce';
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import {
   setAutocompleteLoading,
   setAutocompleteResults,
   setInputValue,
 } from '../redux/autocompleteSlice';
 
-const useAutocomplete = (socket) => {
+const useAutocomplete = () => {
   const dispatch = useDispatch();
-
   const inputValue = useSelector((state) => state.autocomplete.inputValue);
   const autocompleteResults = useSelector(
     (state) => state.autocomplete.results
@@ -20,39 +18,31 @@ const useAutocomplete = (socket) => {
     (state) => state.autocomplete.loading
   );
 
-  // Получаем сессии из Redux
-  const sessions = useSelector((state) => state.session.sessions);
-
-  // Находим сессию для поставщика 'ug'
-  const ugSession = sessions.find(
-    (session) => session.supplier === 'ug' && session.accountAlias === 'nal'
-  );
-
-  const sessionID = ugSession ? ugSession.sessionID : null;
-
-  // Используем useRef для хранения sessionID
-  const sessionIDRef = useRef(sessionID);
-
-  useEffect(() => {
-    sessionIDRef.current = sessionID;
-  }, [sessionID]);
-
-  const debouncedEmitAutocomplete = useMemo(
+  const debouncedFetchAutocomplete = useMemo(
     () =>
-      debounce((query) => {
-        const currentSessionID = sessionIDRef.current;
-        if (currentSessionID) {
-          socket.emit(SOCKET_EVENTS.AUTOCOMPLETE, {
-            sessionID: currentSessionID,
-            query,
-            accountAlias: 'nal',
-          });
-        } else {
-          toast.error('Session for supplier "ug" not found');
-          console.error('Session for supplier "ug" not found');
+      debounce(async (term) => {
+        if (term.length < 3) {
+          dispatch(setAutocompleteResults([]));
+          dispatch(setAutocompleteLoading(false));
+          return;
+        }
+
+        try {
+          const response = await axios.get(
+            'http://localhost:3000/api/autocomplete/ug',
+            {
+              params: { term },
+            }
+          );
+          dispatch(setAutocompleteResults(response.data.results || []));
+        } catch (error) {
+          console.error('Autocomplete error:', error);
+          dispatch(setAutocompleteResults([]));
+        } finally {
+          dispatch(setAutocompleteLoading(false));
         }
       }, 300),
-    [socket]
+    [dispatch]
   );
 
   const handleInputChange = (_event, newValue, reason) => {
@@ -65,9 +55,27 @@ const useAutocomplete = (socket) => {
         return;
       }
 
+      if (newValue.trim().length < 3) {
+        dispatch(setAutocompleteResults([]));
+        dispatch(setAutocompleteLoading(false));
+        return;
+      }
+
       dispatch(setAutocompleteLoading(true));
-      debouncedEmitAutocomplete(newValue);
+      debouncedFetchAutocomplete(newValue.trim());
     }
+
+    if (reason === 'reset') {
+      dispatch(setInputValue(''));
+      dispatch(setAutocompleteResults([]));
+      dispatch(setAutocompleteLoading(false));
+    }
+  };
+
+  const handleClearInput = () => {
+    dispatch(setInputValue(''));
+    dispatch(setAutocompleteResults([]));
+    dispatch(setAutocompleteLoading(false));
   };
 
   return {
@@ -75,6 +83,7 @@ const useAutocomplete = (socket) => {
     handleInputChange,
     autocompleteResults,
     isAutocompleteLoading,
+    handleClearInput,
   };
 };
 

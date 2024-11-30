@@ -60,6 +60,12 @@ const useSocketManager = (socket) => {
         error: null,
       };
 
+      supplierStatusData['autosputnik'] = {
+        loading: false,
+        results: [],
+        error: null,
+      };
+
       dispatch(setSupplierStatus(supplierStatusData));
     },
     [dispatch]
@@ -119,9 +125,11 @@ const useSocketManager = (socket) => {
       //   `Fetching data started for supplier: ${supplier}, accountAlias: ${accountAlias}, article: ${article}`
       // );
       const supplierKey =
-        supplier === 'profit' ? supplier : `${supplier}_${accountAlias}`;
+        supplier === ('profit' || 'autosputnik')
+          ? supplier
+          : `${supplier}_${accountAlias}`;
       dispatch(setSupplierStatusLoading(supplierKey));
-      if (supplier === 'profit' && article) {
+      if (supplier === ('profit' || 'autosputnik') && article) {
         dispatch(setSupplierArticle({ supplier: supplierKey, article }));
       }
     },
@@ -137,11 +145,13 @@ const useSocketManager = (socket) => {
         return;
       }
       const supplierKey =
-        supplier === 'profit' ? supplier : `${supplier}_${accountAlias}`;
+        supplier === ('profit' || 'autosputnik')
+          ? supplier
+          : `${supplier}_${accountAlias}`;
 
       // For 'profit', set accountAlias to 'nal' by default
       const effectiveAccountAlias =
-        supplier === 'profit' ? 'nal' : accountAlias;
+        supplier === ('profit' || 'autosputnik') ? 'nal' : accountAlias;
 
       const resultsWithAccountAlias =
         result?.data.map((item) => ({
