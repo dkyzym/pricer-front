@@ -50,10 +50,7 @@ export const useFilteredData = (
         (isAvailabilityValid && availability >= parseFloat(minQuantity));
 
       const isMultiValid =
-        item &&
-        item?.multi &&
-        isAvailabilityValid &&
-        availability % item.multi === 0;
+        !item.multi || (isAvailabilityValid && availability % item.multi === 0);
 
       return (
         isDeadlineValid && isPriceValid && isMinQuantityValid && isMultiValid

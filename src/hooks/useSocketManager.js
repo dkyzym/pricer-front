@@ -53,14 +53,19 @@ const useSocketManager = (socket) => {
         };
       });
 
-      // Include 'profit' in supplierStatusData if applicable
       supplierStatusData['profit'] = {
         loading: false,
         results: [],
         error: null,
       };
 
-      supplierStatusData['autosputnik'] = {
+      supplierStatusData['ug'] = {
+        loading: false,
+        results: [],
+        error: null,
+      };
+
+      supplierStatusData['turboCars'] = {
         loading: false,
         results: [],
         error: null,
@@ -125,11 +130,9 @@ const useSocketManager = (socket) => {
       //   `Fetching data started for supplier: ${supplier}, accountAlias: ${accountAlias}, article: ${article}`
       // );
       const supplierKey =
-        supplier === ('profit' || 'autosputnik')
-          ? supplier
-          : `${supplier}_${accountAlias}`;
+        supplier !== 'patriot' ? supplier : `${supplier}_${accountAlias}`;
       dispatch(setSupplierStatusLoading(supplierKey));
-      if (supplier === ('profit' || 'autosputnik') && article) {
+      if (supplier !== 'patriot' && article) {
         dispatch(setSupplierArticle({ supplier: supplierKey, article }));
       }
     },
@@ -145,13 +148,11 @@ const useSocketManager = (socket) => {
         return;
       }
       const supplierKey =
-        supplier === ('profit' || 'autosputnik')
-          ? supplier
-          : `${supplier}_${accountAlias}`;
+        supplier !== 'patriot' ? supplier : `${supplier}_${accountAlias}`;
 
       // For 'profit', set accountAlias to 'nal' by default
       const effectiveAccountAlias =
-        supplier === ('profit' || 'autosputnik') ? 'nal' : accountAlias;
+        supplier !== 'patriot' ? 'nal' : accountAlias;
 
       const resultsWithAccountAlias =
         result?.data.map((item) => ({
@@ -185,8 +186,6 @@ const useSocketManager = (socket) => {
     socket.on(SOCKET_EVENTS.CONNECT, handleSocketConnect);
     socket.on(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
     socket.on(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
-    socket.on(SOCKET_EVENTS.AUTOCOMPLETE_RESULTS, handleAutocompleteResults);
-    socket.on(SOCKET_EVENTS.AUTOCOMPLETE_ERROR, handleAutocompleteError);
     socket.on(
       SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
       handleBrandClarificationResults
@@ -213,8 +212,6 @@ const useSocketManager = (socket) => {
       socket.off(SOCKET_EVENTS.CONNECT, handleSocketConnect);
       socket.off(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
       socket.off(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
-      socket.off(SOCKET_EVENTS.AUTOCOMPLETE_RESULTS, handleAutocompleteResults);
-      socket.off(SOCKET_EVENTS.AUTOCOMPLETE_ERROR, handleAutocompleteError);
       socket.off(
         SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
         handleBrandClarificationResults

@@ -1,15 +1,10 @@
 import { SOCKET_EVENTS } from '@api/ws/socket';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  setAutocompleteLoading,
-  setAutocompleteResults,
-} from '../../src/redux/autocompleteSlice';
-import { clearAutocomplete } from '../redux/autocompleteSlice';
 import { clearBrandClarifications } from '../redux/brandClarificationSlice';
 import { resetSupplierStatus } from '../redux/supplierSlice';
 
-const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
+const useSearchHandlers = ({ socket, selectedSuppliers }) => {
   const dispatch = useDispatch();
   const sessions = useSelector((state) => state.session.sessions);
 
@@ -31,15 +26,6 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
     },
     [sessions]
   );
-
-  const handleClearInput = useCallback(() => {
-    dispatch(setAutocompleteResults([]));
-    dispatch(setAutocompleteLoading(false));
-    dispatch(clearAutocomplete(''));
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [dispatch, inputRef]);
 
   const handleBrandClarification = useCallback(
     (value) => {
@@ -131,16 +117,24 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
   const handleOptionSelect = useCallback(
     (_event, value) => {
       if (value) {
+        const mappedValue = {
+          brand: value.brand,
+          article: value.number,
+          description: value.descr || '',
+        };
         dispatch(resetSupplierStatus());
+        // console.log(value, mappedValue);
 
-        const brand = typeof value === 'object' ? value.brand : value;
-        const description = value.description;
+        const brand =
+          typeof mappedValue === 'object' ? mappedValue.brand : mappedValue;
+        const description = mappedValue.description;
 
         if (brand.trim().includes('Найти') && !description) {
           console.log('called brandClarification');
-          handleBrandClarification(value);
+          handleBrandClarification(mappedValue);
         } else {
-          handleDetailedSearch(value);
+          console.log('called handleDetailedSearch');
+          handleDetailedSearch(mappedValue);
         }
       }
     },
@@ -148,7 +142,6 @@ const useSearchHandlers = ({ socket, inputRef, selectedSuppliers }) => {
   );
 
   return {
-    handleClearInput,
     handleBrandClarification,
     handleDetailedSearch,
     handleOptionSelect,

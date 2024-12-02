@@ -3,12 +3,13 @@ import debounce from 'lodash/debounce';
 import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  clearAutocomplete,
   setAutocompleteLoading,
   setAutocompleteResults,
   setInputValue,
 } from '../redux/autocompleteSlice';
 
-const useAutocomplete = () => {
+const useAutocomplete = ({ inputRef }) => {
   const dispatch = useDispatch();
   const inputValue = useSelector((state) => state.autocomplete.inputValue);
   const autocompleteResults = useSelector(
@@ -26,13 +27,10 @@ const useAutocomplete = () => {
           dispatch(setAutocompleteLoading(false));
           return;
         }
-
         try {
           const response = await axios.get(
             'http://localhost:3000/api/autocomplete/ug',
-            {
-              params: { term },
-            }
+            { params: { term } }
           );
           dispatch(setAutocompleteResults(response.data.results || []));
         } catch (error) {
@@ -48,34 +46,26 @@ const useAutocomplete = () => {
   const handleInputChange = (_event, newValue, reason) => {
     if (reason === 'input') {
       dispatch(setInputValue(newValue));
-
-      if (newValue.trim() === '') {
+      if (newValue.trim() === '' || newValue.trim().length < 3) {
         dispatch(setAutocompleteResults([]));
         dispatch(setAutocompleteLoading(false));
         return;
       }
-
-      if (newValue.trim().length < 3) {
-        dispatch(setAutocompleteResults([]));
-        dispatch(setAutocompleteLoading(false));
-        return;
-      }
-
       dispatch(setAutocompleteLoading(true));
       debouncedFetchAutocomplete(newValue.trim());
-    }
-
-    if (reason === 'reset') {
-      dispatch(setInputValue(''));
-      dispatch(setAutocompleteResults([]));
-      dispatch(setAutocompleteLoading(false));
+    } else if (reason === 'clear' || reason === 'reset') {
+      dispatch(clearAutocomplete());
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   };
 
   const handleClearInput = () => {
-    dispatch(setInputValue(''));
-    dispatch(setAutocompleteResults([]));
-    dispatch(setAutocompleteLoading(false));
+    dispatch(clearAutocomplete());
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   return {
