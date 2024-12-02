@@ -4,7 +4,6 @@ import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { LoginStatusIndicator } from '../auth/LoginStatusIndicator';
 
 export const Header = () => {
   return (
@@ -13,8 +12,6 @@ export const Header = () => {
         <Typography variant="h6" component={Link} to="/" sx={{ flex: 1 }}>
           Шикарное название
         </Typography>
-
-        <LoginStatusIndicator />
 
         <SocketStatusIndicator />
         <Button
