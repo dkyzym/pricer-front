@@ -13,9 +13,9 @@ export const SupplierStatusIndicator = ({
   checked,
   onChange,
 }) => {
-  const [supplier, accountAlias] = supplierKey.includes('_')
-    ? supplierKey.split('_')
-    : [supplierKey, null];
+  // const [supplier, accountAlias] = supplierKey.includes('_')
+  //   ? supplierKey.split('_')
+  //   : [supplierKey, null];
 
   return (
     <FormGroup>
@@ -28,7 +28,7 @@ export const SupplierStatusIndicator = ({
               color="primary"
             />
           }
-          label={accountAlias ? `${supplier} (${accountAlias})` : supplier}
+          label={supplierKey}
         />
         {status.loading && <CircularProgress size={16} />}
         {!status.loading && status.error && (
@@ -37,7 +37,7 @@ export const SupplierStatusIndicator = ({
           </Typography>
         )}
         {!status.loading && !status.error && (
-          <Typography>{status.results?.length}</Typography>
+          <Typography>{status.results.data?.length}</Typography>
         )}
       </Stack>
     </FormGroup>

@@ -134,17 +134,17 @@ export const getColumns = ({
     filterable: false,
     renderCell: (params) => <AddToCartCell {...params} />,
   },
-  {
-    field: 'accountAlias',
-    headerName: '',
-    width: 50,
-    cellClassName: (params) =>
-      params.row.accountAlias === 'nal' ? 'nal-cell' : 'beznal-cell',
-    renderCell: (params) => {
-      const { value } = params;
-      return <span>{value === 'nal' ? '' : 'б/н'}</span>;
-    },
-  },
+  // {
+  //   field: 'accountAlias',
+  //   headerName: '',
+  //   width: 50,
+  //   cellClassName: (params) =>
+  //     params.row.accountAlias === 'nal' ? 'nal-cell' : 'beznal-cell',
+  //   renderCell: (params) => {
+  //     const { value } = params;
+  //     return <span>{value === 'nal' ? '' : 'б/н'}</span>;
+  //   },
+  // },
   {
     field: 'supplier',
     headerName: 'Поставщик',

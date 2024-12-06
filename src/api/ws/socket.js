@@ -6,7 +6,7 @@ export const socket = io('http://localhost:3000', {
 });
 
 export const SOCKET_EVENTS = {
-  CONNECT: 'connect',
+  CONNECT: 'connected',
   GET_ITEM_RESULTS: 'getItemResults',
   BRAND_CLARIFICATION: 'getBrandClarification',
   BRAND_CLARIFICATION_RESULTS: 'brandClarificationResults',

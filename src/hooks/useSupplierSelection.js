@@ -13,15 +13,25 @@ const useSupplierSelection = () => {
     supplierKeys.filter((key) => key !== 'undefined' && key)
   );
 
+  // useEffect(() => {
+  //   setSelectedSuppliers((prevSelected) => {
+  //     const updatedSelected = prevSelected.filter((supplier) =>
+  //       supplierKeys.includes(supplier)
+  //     );
+  //     const newSuppliers = supplierKeys.filter(
+  //       (supplier) => !updatedSelected.includes(supplier)
+  //     );
+  //     return [...updatedSelected, ...newSuppliers];
+  //   });
+  // }, [supplierKeys]);
+
   useEffect(() => {
+    // Обновление выбранных поставщиков при изменении списка поставщиков
     setSelectedSuppliers((prevSelected) => {
-      const updatedSelected = prevSelected.filter((supplier) =>
-        supplierKeys.includes(supplier)
+      const validSuppliers = supplierKeys.filter((key) =>
+        prevSelected.includes(key)
       );
-      const newSuppliers = supplierKeys.filter(
-        (supplier) => !updatedSelected.includes(supplier)
-      );
-      return [...updatedSelected, ...newSuppliers];
+      return validSuppliers.length ? validSuppliers : supplierKeys;
     });
   }, [supplierKeys]);
 

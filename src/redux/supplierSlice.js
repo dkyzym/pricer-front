@@ -1,7 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  supplierStatus: {},
+  supplierStatus: {
+    profit: { loading: false, results: [], error: null },
+    turboCars: { loading: false, results: [], error: null },
+    ug: { loading: false, results: [], error: null },
+    patriot: { loading: false, results: [], error: null },
+    autosputnik: { loading: false, results: [], error: null },
+  },
 };
 
 const supplierSlice = createSlice({

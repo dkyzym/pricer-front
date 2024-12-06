@@ -13,10 +13,10 @@ import {
   setBrandClarificationError,
   setBrandClarifications,
 } from '../redux/brandClarificationSlice';
-import { setSessionError, setSessions } from '../redux/sessionSlice';
+// import { setSessionError, setSessions } from '../redux/sessionSlice';
 import {
   setSupplierArticle,
-  setSupplierStatus,
+  // setSupplierStatus,
   setSupplierStatusError,
   setSupplierStatusLoading,
   setSupplierStatusSuccess,
@@ -32,57 +32,57 @@ const useSocketManager = (socket) => {
     dispatch(clearBrandClarifications());
   }, [dispatch]);
 
-  const handleSessionsCreated = useCallback(
-    (sessions) => {
-      dispatch(setSessions(sessions));
-      toast.success('Sessions created successfully');
+  // const handleSessionsCreated = useCallback(
+  //   (sessions) => {
+  //     dispatch(setSessions(sessions));
+  //     toast.success('Sessions created successfully');
 
-      const supplierStatusData = {};
-      sessions.forEach((session) => {
-        const { supplier, accountAlias } = session;
-        if (!supplier) {
-          console.error('Session has undefined supplier:', session);
-          return; // Skip this session
-        }
+  //     const supplierStatusData = {};
+  //     sessions.forEach((session) => {
+  //       const { supplier, accountAlias } = session;
+  //       if (!supplier) {
+  //         console.error('Session has undefined supplier:', session);
+  //         return; // Skip this session
+  //       }
 
-        const key = accountAlias ? `${supplier}_${accountAlias}` : supplier;
-        supplierStatusData[key] = {
-          loading: false,
-          results: [],
-          error: null,
-        };
-      });
+  //       const key = accountAlias ? `${supplier}_${accountAlias}` : supplier;
+  //       supplierStatusData[key] = {
+  //         loading: false,
+  //         results: [],
+  //         error: null,
+  //       };
+  //     });
 
-      supplierStatusData['profit'] = {
-        loading: false,
-        results: [],
-        error: null,
-      };
+  //     supplierStatusData['profit'] = {
+  //       loading: false,
+  //       results: [],
+  //       error: null,
+  //     };
 
-      supplierStatusData['ug'] = {
-        loading: false,
-        results: [],
-        error: null,
-      };
+  //     supplierStatusData['ug'] = {
+  //       loading: false,
+  //       results: [],
+  //       error: null,
+  //     };
 
-      supplierStatusData['turboCars'] = {
-        loading: false,
-        results: [],
-        error: null,
-      };
+  //     supplierStatusData['turboCars'] = {
+  //       loading: false,
+  //       results: [],
+  //       error: null,
+  //     };
 
-      dispatch(setSupplierStatus(supplierStatusData));
-    },
-    [dispatch]
-  );
+  //     dispatch(setSupplierStatus(supplierStatusData));
+  //   },
+  //   [dispatch]
+  // );
 
-  const handleSessionsError = useCallback(
-    (error) => {
-      dispatch(setSessionError(error.message));
-      toast.error(`Session Error: ${error.message}`);
-    },
-    [dispatch]
-  );
+  // const handleSessionsError = useCallback(
+  //   (error) => {
+  //     dispatch(setSessionError(error.message));
+  //     toast.error(`Session Error: ${error.message}`);
+  //   },
+  //   [dispatch]
+  // );
 
   const handleAutocompleteResults = useCallback(
     ({ results }) => {
@@ -119,7 +119,7 @@ const useSocketManager = (socket) => {
   );
 
   const handleSupplierDataFetchStarted = useCallback(
-    ({ supplier, accountAlias, article }) => {
+    ({ supplier, article }) => {
       if (!supplier) {
         console.error(
           'Supplier is undefined in handleSupplierDataFetchStarted'
@@ -129,10 +129,10 @@ const useSocketManager = (socket) => {
       // console.log(
       //   `Fetching data started for supplier: ${supplier}, accountAlias: ${accountAlias}, article: ${article}`
       // );
-      const supplierKey =
-        supplier !== 'patriot' ? supplier : `${supplier}_${accountAlias}`;
+      const supplierKey = supplier;
+
       dispatch(setSupplierStatusLoading(supplierKey));
-      if (supplier !== 'patriot' && article) {
+      if (article) {
         dispatch(setSupplierArticle({ supplier: supplierKey, article }));
       }
     },
@@ -140,31 +140,27 @@ const useSocketManager = (socket) => {
   );
 
   const handleSupplierDataFetchSuccess = useCallback(
-    ({ supplier, accountAlias, result }) => {
+    ({ supplier, result }) => {
       if (!supplier) {
         console.error(
           'Supplier is undefined in handleSupplierDataFetchSuccess'
         );
         return;
       }
-      const supplierKey =
-        supplier !== 'patriot' ? supplier : `${supplier}_${accountAlias}`;
+      const supplierKey = supplier;
 
-      // For 'profit', set accountAlias to 'nal' by default
-      const effectiveAccountAlias =
-        supplier !== 'patriot' ? 'nal' : accountAlias;
+      // const effectiveAccountAlias = 'nal';
 
-      const resultsWithAccountAlias =
-        result?.data.map((item) => ({
-          ...item,
-          accountAlias: effectiveAccountAlias,
-          supplierKey,
-        })) || [];
+      // const resultsWithAccountAlias =
+      //   result?.data.map((item) => ({
+      //     ...item,
+      //     supplierKey,
+      //   })) || [];
 
       dispatch(
         setSupplierStatusSuccess({
           supplier: supplierKey,
-          results: resultsWithAccountAlias,
+          results: result,
         })
       );
     },
@@ -172,11 +168,9 @@ const useSocketManager = (socket) => {
   );
 
   const handleSupplierDataFetchError = useCallback(
-    ({ supplier, accountAlias, error }) => {
+    ({ supplier, error }) => {
       console.error(`Error fetching data for supplier: ${supplier}`, error);
-      const supplierKey = accountAlias
-        ? `${supplier}_${accountAlias}`
-        : supplier;
+      const supplierKey = supplier;
       dispatch(setSupplierStatusError({ supplier: supplierKey, error }));
     },
     [dispatch]
@@ -184,8 +178,8 @@ const useSocketManager = (socket) => {
 
   useEffect(() => {
     socket.on(SOCKET_EVENTS.CONNECT, handleSocketConnect);
-    socket.on(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
-    socket.on(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
+    // socket.on(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
+    // socket.on(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
     socket.on(
       SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
       handleBrandClarificationResults
@@ -210,8 +204,8 @@ const useSocketManager = (socket) => {
     // Очистка подписок при размонтировании
     return () => {
       socket.off(SOCKET_EVENTS.CONNECT, handleSocketConnect);
-      socket.off(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
-      socket.off(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
+      // socket.off(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
+      // socket.off(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
       socket.off(
         SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
         handleBrandClarificationResults
@@ -236,8 +230,8 @@ const useSocketManager = (socket) => {
   }, [
     socket,
     handleSocketConnect,
-    handleSessionsCreated,
-    handleSessionsError,
+    // handleSessionsCreated,
+    // handleSessionsError,
     handleAutocompleteResults,
     handleAutocompleteError,
     handleBrandClarificationResults,
