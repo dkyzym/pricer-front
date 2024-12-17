@@ -13,9 +13,9 @@ export const useFilteredData = (
     const now = DateTime.now();
 
     return allResults.filter((item) => {
-      const deliveryDate = DateTime.fromISO(item.deliveryDate);
+      const deliveryDate = DateTime.fromISO(item?.deliveryDate);
 
-      if (!deliveryDate.isValid) {
+      if (!deliveryDate?.isValid) {
         toast.warn('Дата - что-то пошло не так.');
         return false;
       }

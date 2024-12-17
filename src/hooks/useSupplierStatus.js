@@ -6,6 +6,7 @@ const initialSupplierState = {
   ug: { loading: false, results: [], error: null },
   patriot: { loading: false, results: [], error: null },
   autosputnik: { loading: false, results: [], error: null },
+  autoImpulse: { loading: false, results: [], error: null },
 };
 
 const useSupplierStatus = () => {
