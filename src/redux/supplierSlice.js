@@ -39,7 +39,6 @@ const supplierSlice = createSlice({
     setSupplierStatusSuccess(state, action) {
       const { supplier, results } = action.payload;
 
-      // console.log('setSupplierStatusSuccess called with supplier:', supplier);
       if (!supplier) {
         console.error('Supplier is undefined in setSupplierStatusSuccess');
         return;

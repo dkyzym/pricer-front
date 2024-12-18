@@ -8,22 +8,9 @@ const useSupplierSelection = () => {
     [supplierStatus]
   );
 
-  // Initialize selectedSuppliers with all suppliers, including 'profit'
   const [selectedSuppliers, setSelectedSuppliers] = useState(() =>
     supplierKeys.filter((key) => key !== 'undefined' && key)
   );
-
-  // useEffect(() => {
-  //   setSelectedSuppliers((prevSelected) => {
-  //     const updatedSelected = prevSelected.filter((supplier) =>
-  //       supplierKeys.includes(supplier)
-  //     );
-  //     const newSuppliers = supplierKeys.filter(
-  //       (supplier) => !updatedSelected.includes(supplier)
-  //     );
-  //     return [...updatedSelected, ...newSuppliers];
-  //   });
-  // }, [supplierKeys]);
 
   useEffect(() => {
     // Обновление выбранных поставщиков при изменении списка поставщиков

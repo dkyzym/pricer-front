@@ -63,7 +63,6 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
           description: value.descr || '',
         };
         dispatch(resetSupplierStatus());
-        // console.log(value, mappedValue);
 
         const brand =
           typeof mappedValue === 'object' ? mappedValue.brand : mappedValue;

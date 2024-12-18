@@ -1,5 +1,4 @@
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
-import FollowTheSignsOutlinedIcon from '@mui/icons-material/FollowTheSignsOutlined';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
@@ -29,14 +28,6 @@ export const Header = () => {
           startIcon={<ShoppingCartCheckoutIcon />}
         >
           Корзина
-        </Button>
-        <Button
-          color="inherit"
-          component={Link}
-          to="/auth"
-          startIcon={<FollowTheSignsOutlinedIcon />}
-        >
-          Авторизация
         </Button>
       </Toolbar>
     </AppBar>

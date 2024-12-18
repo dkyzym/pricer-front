@@ -6,7 +6,6 @@ import { HomePage } from '@pages/Home';
 import './index.css';
 
 import AppProviders from '@context/AppProviders';
-import { AuthPage } from '@pages/AuthCage';
 import { CartPage } from '@pages/CartPage';
 import { ErrorPage } from '@pages/ErrorPage';
 import App from './App';
@@ -20,10 +19,6 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <HomePage />,
-      },
-      {
-        path: 'auth',
-        element: <AuthPage />,
       },
       {
         path: 'cart',
