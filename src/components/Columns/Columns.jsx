@@ -22,6 +22,29 @@ export const getColumns = ({
     field: 'article',
     headerName: 'Артикул',
     width: 120,
+    renderCell: (params) => {
+      const handleClick = () => {
+        if (params.value) {
+          navigator.clipboard
+            .writeText(params.value.toString())
+            .catch((err) => console.error(err));
+        }
+      };
+
+      return (
+        <span
+          onClick={handleClick}
+          style={{
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            color: 'blue',
+          }}
+          title="Кликните, чтобы скопировать"
+        >
+          {params.value}
+        </span>
+      );
+    },
   },
   {
     field: 'description',
