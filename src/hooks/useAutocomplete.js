@@ -1,3 +1,4 @@
+import { BASE_URL } from '@utils/constants';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import { useMemo } from 'react';
@@ -28,10 +29,9 @@ const useAutocomplete = ({ inputRef }) => {
           return;
         }
         try {
-          const response = await axios.get(
-            'http://localhost:3000/api/autocomplete/ug',
-            { params: { term } }
-          );
+          const response = await axios.get(`${BASE_URL}api/autocomplete/ug`, {
+            params: { term },
+          });
           dispatch(setAutocompleteResults(response.data.results || []));
         } catch (error) {
           console.error('Autocomplete error:', error);

@@ -50,10 +50,6 @@ export const SearchComponent = () => {
 
   const { selectedSuppliers, handleSupplierChange } = useSupplierSelection();
 
-  // useEffect(() => {
-  //   console.log('Selected Suppliers:', selectedSuppliers);
-  // }, [selectedSuppliers]);
-
   const {
     handleOptionSelect,
     // handleBrandSelect
@@ -68,14 +64,7 @@ export const SearchComponent = () => {
     (status) => status.results.data || []
   );
 
-  // useEffect(() => {
-  //   console.log(Object.entries(supplierStatus));
-  // }, [Object.entries(supplierStatus)]);
   const filteredResults = useFilteredResults(allResults, selectedSuppliers);
-
-  // useEffect(() => {
-  //   console.log('filtered', filteredResults);
-  // }, [filteredResults]);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
