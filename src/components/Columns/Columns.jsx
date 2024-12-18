@@ -37,7 +37,6 @@ export const getColumns = ({
           style={{
             cursor: 'pointer',
             textDecoration: 'underline',
-            color: 'blue',
           }}
           title="Кликните, чтобы скопировать"
         >
