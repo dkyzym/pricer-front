@@ -23,7 +23,6 @@ export const useFilteredData = (
       const daysUntilDelivery = deliveryDate.diff(now, 'days').days;
 
       if (deliveryDate.startOf('day') < now.startOf('day')) {
-        console.log(item);
         toast.warn('Смотреть в завтрашний день могут не только лишь все...');
         return false;
       }

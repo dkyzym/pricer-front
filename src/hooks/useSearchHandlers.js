@@ -21,7 +21,6 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
 
   const handleDetailedSearch = useCallback(
     (value) => {
-      console.log(value, selectedSuppliers);
       selectedSuppliers.forEach((supplier) => {
         if (!supplier) {
           console.error('Invalid supplierKey:', supplier);
@@ -39,7 +38,6 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
 
   const handleBrandSelect = useCallback(
     (selectedItem) => {
-      console.log('handleBrandSelect called with selectedItem:', selectedItem);
       dispatch(resetSupplierStatus());
 
       selectedSuppliers.forEach((supplierKey) => {
@@ -69,10 +67,8 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
         const description = mappedValue.description;
 
         if (brand.trim().includes('Найти') && !description) {
-          console.log('called brandClarification');
           handleBrandClarification(mappedValue);
         } else {
-          console.log('called handleDetailedSearch');
           handleDetailedSearch(mappedValue);
         }
       }
