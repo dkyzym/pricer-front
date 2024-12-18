@@ -13,10 +13,6 @@ export const SupplierStatusIndicator = ({
   checked,
   onChange,
 }) => {
-  // const [supplier, accountAlias] = supplierKey.includes('_')
-  //   ? supplierKey.split('_')
-  //   : [supplierKey, null];
-
   return (
     <FormGroup>
       <Stack direction="row" alignItems="center" spacing={1}>

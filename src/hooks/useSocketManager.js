@@ -13,10 +13,9 @@ import {
   setBrandClarificationError,
   setBrandClarifications,
 } from '../redux/brandClarificationSlice';
-// import { setSessionError, setSessions } from '../redux/sessionSlice';
+
 import {
   setSupplierArticle,
-  // setSupplierStatus,
   setSupplierStatusError,
   setSupplierStatusLoading,
   setSupplierStatusSuccess,
@@ -31,58 +30,6 @@ const useSocketManager = (socket) => {
     dispatch(setAutocompleteResults([]));
     dispatch(clearBrandClarifications());
   }, [dispatch]);
-
-  // const handleSessionsCreated = useCallback(
-  //   (sessions) => {
-  //     dispatch(setSessions(sessions));
-  //     toast.success('Sessions created successfully');
-
-  //     const supplierStatusData = {};
-  //     sessions.forEach((session) => {
-  //       const { supplier, accountAlias } = session;
-  //       if (!supplier) {
-  //         console.error('Session has undefined supplier:', session);
-  //         return; // Skip this session
-  //       }
-
-  //       const key = accountAlias ? `${supplier}_${accountAlias}` : supplier;
-  //       supplierStatusData[key] = {
-  //         loading: false,
-  //         results: [],
-  //         error: null,
-  //       };
-  //     });
-
-  //     supplierStatusData['profit'] = {
-  //       loading: false,
-  //       results: [],
-  //       error: null,
-  //     };
-
-  //     supplierStatusData['ug'] = {
-  //       loading: false,
-  //       results: [],
-  //       error: null,
-  //     };
-
-  //     supplierStatusData['turboCars'] = {
-  //       loading: false,
-  //       results: [],
-  //       error: null,
-  //     };
-
-  //     dispatch(setSupplierStatus(supplierStatusData));
-  //   },
-  //   [dispatch]
-  // );
-
-  // const handleSessionsError = useCallback(
-  //   (error) => {
-  //     dispatch(setSessionError(error.message));
-  //     toast.error(`Session Error: ${error.message}`);
-  //   },
-  //   [dispatch]
-  // );
 
   const handleAutocompleteResults = useCallback(
     ({ results }) => {
@@ -126,9 +73,7 @@ const useSocketManager = (socket) => {
         );
         return;
       }
-      // console.log(
-      //   `Fetching data started for supplier: ${supplier}, accountAlias: ${accountAlias}, article: ${article}`
-      // );
+
       const supplierKey = supplier;
 
       dispatch(setSupplierStatusLoading(supplierKey));
@@ -148,14 +93,6 @@ const useSocketManager = (socket) => {
         return;
       }
       const supplierKey = supplier;
-
-      // const effectiveAccountAlias = 'nal';
-
-      // const resultsWithAccountAlias =
-      //   result?.data.map((item) => ({
-      //     ...item,
-      //     supplierKey,
-      //   })) || [];
 
       dispatch(
         setSupplierStatusSuccess({
@@ -178,8 +115,7 @@ const useSocketManager = (socket) => {
 
   useEffect(() => {
     socket.on(SOCKET_EVENTS.CONNECT, handleSocketConnect);
-    // socket.on(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
-    // socket.on(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
+
     socket.on(
       SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
       handleBrandClarificationResults
@@ -204,8 +140,7 @@ const useSocketManager = (socket) => {
     // Очистка подписок при размонтировании
     return () => {
       socket.off(SOCKET_EVENTS.CONNECT, handleSocketConnect);
-      // socket.off(SOCKET_EVENTS.SESSIONS_CREATED, handleSessionsCreated);
-      // socket.off(SOCKET_EVENTS.SESSIONS_ERROR, handleSessionsError);
+
       socket.off(
         SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
         handleBrandClarificationResults
@@ -230,8 +165,6 @@ const useSocketManager = (socket) => {
   }, [
     socket,
     handleSocketConnect,
-    // handleSessionsCreated,
-    // handleSessionsError,
     handleAutocompleteResults,
     handleAutocompleteError,
     handleBrandClarificationResults,

@@ -1,12 +1,12 @@
-import { useCallback, useContext } from 'react';
 import { SOCKET_EVENTS } from '@api/ws/socket';
 import { SocketContext } from '@context/SocketContext';
+import { useCallback, useContext } from 'react';
 
 const useAddToCart = () => {
   const socket = useContext(SocketContext);
 
   const addToCart = useCallback(
-    (count, item, sessionID, accountAlias) => {
+    (count, item) => {
       return new Promise((resolve, reject) => {
         const handleSuccess = (data) => {
           socket.off(SOCKET_EVENTS.ADD_TO_CART_SUCCESS, handleSuccess);
@@ -25,8 +25,6 @@ const useAddToCart = () => {
         socket.emit(SOCKET_EVENTS.ADD_TO_CART_REQUEST, {
           count,
           item,
-          sessionID,
-          accountAlias,
         });
       });
     },

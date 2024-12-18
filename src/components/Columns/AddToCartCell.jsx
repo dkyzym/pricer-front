@@ -4,7 +4,6 @@ import { Box } from '@mui/material';
 import { CREDENTIALS } from '@utils/constants';
 import axios from 'axios';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
 export const AddToCartCell = (props) => {
@@ -12,14 +11,6 @@ export const AddToCartCell = (props) => {
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
   const { addToCart } = useAddToCart();
-
-  const sessions = useSelector((state) => state.session.sessions);
-
-  // Helper functions to get sessionID and accountAlias for the supplier
-  const getSessionIDForSupplier = (supplier, accountAlias) =>
-    sessions.find(
-      (s) => s.supplier === supplier && s.accountAlias === accountAlias
-    )?.sessionID || null;
 
   const handleAddToCart = async (count) => {
     const numericCount = parseInt(count, 10);
@@ -48,25 +39,7 @@ export const AddToCartCell = (props) => {
           toast.error('Ошибка добавления в корзину');
         }
       } else {
-        const sessionID = getSessionIDForSupplier(
-          row.supplier,
-          row.accountAlias
-        );
-
-        if (!sessionID) {
-          toast.error(
-            'Сессия не найдена для данного поставщика и accountAlias'
-          );
-          setLoading(false);
-          return;
-        }
-
-        const res = await addToCart(
-          numericCount,
-          row,
-          sessionID,
-          row.accountAlias
-        );
+        const res = await addToCart(numericCount, row);
         setAdded(true);
 
         toast.success(res.result.message);
