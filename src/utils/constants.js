@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:3000/';
+export const BASE_URL = 'http://localhost:3000';
 
 export const CREDENTIALS = {
   ЮГ: {
@@ -32,24 +32,6 @@ export const CREDENTIALS = {
     logoutUrl: `${BASE_URL}logout/ar`,
   },
   profit: {
-    addToCartURL: `${BASE_URL}addToCart`,
+    addToCartURL: `${BASE_URL}/api/cart/add`,
   },
 };
-
-export const SUPPLIERS = [
-  { name: 'ЮГ', shortName: 'ЮГ', color: 'error' },
-  { name: 'TurboCars', shortName: 'TC', color: 'secondary' },
-  { name: 'Патриот', shortName: 'ПТ', color: 'success' },
-  // { name: 'Orion', shortName: 'OR', color: 'warning' },
-  // { name: 'Armtek', shortName: 'AR', color: 'info' },
-  // { name: 'Profit', shortName: 'PR', color: 'info' },
-];
-
-export const INITIAL_STATUSES = {
-  ЮГ: false,
-  TC: false,
-  ПТ: false,
-  // OR: false,
-};
-
-Object.seal(INITIAL_STATUSES);

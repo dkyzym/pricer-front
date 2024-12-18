@@ -1,8 +1,6 @@
 import { QuantitySelector } from '@components/QuantitySelector/QuantitySelector';
 import useAddToCart from '@hooks/useAddToCart';
 import { Box } from '@mui/material';
-import { CREDENTIALS } from '@utils/constants';
-import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -22,27 +20,22 @@ export const AddToCartCell = (props) => {
     setLoading(true);
 
     try {
-      if (row.supplier === 'profit') {
-        const data = {
-          id: row.innerId,
-          warehouse: row.warehouse_id,
-          quantity: numericCount,
-          code: row.inner_product_code,
-          supplier: row.supplier,
-        };
-        const url = CREDENTIALS['profit'].addToCartURL;
-        const res = await axios.post(url, data);
-        if (res.data.success) {
-          setAdded(true);
-          toast.success('Товар добавлен в корзину');
-        } else {
-          toast.error('Ошибка добавления в корзину');
-        }
-      } else {
-        const res = await addToCart(numericCount, row);
-        setAdded(true);
+      const data = {
+        supplier: row.supplier,
+        innerId: row.innerId,
+        warehouse_id: row.warehouse_id,
+        inner_product_code: row.inner_product_code,
+        quantity: numericCount,
+        brand: row.brand,
+        number: row.article,
+      };
 
-        toast.success(res.result.message);
+      const res = await addToCart(data);
+      if (res.success) {
+        setAdded(true);
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
       }
     } catch (error) {
       console.error(error);
