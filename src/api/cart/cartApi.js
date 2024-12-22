@@ -75,6 +75,7 @@ export const addToCart = async (item) => {
       QTY: quantity,
       StockID: item.turboCars.stock_id,
       ZakazCode: item.turboCars.zakazCode,
+      nal: item.turboCars.nal,
     };
     console.log(data);
     const response = await axiosInstance.post(url, data);
