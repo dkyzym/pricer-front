@@ -3,7 +3,6 @@ import { CREDENTIALS } from '@utils/constants';
 
 export const addToCart = async (item) => {
   const { supplier, quantity } = item;
-
   // Унифицированный формат данных
   // В зависимости от поставщика применяем разные параметры
   if (supplier === 'profit') {
@@ -25,7 +24,7 @@ export const addToCart = async (item) => {
         message: 'Ошибка добавления в корзину (Profit)',
       };
     }
-  } else if (supplier == 'ug') {
+  } else if (supplier === 'ug') {
     // Для остальных поставщиков унифицированный запрос
     // Предположим у них единый эндпоинт /api/cart/add
     // И они не требуют специфичных полей
@@ -47,6 +46,42 @@ export const addToCart = async (item) => {
       message: response.data.success
         ? 'Товар добавлен в корзину'
         : 'Ошибка добавления в корзину',
+    };
+  } else if (supplier === 'autosputnik') {
+    const url = '/api/cart/add'; // Это может быть динамическое значение или тоже в CREDENTIALS
+
+    const data = {
+      supplier,
+      amount: quantity,
+      articul: item.article,
+      brand: item?.autosputnik.brand,
+      id_shop_prices: item?.autosputnik.id_shop_prices,
+      price: item.price,
+    };
+    console.log(data);
+    const response = await axiosInstance.post(url, data);
+    console.log(response);
+    return {
+      success: response.data.success,
+      message: response.data.success
+        ? 'Товар добавлен в корзину'
+        : 'Ошибка добавления в корзину',
+    };
+  } else if (supplier === 'turboCars') {
+    const url = '/api/cart/add';
+
+    const data = {
+      supplier,
+      QTY: quantity,
+      StockID: item.turboCars.stock_id,
+      ZakazCode: item.turboCars.zakazCode,
+    };
+    console.log(data);
+    const response = await axiosInstance.post(url, data);
+    console.log(response);
+    return {
+      success: response.data.success,
+      message: response.data.message,
     };
   }
 };

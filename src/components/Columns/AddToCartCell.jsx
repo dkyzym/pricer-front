@@ -28,6 +28,10 @@ export const AddToCartCell = (props) => {
         quantity: numericCount,
         brand: row.brand,
         number: row.article,
+        price: row.price,
+        article: row.article,
+        autosputnik: row?.autosputnik || {},
+        turboCars: row?.turboCars || {},
       };
 
       const res = await addToCart(data);
