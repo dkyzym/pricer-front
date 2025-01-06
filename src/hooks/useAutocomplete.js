@@ -39,7 +39,7 @@ const useAutocomplete = ({ inputRef }) => {
         } finally {
           dispatch(setAutocompleteLoading(false));
         }
-      }, 300),
+      }, 200),
     [dispatch]
   );
 
@@ -53,7 +53,10 @@ const useAutocomplete = ({ inputRef }) => {
       }
       dispatch(setAutocompleteLoading(true));
       debouncedFetchAutocomplete(newValue.trim());
-    } else if (reason === 'clear' || reason === 'reset') {
+    } else if (
+      reason === 'clear'
+      // || reason === 'reset'
+    ) {
       dispatch(clearAutocomplete());
       if (inputRef.current) {
         inputRef.current.focus();
