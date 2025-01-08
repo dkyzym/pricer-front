@@ -13,7 +13,6 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
 
       socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, {
         query: article,
-        supplier: 'ug',
       });
     },
     [socket, selectedSuppliers]
@@ -70,6 +69,7 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
           handleBrandClarification(mappedValue);
         } else {
           handleDetailedSearch(mappedValue);
+          dispatch(clearBrandClarifications());
         }
       }
     },

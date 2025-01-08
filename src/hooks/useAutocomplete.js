@@ -9,6 +9,7 @@ import {
   setAutocompleteResults,
   setInputValue,
 } from '../redux/autocompleteSlice';
+import { clearBrandClarifications } from '../redux/brandClarificationSlice';
 
 const useAutocomplete = ({ inputRef }) => {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ const useAutocomplete = ({ inputRef }) => {
           const response = await axios.get(`${BASE_URL}/api/autocomplete/ug`, {
             params: { term },
           });
+          dispatch(clearBrandClarifications());
           dispatch(setAutocompleteResults(response.data.results || []));
         } catch (error) {
           console.error('Autocomplete error:', error);
@@ -66,6 +68,7 @@ const useAutocomplete = ({ inputRef }) => {
 
   const handleClearInput = () => {
     dispatch(clearAutocomplete());
+    dispatch(clearBrandClarifications());
     if (inputRef.current) {
       inputRef.current.focus();
     }

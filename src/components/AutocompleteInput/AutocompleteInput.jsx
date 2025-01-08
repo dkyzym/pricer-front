@@ -8,6 +8,7 @@ const AutocompleteInputComponent = ({
   isAutocompleteLoading,
   inputValue,
   handleClearInput,
+  hasOptions,
 }) => (
   <TextField
     {...params}
@@ -22,11 +23,13 @@ const AutocompleteInputComponent = ({
           {isAutocompleteLoading && (
             <CircularProgress color="inherit" size={20} />
           )}
-          {inputValue && (
+          {(inputValue || hasOptions) && (
             <IconButton
               onClick={handleClearInput}
               size="small"
-              sx={{ visibility: inputValue ? 'visible' : 'hidden' }}
+              sx={{
+                visibility: inputValue || hasOptions ? 'visible' : 'hidden',
+              }}
             >
               <ClearIcon />
             </IconButton>

@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Container, Grid } from '@mui/material';
-import { useContext, useRef } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 
 import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
 import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
@@ -22,6 +22,7 @@ import {
 // import { clearBrandClarifications } from '../../redux/brandClarificationSlice';
 // import { resetSupplierStatus } from '../../redux/supplierSlice';
 // import { BrandClarificationTable } from './BrandClarificationTable/BrandClarificationTable';
+import { simulateClick } from '@utils/simulateClick';
 import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
@@ -41,25 +42,44 @@ export const SearchComponent = () => {
     handleClearInput,
   } = useAutocomplete({ inputRef });
 
-  // const brandClarifications = useSelector(
-  //   (state) => state.brandClarification.brands
-  // );
-  // const isClarifying = useSelector(
-  //   (state) => state.brandClarification.isClarifying
-  // );
+  const brandClarifications = useSelector(
+    (state) => state.brandClarification.brands
+  );
+
+  const isClarifying = useSelector(
+    (state) => state.brandClarification.isClarifying
+  );
 
   const { selectedSuppliers, handleSupplierChange } = useSupplierSelection();
 
-  const {
-    handleOptionSelect,
-    // handleBrandSelect
-  } = useSearchHandlers({
+  const { handleOptionSelect } = useSearchHandlers({
     socket,
     // resetSupplierStatus: () => dispatch(resetSupplierStatus()),
     // clearBrandClarifications: () => dispatch(clearBrandClarifications()),
     selectedSuppliers,
   });
 
+  const combinedOptions = useMemo(() => {
+    if (isClarifying && brandClarifications?.length) {
+      return brandClarifications;
+    }
+    return autocompleteResults;
+  }, [isClarifying, brandClarifications, autocompleteResults]);
+
+  useEffect(() => {
+    if (isClarifying && brandClarifications.length > 0) {
+      // Делаем небольшую задержку, чтобы React успел зарендерить обновлённые опции
+      setTimeout(() => {
+        // Ставим фокус, чтобы Autocomplete не «ругался», что нет фокуса
+        inputRef.current?.focus();
+
+        // Эмулируем клик
+        simulateClick(inputRef.current);
+      }, 0);
+    }
+  }, [isClarifying, brandClarifications]);
+
+  // 131004062СБ
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results.data || []
   );
@@ -74,7 +94,7 @@ export const SearchComponent = () => {
             sx={{ width: '100%' }}
             freeSolo
             inputValue={inputValue}
-            options={autocompleteResults}
+            options={combinedOptions}
             filterOptions={(x) => x}
             getOptionLabel={(option) =>
               `${option.brand} - ${option.number} - ${option.descr}`
@@ -88,6 +108,7 @@ export const SearchComponent = () => {
                 inputRef={inputRef}
                 isAutocompleteLoading={isAutocompleteLoading}
                 inputValue={inputValue}
+                hasOptions={Boolean(combinedOptions.length)}
                 handleClearInput={handleClearInput}
               />
             )}
