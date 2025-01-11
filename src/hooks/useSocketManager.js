@@ -12,6 +12,7 @@ import {
   clearBrandClarifications,
   setBrandClarificationError,
   setBrandClarifications,
+  unsetLoading,
 } from '../redux/brandClarificationSlice';
 
 import {
@@ -53,6 +54,7 @@ const useSocketManager = (socket) => {
     (data) => {
       toast.success(data?.message);
       dispatch(setBrandClarifications(data?.brands));
+      dispatch(unsetLoading());
     },
     [dispatch]
   );
@@ -61,6 +63,7 @@ const useSocketManager = (socket) => {
     (error) => {
       toast.error(`Brand Clarification Error: ${error.message}`);
       dispatch(setBrandClarificationError(error.message));
+      dispatch(unsetLoading());
     },
     [dispatch]
   );

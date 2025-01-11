@@ -1,21 +1,29 @@
+// useSearchHandlers.js
 import { SOCKET_EVENTS } from '@api/ws/socket';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { clearBrandClarifications } from '../redux/brandClarificationSlice';
+import {
+  clearBrandClarifications,
+  setBrandClarificationError,
+  setBrandClarifications,
+  setLoading,
+} from '../redux/brandClarificationSlice';
+
 import { resetSupplierStatus } from '../redux/supplierSlice';
 
 const useSearchHandlers = ({ socket, selectedSuppliers }) => {
   const dispatch = useDispatch();
 
   const handleBrandClarification = useCallback(
-    (value) => {
-      const { article } = value;
-
-      socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, {
-        query: article,
-      });
+    (query) => {
+      if (!query.trim()) {
+        console.warn('Пустой запрос для уточнения бренда.');
+        return;
+      }
+      dispatch(setLoading());
+      socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, { query });
     },
-    [socket, selectedSuppliers]
+    [socket, dispatch]
   );
 
   const handleDetailedSearch = useCallback(
@@ -23,13 +31,9 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
       selectedSuppliers.forEach((supplier) => {
         if (!supplier) {
           console.error('Invalid supplierKey:', supplier);
-          return; // Skip invalid supplierKey
+          return;
         }
-
-        socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
-          item: value,
-          supplier: supplier,
-        });
+        socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, { item: value, supplier });
       });
     },
     [socket, selectedSuppliers]
@@ -38,14 +42,12 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
   const handleBrandSelect = useCallback(
     (selectedItem) => {
       dispatch(resetSupplierStatus());
-
       selectedSuppliers.forEach((supplierKey) => {
         socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
           item: selectedItem,
           supplier: supplierKey,
         });
       });
-
       dispatch(clearBrandClarifications());
     },
     [dispatch, socket, selectedSuppliers]
@@ -60,13 +62,9 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
           description: value.descr || '',
         };
         dispatch(resetSupplierStatus());
-
-        const brand =
-          typeof mappedValue === 'object' ? mappedValue.brand : mappedValue;
-        const description = mappedValue.description;
-
+        const { brand, description } = mappedValue;
         if (brand.trim().includes('Найти') && !description) {
-          handleBrandClarification(mappedValue);
+          handleBrandClarification(mappedValue.article);
         } else {
           handleDetailedSearch(mappedValue);
           dispatch(clearBrandClarifications());
@@ -75,6 +73,28 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
     },
     [dispatch, handleBrandClarification, handleDetailedSearch]
   );
+
+  useEffect(() => {
+    const handleBrandClarificationResponse = (response) => {
+      if (response.error) {
+        dispatch(setBrandClarificationError(response.error));
+      } else {
+        dispatch(setBrandClarifications(response.brands));
+      }
+    };
+
+    socket.on(
+      SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
+      handleBrandClarificationResponse
+    );
+
+    return () => {
+      socket.off(
+        SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
+        handleBrandClarificationResponse
+      );
+    };
+  }, [socket, dispatch]);
 
   return {
     handleBrandClarification,
