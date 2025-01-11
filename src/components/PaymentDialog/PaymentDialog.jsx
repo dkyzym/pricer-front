@@ -1,5 +1,3 @@
-// PaymentDialog.jsx
-
 import {
   Button,
   Dialog,

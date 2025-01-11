@@ -1,4 +1,3 @@
-// SearchComponent.jsx
 import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
 import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
 import { SocketContext } from '@context/SocketContext';

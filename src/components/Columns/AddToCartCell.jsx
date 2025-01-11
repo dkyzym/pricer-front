@@ -4,7 +4,6 @@ import { Box } from '@mui/material';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-// Импортируем созданный нами диалог
 import { PaymentDialog } from '@components/PaymentDialog/PaymentDialog';
 
 export const AddToCartCell = (props) => {
