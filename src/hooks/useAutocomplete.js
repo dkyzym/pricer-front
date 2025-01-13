@@ -1,6 +1,6 @@
 import { BASE_URL } from '@utils/constants';
 import axios from 'axios';
-import debounce from 'lodash/debounce';
+import debounce from 'lodash.debounce';
 import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
