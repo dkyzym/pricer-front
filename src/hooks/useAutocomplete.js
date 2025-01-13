@@ -1,4 +1,3 @@
-import { BASE_URL } from '@utils/constants';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
 import { useMemo } from 'react';
@@ -10,6 +9,7 @@ import {
   setInputValue,
 } from '../redux/autocompleteSlice';
 import { clearBrandClarifications } from '../redux/brandClarificationSlice';
+import { API_URL } from '@api/config';
 
 const useAutocomplete = ({ inputRef }) => {
   const dispatch = useDispatch();
@@ -30,7 +30,7 @@ const useAutocomplete = ({ inputRef }) => {
           return;
         }
         try {
-          const response = await axios.get(`${BASE_URL}/api/autocomplete/ug`, {
+          const response = await axios.get(`${API_URL}/api/autocomplete/ug`, {
             params: { term },
           });
           dispatch(clearBrandClarifications());

@@ -1,8 +1,8 @@
-import { BASE_URL } from '@utils/constants';
 import axios from 'axios';
+import { API_URL } from './config';
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL, // Может быть пустым или вынести в ENV
+  baseURL: API_URL, // Может быть пустым или вынести в ENV
   timeout: 10000,
 });
 

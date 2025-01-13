@@ -1,37 +1,37 @@
-export const BASE_URL = 'http://localhost:3000';
+import { API_URL } from '@api/config';
 
 export const CREDENTIALS = {
   ЮГ: {
     username: 'automir.lg@gmail.com',
     password: '954712',
-    loginUrl: `${BASE_URL}login/ug`,
-    logoutUrl: `${BASE_URL}logout/ug`,
+    loginUrl: `${API_URL}login/ug`,
+    logoutUrl: `${API_URL}logout/ug`,
   },
   TurboCars: {
     username: '32831',
     password: '12345678',
-    loginUrl: `${BASE_URL}login/tc`,
-    logoutUrl: `${BASE_URL}logout/tc`,
+    loginUrl: `${API_URL}login/tc`,
+    logoutUrl: `${API_URL}logout/tc`,
   },
   Патриот: {
     username: 'automir.lg@gmail.com',
     password: '296942aA',
-    loginUrl: `${BASE_URL}login/pt`,
-    logoutUrl: `${BASE_URL}logout/pt`,
+    loginUrl: `${API_URL}login/pt`,
+    logoutUrl: `${API_URL}logout/pt`,
   },
   Orion: {
     username: 'automir.19@yandex.ru',
     password: '296942',
-    loginUrl: `${BASE_URL}login/or`,
-    logoutUrl: `${BASE_URL}logout/or`,
+    loginUrl: `${API_URL}login/or`,
+    logoutUrl: `${API_URL}logout/or`,
   },
   Armtek: {
     username: 'automir.lg@gmail.com',
     password: '296942',
-    loginUrl: `${BASE_URL}login/ar`,
-    logoutUrl: `${BASE_URL}logout/ar`,
+    loginUrl: `${API_URL}login/ar`,
+    logoutUrl: `${API_URL}logout/ar`,
   },
   profit: {
-    addToCartURL: `${BASE_URL}/api/cart/add`,
+    addToCartURL: `${API_URL}/api/cart/add`,
   },
 };
