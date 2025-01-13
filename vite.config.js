@@ -37,6 +37,7 @@ export default defineConfig({
           ],
           luxon: ['luxon'],
           io: ['socket.io-client'],
+          external: ['lodash/debounce', 'lodash.throttle'],
         },
       },
     },
