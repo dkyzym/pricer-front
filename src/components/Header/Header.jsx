@@ -18,7 +18,7 @@ const LogoIcon = (props) => (
   </SvgIcon>
 );
 
-export const HeaderComponent = () => {
+export const Header = () => {
   return (
     <AppBar position="static">
       <Toolbar sx={{ width: '100%' }}>
