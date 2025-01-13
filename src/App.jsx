@@ -1,4 +1,4 @@
-import { Header } from '@components/Header/Header';
+import { Header } from '@components/Header/Header.jsx';
 import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
