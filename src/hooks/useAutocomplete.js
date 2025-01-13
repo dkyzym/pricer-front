@@ -30,7 +30,7 @@ const useAutocomplete = ({ inputRef }) => {
           return;
         }
         try {
-          const response = await axios.get(`${API_URL}/api/autocomplete/ug`, {
+          const response = await axios.get(`${API_URL}api/autocomplete/ug`, {
             params: { term },
           });
           dispatch(clearBrandClarifications());
