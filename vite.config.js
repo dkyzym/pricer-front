@@ -19,7 +19,26 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/utils'),
       '@api': path.resolve(__dirname, './src/api'),
       '@assets': path.resolve(__dirname, './src/assets'),
-      '@redux': path.relative(__dirname, './src/redux'),
+      '@redux': path.resolve(__dirname, './src/redux'),
+    },
+    extensions: ['.js', '.jsx'],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          libs: [
+            '@reduxjs/toolkit',
+            '@mui/material',
+            'axios',
+            'react-router-dom',
+            'react-redux',
+          ],
+          luxon: ['luxon'],
+          io: ['socket.io-client'],
+        },
+      },
     },
   },
 });
