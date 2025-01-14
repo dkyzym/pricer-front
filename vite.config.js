@@ -32,7 +32,7 @@ export default defineConfig({
             '@reduxjs/toolkit',
             '@mui/material',
             'axios',
-            'react-router-dom',
+            'react-router',
             'react-redux',
             'react-toastify',
             'lodash.debounce',
