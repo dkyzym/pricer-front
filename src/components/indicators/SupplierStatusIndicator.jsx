@@ -10,6 +10,15 @@ import {
   Typography,
 } from '@mui/material';
 
+const supplierNameMap = {
+  profit: 'Профит',
+  turboCars: 'Турбокарс',
+  autosputnik: 'Автоспутник',
+  autoImpulse: 'Автоимпульс',
+  ug: 'ЮГ',
+  patriot: ' Патриот',
+};
+
 export const SupplierStatusIndicator = ({
   supplierKey,
   status,
@@ -17,32 +26,35 @@ export const SupplierStatusIndicator = ({
   onChange,
 }) => {
   return (
-    <FormGroup>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={checked}
-              onChange={() => onChange(supplierKey)}
-              color="primary"
+    <Tooltip title="Выберите поставщика">
+      <Box>
+        <FormGroup>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checked}
+                  onChange={() => onChange(supplierKey)}
+                  color="primary"
+                />
+              }
+              label={supplierNameMap[supplierKey]}
             />
-          }
-          label={supplierKey}
-        />
 
-        {/* Блок фиксированной ширины, внутри - короткий индикатор */}
-        <Box sx={{ width: 20, display: 'flex', justifyContent: 'center' }}>
-          {status.loading && <CircularProgress size={16} />}
-          {!status.loading && status.error && (
-            <Tooltip title={status.error}>
-              <ErrorOutlineIcon color="error" />
-            </Tooltip>
-          )}
-          {!status.loading && !status.error && (
-            <Typography>{status.results.data?.length}</Typography>
-          )}
-        </Box>
-      </Stack>
-    </FormGroup>
+            <Box sx={{ width: 20, display: 'flex', justifyContent: 'center' }}>
+              {status.loading && <CircularProgress size={16} />}
+              {!status.loading && status.error && (
+                <Tooltip title={status.error}>
+                  <ErrorOutlineIcon color="error" />
+                </Tooltip>
+              )}
+              {!status.loading && !status.error && (
+                <Typography>{status.results.data?.length}</Typography>
+              )}
+            </Box>
+          </Stack>
+        </FormGroup>
+      </Box>
+    </Tooltip>
   );
 };

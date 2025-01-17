@@ -102,7 +102,7 @@ export const AddToCartCell = (props) => {
         <QuantitySelector
           multi={row?.multi ?? 1}
           loading={loading}
-          disabledAddToCartSuppliers={disabledAddToCartSuppliers}
+          disabledAddToCartSuppliers={Boolean(disabledAddToCartSuppliers)}
           added={added}
           // вместо handleAddToCart передаем новую функцию
           onAddToCart={handleCheckSupplierAndAdd}
