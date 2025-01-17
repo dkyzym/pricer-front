@@ -89,6 +89,12 @@ export const AddToCartCell = (props) => {
     setPaymentDialogOpen(false);
     handleAddToCart(temporaryCount, nalValue);
   };
+  const disabledAddToCartSuppliers = [
+    'autosputnik',
+    'patriot',
+    'turboCars',
+    'autoImpulse',
+  ].includes(row.supplier);
 
   return (
     <>
@@ -96,6 +102,7 @@ export const AddToCartCell = (props) => {
         <QuantitySelector
           multi={row?.multi ?? 1}
           loading={loading}
+          disabledAddToCartSuppliers={disabledAddToCartSuppliers}
           added={added}
           // вместо handleAddToCart передаем новую функцию
           onAddToCart={handleCheckSupplierAndAdd}

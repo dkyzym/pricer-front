@@ -1,7 +1,13 @@
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { Box, CircularProgress, IconButton, TextField } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  IconButton,
+  TextField,
+  Tooltip,
+} from '@mui/material';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -10,6 +16,7 @@ export const QuantitySelector = ({
   loading,
   added,
   onAddToCart,
+  disabledAddToCartSuppliers,
 }) => {
   const [count, setCount] = useState(multi);
 
@@ -102,28 +109,38 @@ export const QuantitySelector = ({
         </IconButton>
       </Box>
 
-      <IconButton
-        onClick={handleAddToCartClick}
-        color={added ? 'primary' : 'default'}
-        disabled={loading}
-        sx={{
-          borderRadius: 2,
-          width: 20,
-          height: 30,
-          marginLeft: 1,
-          transition: 'transform 0.2s, background-color 0.2s',
-          '&:hover': {
-            backgroundColor: 'rgba(25, 118, 210, 0.1)',
-            transform: 'scale(1.1)',
-          },
-        }}
+      <Tooltip
+        title={
+          disabledAddToCartSuppliers
+            ? 'Добавление недоступно, разработчик лентяй'
+            : 'Добавить в корзину'
+        }
       >
-        {loading ? (
-          <CircularProgress size={20} />
-        ) : (
-          <ShoppingCartIcon fontSize="" />
-        )}
-      </IconButton>
+        <span>
+          <IconButton
+            onClick={handleAddToCartClick}
+            color={added ? 'primary' : 'default'}
+            disabled={loading || disabledAddToCartSuppliers}
+            sx={{
+              borderRadius: 2,
+              width: 20,
+              height: 30,
+              marginLeft: 1,
+              transition: 'transform 0.2s, background-color 0.2s',
+              '&:hover': {
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                transform: 'scale(1.1)',
+              },
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <ShoppingCartIcon fontSize="" />
+            )}
+          </IconButton>
+        </span>
+      </Tooltip>
     </Box>
   );
 };

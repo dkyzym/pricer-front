@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 export const Cart = () => {
   return (
     <div>
-      <Typography>Тут будет корзина</Typography>
+      <Typography variant="h8">Тут может быть корзина</Typography>
     </div>
   );
 };
