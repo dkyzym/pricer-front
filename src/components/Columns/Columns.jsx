@@ -4,6 +4,7 @@ import StarIcon from '@mui/icons-material/Star';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
 import { AddToCartCell } from './AddToCartCell';
+import { CopiableCell } from './CopiableCell';
 
 export const getColumns = ({
   minPrice,
@@ -22,28 +23,7 @@ export const getColumns = ({
     field: 'article',
     headerName: 'Артикул',
     width: 120,
-    renderCell: (params) => {
-      const handleClick = () => {
-        if (params.value) {
-          navigator.clipboard
-            .writeText(params.value.toString())
-            .catch((err) => console.error(err));
-        }
-      };
-
-      return (
-        <span
-          onClick={handleClick}
-          style={{
-            cursor: 'pointer',
-            textDecoration: 'underline',
-          }}
-          title="Кликните, чтобы скопировать"
-        >
-          {params.value}
-        </span>
-      );
-    },
+    renderCell: (params) => <CopiableCell value={params.value} />,
   },
   {
     field: 'description',
