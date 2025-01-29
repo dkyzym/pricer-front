@@ -9,7 +9,6 @@ export const CopiableCell = ({ value }) => {
         .writeText(value.toString())
         .then(() => {
           setCopied(true);
-          // Вернуть исходное значение через 1.5 секунды
           setTimeout(() => setCopied(false), 500);
         })
         .catch((err) => console.error(err));
