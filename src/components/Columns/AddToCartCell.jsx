@@ -94,6 +94,7 @@ export const AddToCartCell = (props) => {
     'patriot',
     'turboCars',
     'autoImpulse',
+    'armtek',
   ].includes(row.supplier);
 
   return (

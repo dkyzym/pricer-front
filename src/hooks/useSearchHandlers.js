@@ -1,4 +1,3 @@
-// useSearchHandlers.js
 import { SOCKET_EVENTS } from '@api/ws/socket';
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';

@@ -17,6 +17,7 @@ const supplierNameMap = {
   autoImpulse: 'Автоимпульс',
   ug: 'ЮГ',
   patriot: ' Патриот',
+  armtek: 'Армтек',
 };
 
 export const SupplierStatusIndicator = ({

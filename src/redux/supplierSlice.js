@@ -8,6 +8,7 @@ const initialState = {
     patriot: { loading: false, results: [], error: null },
     autosputnik: { loading: false, results: [], error: null },
     autoImpulse: { loading: false, results: [], error: null },
+    armtek: { loading: false, results: [], error: null },
   },
 };
 
