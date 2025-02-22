@@ -71,7 +71,7 @@ export const SearchComponent = () => {
     (status) => status.results.data || []
   );
   const filteredResults = useFilteredResults(allResults, selectedSuppliers);
-  console.log(allResults, filteredResults);
+
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
       <Grid container spacing={2}>
