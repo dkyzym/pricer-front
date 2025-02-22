@@ -10,6 +10,7 @@ html,
 body {
   height: 100%;
   min-width: 20rem;
+  scrollbar-gutter: stable;
   ::-webkit-scrollbar {
     width: 8px;
   }
