@@ -5,6 +5,7 @@ import {
   AppBar,
   Box,
   Button,
+  Container,
   SvgIcon,
   Toolbar,
   Typography,
@@ -21,50 +22,52 @@ const LogoIcon = (props) => (
 export const Header = () => {
   return (
     <AppBar position="static">
-      <Toolbar sx={{ width: '100%' }}>
-        <Box
-          component={Link}
-          to="/"
-          sx={{
-            display: 'flex',
-            flex: 1,
-            flexDirection: 'column',
-          }}
-        >
-          <Box sx={{ maxWidth: '200px' }}>
-            <Box
-              sx={{
-                height: '50px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <LogoIcon sx={{ fontSize: '120px' }} />
+      <Container maxWidth="lg">
+        <Toolbar>
+          <Box
+            component={Link}
+            to="/"
+            sx={{
+              display: 'flex',
+              flex: 1,
+              flexDirection: 'column',
+            }}
+          >
+            <Box sx={{ maxWidth: '200px' }}>
+              <Box
+                sx={{
+                  height: '50px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <LogoIcon sx={{ fontSize: '120px' }} />
+              </Box>
             </Box>
+            <Typography variant="h6" sx={{ fontSize: 12, fontWeight: 100 }}>
+              Шикарное название
+            </Typography>
           </Box>
-          <Typography variant="h6" sx={{ fontSize: 12, fontWeight: 100 }}>
-            Шикарное название
-          </Typography>
-        </Box>
 
-        <SocketStatusIndicator />
-        <Button
-          color="inherit"
-          component={Link}
-          to="/"
-          startIcon={<ManageSearchIcon />}
-        >
-          Поиск
-        </Button>
-        <Button
-          color="inherit"
-          component={Link}
-          to="/cart"
-          startIcon={<ShoppingCartCheckoutIcon />}
-        >
-          Корзина
-        </Button>
-      </Toolbar>
+          <SocketStatusIndicator />
+          <Button
+            color="inherit"
+            component={Link}
+            to="/"
+            startIcon={<ManageSearchIcon />}
+          >
+            Поиск
+          </Button>
+          <Button
+            color="inherit"
+            component={Link}
+            to="/cart"
+            startIcon={<ShoppingCartCheckoutIcon />}
+          >
+            Корзина
+          </Button>
+        </Toolbar>
+      </Container>
     </AppBar>
   );
 };
