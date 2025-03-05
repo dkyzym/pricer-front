@@ -45,7 +45,7 @@ export const Header = () => {
               </Box>
             </Box>
             <Typography variant="h6" sx={{ fontSize: 12, fontWeight: 100 }}>
-              Супер Шикарное название
+              Шикарное Название
             </Typography>
           </Box>
 
