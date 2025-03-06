@@ -12,7 +12,7 @@ const autocompleteSlice = createSlice({
   initialState,
   reducers: {
     setInputValue(state, action) {
-      state.inputValue = action.payload;
+      state.inputValue = action.payload.trimStart();
     },
     setAutocompleteResults(state, action) {
       state.results = action.payload;
