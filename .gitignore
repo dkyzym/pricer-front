@@ -29,4 +29,5 @@ todo*
 SearchUg copy.jsx
 SearchUgcopy* 
 some*
-.env 
+.env
+.env.production 
