@@ -8,7 +8,13 @@ const App = () => {
     <>
       <Header />
       <Outlet />
-      <ToastContainer autoClose={1500} closeOnClick={true} />
+      <ToastContainer
+        autoClose={1500}
+        closeOnClick
+        pauseOnFocusLoss={false}
+        pauseOnHover={false}
+        draggable={false}
+      />
     </>
   );
 };
