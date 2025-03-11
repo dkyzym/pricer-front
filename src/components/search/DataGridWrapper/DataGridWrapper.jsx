@@ -1,5 +1,5 @@
-import { DataGrid } from '@mui/x-data-grid';
 import { alpha, useTheme } from '@mui/material/styles';
+import { DataGrid } from '@mui/x-data-grid';
 
 export const DataGridWrapper = ({
   rows,
@@ -81,6 +81,13 @@ export const DataGridWrapper = ({
         disableSelectionOnClick
         autoHeight
         localeText={{ noRowsLabel: 'Тут пока ничего нет' }}
+        initialState={{
+          columns: {
+            columnVisibilityModel: {
+              deadline: false,
+            },
+          },
+        }}
       />
     </div>
   );

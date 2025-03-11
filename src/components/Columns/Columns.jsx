@@ -1,4 +1,5 @@
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StarIcon from '@mui/icons-material/Star';
 import { Box, Tooltip, Typography } from '@mui/material';
@@ -16,6 +17,9 @@ export const getColumns = ({
     field: 'brand',
     headerName: 'Брэнд',
     width: 100,
+    disableColumnMenu: true,
+    sortable: false,
+    filterable: false,
     cellClassName: (params) =>
       params.row.needToCheckBrand ? 'highlightBrand' : '',
   },
@@ -23,12 +27,18 @@ export const getColumns = ({
     field: 'article',
     headerName: 'Артикул',
     width: 120,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
     renderCell: (params) => <CopiableCell value={params.value} />,
   },
   {
     field: 'description',
     headerName: 'Описание',
     width: 220,
+    disableColumnMenu: true,
+    sortable: false,
+    filterable: false,
     renderCell: (params) => (
       <Box
         display="flex"
@@ -69,11 +79,60 @@ export const getColumns = ({
     field: 'warehouse',
     headerName: 'Склад',
     width: 85,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
+  },
+  {
+    field: 'availability',
+    headerName: 'Наличие',
+    width: 60,
+    filterable: false,
+    disableColumnMenu: true,
+    sortable: false,
+  },
+  {
+    field: 'allow_return',
+    headerName: '',
+    width: 50,
+    disableColumnMenu: true,
+    sortable: false,
+    filterable: false,
+    align: 'center',
+    headerAlign: 'center',
+    // Иконка в заголовке
+    renderHeader: () => (
+      <Tooltip title="Возможность возврата">
+        <KeyboardReturnIcon />
+      </Tooltip>
+    ),
+    // Иконка в ячейках (true/false) или пустая ячейка
+    renderCell: (params) => {
+      const allowReturn = params.value;
+      if (typeof allowReturn === 'undefined') {
+        return null;
+      }
+      const iconColor = allowReturn ? 'green' : '#f54269';
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          <KeyboardReturnIcon style={{ color: iconColor }} />
+        </div>
+      );
+    },
   },
   {
     field: 'probability',
     headerName: '%',
     width: 40,
+    disableColumnMenu: true,
     cellClassName: (params) =>
       params.value === maxProbability ? 'bestProbability' : '',
   },
@@ -81,6 +140,9 @@ export const getColumns = ({
     field: 'deadline',
     headerName: 'Ч',
     width: 20,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
     cellClassName: (params) =>
       params.value === minDeadline ? 'bestDeadline' : '',
   },
@@ -88,6 +150,7 @@ export const getColumns = ({
     field: 'deliveryDate',
     headerName: 'Доставка',
     width: 110,
+    disableColumnMenu: true,
     type: 'string',
     cellClassName: (params) => {
       const dateStr = params.value;
@@ -118,14 +181,10 @@ export const getColumns = ({
     },
   },
   {
-    field: 'availability',
-    headerName: 'Наличие',
-    width: 60,
-  },
-  {
     field: 'price',
     headerName: 'Цена',
     width: 100,
+    disableColumnMenu: true,
     cellClassName: (params) => (params.value === minPrice ? 'bestPrice' : ''),
   },
   {
@@ -134,11 +193,15 @@ export const getColumns = ({
     width: 130,
     sortable: false,
     filterable: false,
+    disableColumnMenu: true,
     renderCell: (params) => <AddToCartCell {...params} />,
   },
   {
     field: 'supplier',
     headerName: 'Поставщик',
     width: 75,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
   },
 ];
