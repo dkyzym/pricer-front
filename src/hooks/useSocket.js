@@ -8,17 +8,13 @@ export const useSocketStatus = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const updateStatus = (status) => {
-      setSocketStatus(status);
-    };
+    // Если сокет уже подключён, сразу ставим статус
+    if (socket.connected) {
+      setSocketStatus('connected');
+    }
 
-    const onConnect = () => {
-      updateStatus('connected');
-    };
-
-    const onDisconnect = () => {
-      updateStatus('disconnected');
-    };
+    const onConnect = () => setSocketStatus('connected');
+    const onDisconnect = () => setSocketStatus('disconnected');
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);

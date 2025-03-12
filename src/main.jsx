@@ -8,21 +8,39 @@ import './index.css';
 import AppProviders from '@context/AppProviders';
 import { CartPage } from '@pages/CartPage';
 import { ErrorPage } from '@pages/ErrorPage';
+import { LoginPage } from '@pages/LoginPage';
+import { LogsPage } from '@pages/LogsPage';
 import App from './App';
+import { ProtectedRoute } from './routes/ProtectedRoute';
 
 const router = createBrowserRouter([
+  // Страница логина (открыта для всех)
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+
+  // Все остальные пути защищены:
   {
     path: '/',
-    element: <App />,
+    element: (
+      <ProtectedRoute>
+        <App />
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />,
     children: [
+      // Главная (index: true)
+      { index: true, element: <HomePage /> },
+      { path: 'cart', element: <CartPage /> },
+
       {
-        path: '/',
-        element: <HomePage />,
-      },
-      {
-        path: 'cart',
-        element: <CartPage />,
+        path: 'admin/logs',
+        element: (
+          <ProtectedRoute requiredRole="admin">
+            <LogsPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

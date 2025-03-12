@@ -1,4 +1,5 @@
 import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndicator';
+import HistoryIcon from '@mui/icons-material/History';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import {
@@ -8,9 +9,12 @@ import {
   Container,
   SvgIcon,
   Toolbar,
+  Tooltip,
   Typography,
 } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { logout } from 'src/redux/authSlice';
 import { default as logoUrl } from '../../images/logo.svg';
 
 const LogoIcon = (props) => (
@@ -20,6 +24,16 @@ const LogoIcon = (props) => (
 );
 
 export const Header = () => {
+  const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const isAdmin = user.role === 'admin';
+
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem('authUser');
+    // Если хотите — можно сделать navigate на /login
+  };
+
   return (
     <AppBar position="static">
       <Container maxWidth="lg">
@@ -66,6 +80,27 @@ export const Header = () => {
           >
             Корзина
           </Button>
+          {isAdmin && (
+            <Tooltip title="Логи">
+              <Button color="inherit" component={Link} to="/admin/logs">
+                <HistoryIcon />
+              </Button>
+            </Tooltip>
+          )}
+          {user ? (
+            <>
+              <Typography variant="subtitle1" sx={{ ml: 2 }}>
+                Привет, {user.name}!
+              </Typography>
+              <Button color="inherit" onClick={handleLogout}>
+                Выйти
+              </Button>
+            </>
+          ) : (
+            <Button color="inherit" component={Link} to="/login">
+              Войти
+            </Button>
+          )}
         </Toolbar>
       </Container>
     </AppBar>
