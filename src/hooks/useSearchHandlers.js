@@ -74,6 +74,8 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
   );
 
   useEffect(() => {
+    if (!socket) return;
+
     const handleBrandClarificationResponse = (response) => {
       if (response.error) {
         dispatch(setBrandClarificationError(response.error));

@@ -1,4 +1,3 @@
-import { socket } from '@api/ws/socket';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useEffect } from 'react';
 import { Provider, useDispatch } from 'react-redux';
@@ -7,10 +6,6 @@ import store from '../redux/store';
 import { SocketProvider } from './SocketProvider';
 import { SocketStatusProvider } from './SocketStatusProvider';
 
-/**
- * Вспомогательный компонент, который при монтировании
- * восстанавливает состояние auth из localStorage.
- */
 const InitAuth = ({ children }) => {
   const dispatch = useDispatch();
 
@@ -19,27 +14,24 @@ const InitAuth = ({ children }) => {
     if (savedUser) {
       dispatch(setUser(JSON.parse(savedUser)));
     }
-    // По окончании проверки ставим isCheckingAuth = false
+
     dispatch(finishCheckingAuth());
   }, [dispatch]);
 
   return children;
 };
 
-const AppProviders = ({ children }) => {
+export default function AppProviders({ children }) {
   return (
-    // Подключаем сокет-провайдеры (если нужно, сразу при старте)
-    <SocketProvider socket={socket}>
-      <Provider store={store}>
-        <SocketStatusProvider>
-          <InitAuth>
+    <Provider store={store}>
+      <InitAuth>
+        <SocketProvider>
+          <SocketStatusProvider>
             <CssBaseline />
             {children}
-          </InitAuth>
-        </SocketStatusProvider>
-      </Provider>
-    </SocketProvider>
+          </SocketStatusProvider>
+        </SocketProvider>
+      </InitAuth>
+    </Provider>
   );
-};
-
-export default AppProviders;
+}

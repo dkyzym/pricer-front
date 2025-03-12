@@ -3,15 +3,18 @@ import { useContext, useEffect, useState } from 'react';
 
 export const useSocketStatus = () => {
   const socket = useContext(SocketContext);
-  const [socketStatus, setSocketStatus] = useState('connecting');
+  const [socketStatus, setSocketStatus] = useState('disconnected');
 
   useEffect(() => {
-    if (!socket) return;
-
-    // Если сокет уже подключён, сразу ставим статус
-    if (socket.connected) {
-      setSocketStatus('connected');
+    if (!socket) {
+      // Если сокета нет, показываем "disconnected" (или "no-socket")
+      setSocketStatus('disconnected');
+      return;
     }
+
+    // Если сокет есть, ставим 'connecting' или сразу 'connected',
+    // если socket.io клиент уже успел подключиться
+    setSocketStatus(socket.connected ? 'connected' : 'connecting');
 
     const onConnect = () => setSocketStatus('connected');
     const onDisconnect = () => setSocketStatus('disconnected');

@@ -1,11 +1,3 @@
-import { API_URL } from '@api/config';
-import { io } from 'socket.io-client';
-
-export const socket = io(API_URL, {
-  autoConnect: true,
-  reconnection: true,
-});
-
 export const SOCKET_EVENTS = {
   CONNECT: 'connected',
   GET_ITEM_RESULTS: 'getItemResults',

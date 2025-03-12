@@ -117,6 +117,10 @@ const useSocketManager = (socket) => {
   );
 
   useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
     socket.on(SOCKET_EVENTS.CONNECT, handleSocketConnect);
 
     socket.on(
