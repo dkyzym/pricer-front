@@ -6,6 +6,7 @@ import { SocketContext } from './SocketContext';
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
+  // В store.auth.user (см. authSlice) мы храним { username, role, token }
   const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
@@ -22,9 +23,7 @@ export const SocketProvider = ({ children }) => {
     const newSocket = io(API_URL, {
       autoConnect: true,
       reconnection: true,
-      // query: { token: user.token },
-      // Или можно передать авторизацию через "auth" в socket.io-client >=4
-      auth: { token: user.token },
+      query: { token: user.token },
     });
 
     setSocket(newSocket);

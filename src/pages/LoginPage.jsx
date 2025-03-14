@@ -1,3 +1,5 @@
+// src/pages/LoginPage.jsx
+import { API_URL } from '@api/config';
 import {
   Box,
   Button,
@@ -6,6 +8,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import axios from 'axios';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -19,28 +22,39 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Здесь имитируем ответ с бэкенда.
-    // В реальном проекте сделаете вызов API.
-    const fakeUser = {
-      name: 'Test User',
-      login: 'user0',
-      role: 'admin',
-      token: 'fake-jwt-token',
-    };
+    try {
+      // Шлём запрос на бэкенд
+      const response = await axios.post(`${API_URL}/api/auth`, {
+        username: login,
+        password,
+      });
 
-    // Запоминаем в Redux
-    dispatch(setUser(fakeUser));
+      // На бэкенде у вас возвращается объект вида { token, user: {username, role} }
+      const { token, user } = response.data;
 
-    // Если стоит "галочка" - кладём в localStorage
-    if (rememberMe) {
-      localStorage.setItem('authUser', JSON.stringify(fakeUser));
+      // Формируем объект, который будем хранить в Redux
+      const userData = {
+        ...user,
+        token,
+      };
+
+      // Пишем в Redux
+      dispatch(setUser(userData));
+
+      // Если включено "Запомнить меня", то кладем в localStorage
+      if (rememberMe) {
+        localStorage.setItem('authUser', JSON.stringify(userData));
+      }
+
+      // Переходим на главную страницу (или куда нужно)
+      navigate('/');
+    } catch (err) {
+      console.error('Ошибка авторизации:', err?.response?.data || err.message);
+      // Тут можно добавить вывод ошибки на экран, alert, тост и т.д.
     }
-
-    // После логина переходим на главную страницу (или куда нужно)
-    navigate('/');
   };
 
   return (

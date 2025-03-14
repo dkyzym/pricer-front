@@ -30,8 +30,10 @@ export const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+
+    
     localStorage.removeItem('authUser');
-    // Если хотите — можно сделать navigate на /login
+
   };
 
   return (
@@ -90,7 +92,7 @@ export const Header = () => {
           {user ? (
             <>
               <Typography variant="subtitle1" sx={{ ml: 2 }}>
-                Привет, {user.name}!
+                Привет, {user.username}!
               </Typography>
               <Button color="inherit" onClick={handleLogout}>
                 Выйти
