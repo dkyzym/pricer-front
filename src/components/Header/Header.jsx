@@ -31,9 +31,7 @@ export const Header = () => {
   const handleLogout = () => {
     dispatch(logout());
 
-    
     localStorage.removeItem('authUser');
-
   };
 
   return (
@@ -74,14 +72,16 @@ export const Header = () => {
           >
             Поиск
           </Button>
-          <Button
-            color="inherit"
-            component={Link}
-            to="/cart"
-            startIcon={<ShoppingCartCheckoutIcon />}
-          >
-            Корзина
-          </Button>
+          {isAdmin && (
+            <Button
+              color="inherit"
+              component={Link}
+              to="/cart"
+              startIcon={<ShoppingCartCheckoutIcon />}
+            >
+              Корзина
+            </Button>
+          )}
           {isAdmin && (
             <Tooltip title="Логи">
               <Button color="inherit" component={Link} to="/admin/logs">

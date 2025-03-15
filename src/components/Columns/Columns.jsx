@@ -78,7 +78,7 @@ export const getColumns = ({
   {
     field: 'warehouse',
     headerName: 'Склад',
-    width: 85,
+    width: 100,
     sortable: false,
     filterable: false,
     disableColumnMenu: true,
@@ -199,7 +199,7 @@ export const getColumns = ({
   {
     field: 'supplier',
     headerName: 'Поставщик',
-    width: 75,
+    width: 100,
     sortable: false,
     filterable: false,
     disableColumnMenu: true,
