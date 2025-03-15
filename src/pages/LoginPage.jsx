@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import { API_URL } from '@api/config';
 import {
   Box,
