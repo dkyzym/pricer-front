@@ -1,9 +1,11 @@
-import { Logs } from '@components/Logs/Logs';
+import { HistoryLogs } from '@components/logs/HistoryLogs';
+import { Typography } from '@mui/material';
 
 export const LogsPage = () => {
   return (
     <>
-      <Logs />
+      <Typography>LogsPage</Typography>
+      <HistoryLogs />
     </>
   );
 };
