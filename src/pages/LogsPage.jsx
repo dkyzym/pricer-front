@@ -1,6 +1,6 @@
 import { HistoryLogs } from '@components/logs/HistoryLogs';
 import { RealtimeLogs } from '@components/logs/RealtimeLogs';
-import { Box, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Tab, Tabs } from '@mui/material';
 import { useState } from 'react';
 
 export const LogsPage = () => {
@@ -16,9 +16,6 @@ export const LogsPage = () => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        Logs Page
-      </Typography>
       <Tabs value={tabIndex} onChange={handleChange}>
         <Tab label="History" />
         <Tab label="Stream" />

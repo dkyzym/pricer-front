@@ -28,8 +28,8 @@ export const SocketProvider = ({ children }) => {
     });
 
     newSocket.on(SOCKET_EVENTS.CONNECT, () => {
-      console.log('Connected with socket:', newSocket.id);
       if (user.role === 'admin') {
+        console.log('Connected with socket:', newSocket.id);
         // Отправляем серверу просьбу добавить сокет в админскую комнату
         newSocket.emit('joinRoom', 'admin');
       }
