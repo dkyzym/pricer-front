@@ -70,15 +70,14 @@ export const HistoryLogs = ({ token }) => {
       // userSearchCounts[user] = число запросов
       const userSearchCounts = {};
       // prevCombos[user] = предыдущий combo brand:article
-      const prevCombos = {};
-
+      const prevSearch = {};
+      console.log(cleanLogs);
       cleanLogs.forEach((log) => {
         // Логика определения user: может лежать в log.user
         const currentUser = log.user || 'unknown';
 
         if (log.message?.includes('Received GET_ITEM_RESULTS event:')) {
-          // Пример: "Received GET_ITEM_RESULTS event: {\"item\":{\"brand\":\"SCT\",\"article\":\"SM105\"} ... }"
-          // Нужно парсить JSON из строки после "event:"
+          // Ищем кусок JSON после "event:"
           const jsonPartMatch = log.message.match(/event:\s*(\{.*\})/);
           if (jsonPartMatch && jsonPartMatch[1]) {
             try {
@@ -87,17 +86,35 @@ export const HistoryLogs = ({ token }) => {
               const article = parsed.item?.article;
 
               const combo = `${brand}:${article}`;
-              // Инициируем счётчики
-              if (!userSearchCounts[currentUser])
-                userSearchCounts[currentUser] = 0;
-              if (!prevCombos[currentUser]) prevCombos[currentUser] = '';
+              const currentTimestamp = log.timestamp;
+              // например, "2025-03-17 10:23:45" или другой формат
 
-              if (combo && combo !== prevCombos[currentUser]) {
+              // Инициируем счётчики и структуру
+              if (!userSearchCounts[currentUser]) {
+                userSearchCounts[currentUser] = 0;
+              }
+              if (!prevSearch[currentUser]) {
+                // prevSearch[currentUser] будет объектом типа { combo, timestamp }
+                prevSearch[currentUser] = { combo: '', timestamp: '' };
+              }
+
+              // Сравниваем combo + timestamp с предыдущими
+              const wasSameCombo = prevSearch[currentUser].combo === combo;
+              const wasSameTime =
+                prevSearch[currentUser].timestamp === currentTimestamp;
+
+              // Если combo и timestamp такие же, считаем что это тот же поиск
+              // Иначе считаем это новым поиском
+              if (combo && (!wasSameCombo || !wasSameTime)) {
                 userSearchCounts[currentUser]++;
-                prevCombos[currentUser] = combo;
+                // Запоминаем новые значения
+                prevSearch[currentUser] = {
+                  combo,
+                  timestamp: currentTimestamp,
+                };
               }
             } catch (e) {
-              // Если JSON.parse упал, ничего не делаем
+              // Если JSON.parse упал — игнорируем
             }
           }
         }
