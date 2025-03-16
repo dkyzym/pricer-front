@@ -1,5 +1,5 @@
-import { HistoryLogs } from '@components/logs/HistoryLogs';
-import { RealtimeLogs } from '@components/logs/RealtimeLogs';
+import { HistoryLogs } from '@components/appLogs/HistoryLogs';
+import { RealtimeLogs } from '@components/appLogs/RealtimeLogs';
 import { Box, Tab, Tabs } from '@mui/material';
 import { useState } from 'react';
 
