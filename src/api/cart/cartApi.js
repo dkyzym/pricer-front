@@ -1,5 +1,5 @@
 import axiosInstance from '@api/axiosInstance';
-import { CREDENTIALS } from '@utils/constants';
+import { API_URL } from '@api/config';
 
 export const addToCart = async (item) => {
   const { supplier, quantity } = item;
@@ -14,7 +14,7 @@ export const addToCart = async (item) => {
       supplier: item.supplier,
     };
 
-    const url = CREDENTIALS['profit'].addToCartURL;
+    const url = `${API_URL}/api/cart/add`;
     const response = await axiosInstance.post(url, data);
     if (response.data.success) {
       return { success: true, message: 'Товар добавлен в корзину (Profit)' };
@@ -24,7 +24,7 @@ export const addToCart = async (item) => {
         message: 'Ошибка добавления в корзину (Profit)',
       };
     }
-  } else if (supplier === 'ug') {
+  } else if (supplier === 'ug' || supplier === 'patriot') {
     // Для остальных поставщиков унифицированный запрос
     // Предположим у них единый эндпоинт /api/cart/add
     // И они не требуют специфичных полей

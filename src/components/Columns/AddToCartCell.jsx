@@ -91,7 +91,7 @@ export const AddToCartCell = (props) => {
   };
   const disabledAddToCartSuppliers = [
     'autosputnik',
-    'patriot',
+    // 'patriot',
     'turboCars',
     'autoImpulse',
     'armtek',
