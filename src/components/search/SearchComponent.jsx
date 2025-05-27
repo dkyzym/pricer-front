@@ -14,6 +14,7 @@ import {
   Container,
   Grid,
 } from '@mui/material';
+import { dedupeResults } from '@utils/dedupeResults';
 import { simulateClick } from '@utils/simulateClick';
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
@@ -70,7 +71,9 @@ export const SearchComponent = () => {
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results.data || []
   );
-  const filteredResults = useFilteredResults(allResults, selectedSuppliers);
+
+  const uniqueResults = useMemo(() => dedupeResults(allResults), [allResults]);
+  const filteredResults = useFilteredResults(uniqueResults, selectedSuppliers);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>

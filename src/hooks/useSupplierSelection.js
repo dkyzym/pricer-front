@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 const useSupplierSelection = () => {
   const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
+
   const supplierKeys = useMemo(
     () => Object.keys(supplierStatus),
     [supplierStatus]

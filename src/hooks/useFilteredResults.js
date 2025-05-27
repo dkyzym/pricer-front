@@ -1,9 +1,13 @@
 import { useMemo } from 'react';
 
+const normalizeSupplier = (supplier) => (supplier === 'ug_f' ? 'ug' : supplier);
+
 const useFilteredResults = (allResults, selectedSuppliers) =>
   useMemo(() => {
+    const normalizedSuppliers = selectedSuppliers.map(normalizeSupplier);
+
     return allResults.filter((item) =>
-      selectedSuppliers.includes(item.supplier)
+      normalizedSuppliers.includes(normalizeSupplier(item.supplier))
     );
   }, [allResults, selectedSuppliers]);
 

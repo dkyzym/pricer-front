@@ -5,6 +5,7 @@ const initialState = {
     profit: { loading: false, results: [], error: null },
     turboCars: { loading: false, results: [], error: null },
     ug: { loading: false, results: [], error: null },
+    ug_f: { loading: false, results: [], error: null },
     patriot: { loading: false, results: [], error: null },
     autosputnik: { loading: false, results: [], error: null },
     autoImpulse: { loading: false, results: [], error: null },

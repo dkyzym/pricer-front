@@ -11,13 +11,14 @@ import {
 } from '@mui/material';
 
 const supplierNameMap = {
-  profit: 'Профит',
-  turboCars: 'Турбокарс',
+  profit: 'ПР',
+  turboCars: 'ТК',
   autosputnik: 'Автоспутник',
   autoImpulse: 'Автоимпульс',
   ug: 'ЮГ',
+  ug_f: 'ЮГ-Б',
   patriot: ' Патриот',
-  armtek: 'Армтек',
+  armtek: 'АР',
 };
 
 export const SupplierStatusIndicator = ({
