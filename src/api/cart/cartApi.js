@@ -24,7 +24,11 @@ export const addToCart = async (item) => {
         message: 'Ошибка добавления в корзину (Profit)',
       };
     }
-  } else if (supplier === 'ug' || supplier === 'patriot') {
+  } else if (
+    supplier === 'ug' ||
+    supplier === 'patriot' ||
+    supplier === 'npn'
+  ) {
     // Для остальных поставщиков унифицированный запрос
     // Предположим у них единый эндпоинт /api/cart/add
     // И они не требуют специфичных полей

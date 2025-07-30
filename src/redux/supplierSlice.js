@@ -10,6 +10,7 @@ const initialState = {
     autosputnik: { loading: false, results: [], error: null },
     autoImpulse: { loading: false, results: [], error: null },
     armtek: { loading: false, results: [], error: null },
+    npn: { loading: false, results: [], error: null },
   },
 };
 

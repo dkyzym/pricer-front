@@ -13,12 +13,13 @@ import {
 const supplierNameMap = {
   profit: 'ПР',
   turboCars: 'ТК',
-  autosputnik: 'Автоспутник',
-  autoImpulse: 'Автоимпульс',
+  autosputnik: 'АС',
+  autoImpulse: 'АИ',
   ug: 'ЮГ',
   ug_f: 'ЮГ-Б',
   patriot: ' Патриот',
   armtek: 'АР',
+  npn: 'НПН',
 };
 
 export const SupplierStatusIndicator = ({
