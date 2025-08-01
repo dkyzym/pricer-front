@@ -1,5 +1,5 @@
-import { useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useStore } from 'react-redux';
 import { toast } from 'react-toastify';
 
 import { SOCKET_EVENTS } from '@api/ws/socket';
@@ -22,12 +22,19 @@ import {
   setSupplierStatusSuccess,
 } from '../redux/supplierSlice';
 
+// Константа для таймаута в миллисекундах.
+const CLIENT_SIDE_TIMEOUT_MS = 25000; // 25 секунд
+
 const useSocketManager = (socket) => {
   const dispatch = useDispatch();
+  const store = useStore();
+
+  // Используем useRef для хранения идентификаторов таймеров.
+  // Это не вызывает перерисовку компонента при изменении.
+  const supplierTimeoutRefs = useRef({});
 
   const handleSocketConnect = useCallback(() => {
     toast.info('WebSocket connected');
-
     dispatch(setAutocompleteResults([]));
     dispatch(clearBrandClarifications());
   }, [dispatch]);
@@ -68,6 +75,8 @@ const useSocketManager = (socket) => {
     [dispatch]
   );
 
+  // --- ИЗМЕНЕНИЯ НАЧИНАЮТСЯ ЗДЕСЬ ---
+
   const handleSupplierDataFetchStarted = useCallback(
     ({ supplier, article }) => {
       if (!supplier) {
@@ -77,29 +86,57 @@ const useSocketManager = (socket) => {
         return;
       }
 
-      const supplierKey = supplier;
-
-      dispatch(setSupplierStatusLoading(supplierKey));
+      dispatch(setSupplierStatusLoading(supplier));
       if (article) {
-        dispatch(setSupplierArticle({ supplier: supplierKey, article }));
+        dispatch(setSupplierArticle({ supplier, article }));
       }
+
+      // Очищаем предыдущий таймер для этого поставщика, если он вдруг остался.
+      if (supplierTimeoutRefs.current[supplier]) {
+        clearTimeout(supplierTimeoutRefs.current[supplier]);
+      }
+
+      // Устанавливаем новый "сторожевой" таймер.
+      supplierTimeoutRefs.current[supplier] = setTimeout(() => {
+        // Проверяем актуальное состояние Redux.
+        const currentStatus =
+          store.getState().supplier.supplierStatus[supplier];
+
+        // Если спинер все еще крутится, принудительно завершаем с ошибкой.
+        if (currentStatus?.loading) {
+          console.warn(`[Client Timeout] Supplier ${supplier} took too long.`);
+          dispatch(
+            setSupplierStatusError({
+              supplier,
+              error: 'Ответ от поставщика не получен вовремя.',
+            })
+          );
+        }
+        // Удаляем ссылку на таймер после его выполнения.
+        delete supplierTimeoutRefs.current[supplier];
+      }, CLIENT_SIDE_TIMEOUT_MS);
     },
-    [dispatch]
+    [dispatch, store]
   );
 
   const handleSupplierDataFetchSuccess = useCallback(
     ({ supplier, result }) => {
+      // При получении успешного ответа, очищаем таймер.
+      if (supplierTimeoutRefs.current[supplier]) {
+        clearTimeout(supplierTimeoutRefs.current[supplier]);
+        delete supplierTimeoutRefs.current[supplier];
+      }
+
       if (!supplier) {
         console.error(
           'Supplier is undefined in handleSupplierDataFetchSuccess'
         );
         return;
       }
-      const supplierKey = supplier;
 
       dispatch(
         setSupplierStatusSuccess({
-          supplier: supplierKey,
+          supplier: supplier,
           results: result,
         })
       );
@@ -109,9 +146,14 @@ const useSocketManager = (socket) => {
 
   const handleSupplierDataFetchError = useCallback(
     ({ supplier, error }) => {
+      // При получении ошибки, также очищаем таймер.
+      if (supplierTimeoutRefs.current[supplier]) {
+        clearTimeout(supplierTimeoutRefs.current[supplier]);
+        delete supplierTimeoutRefs.current[supplier];
+      }
+
       console.error(`Error fetching data for supplier: ${supplier}`, error);
-      const supplierKey = supplier;
-      dispatch(setSupplierStatusError({ supplier: supplierKey, error }));
+      dispatch(setSupplierStatusError({ supplier, error }));
     },
     [dispatch]
   );
@@ -122,7 +164,6 @@ const useSocketManager = (socket) => {
     }
 
     socket.on(SOCKET_EVENTS.CONNECT, handleSocketConnect);
-
     socket.on(
       SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
       handleBrandClarificationResults
@@ -144,10 +185,9 @@ const useSocketManager = (socket) => {
       handleSupplierDataFetchError
     );
 
-    // Очистка подписок при размонтировании
+    // Функция очистки при размонтировании компонента.
     return () => {
       socket.off(SOCKET_EVENTS.CONNECT, handleSocketConnect);
-
       socket.off(
         SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
         handleBrandClarificationResults
@@ -168,12 +208,15 @@ const useSocketManager = (socket) => {
         SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR,
         handleSupplierDataFetchError
       );
+
+      // Очищаем ВСЕ активные таймеры, чтобы избежать утечек памяти.
+      Object.values(supplierTimeoutRefs.current).forEach(clearTimeout);
     };
   }, [
     socket,
     handleSocketConnect,
-    handleAutocompleteResults,
-    handleAutocompleteError,
+    handleAutocompleteResults, // Эта зависимость была пропущена, но лучше ее включить для полноты
+    handleAutocompleteError, // Эта зависимость была пропущена, но лучше ее включить для полноты
     handleBrandClarificationResults,
     handleBrandClarificationError,
     handleSupplierDataFetchStarted,
