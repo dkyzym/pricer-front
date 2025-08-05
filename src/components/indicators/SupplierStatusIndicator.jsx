@@ -14,12 +14,14 @@ const supplierNameMap = {
   profit: 'ПР',
   turboCars: 'ТК',
   autosputnik: 'АС',
+  autosputnik_bn: 'АС-б/н',
   autoImpulse: 'АИ',
   ug: 'ЮГ',
-  ug_f: 'ЮГ-Б',
+  ug_f: 'ЮГ-б',
   patriot: ' Патриот',
   armtek: 'АР',
   npn: 'НПН',
+  ug_bn: 'ЮГ-б/н',
 };
 
 export const SupplierStatusIndicator = ({

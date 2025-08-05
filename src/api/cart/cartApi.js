@@ -26,6 +26,8 @@ export const addToCart = async (item) => {
     }
   } else if (
     supplier === 'ug' ||
+    supplier === 'ug_f' ||
+    supplier === 'ug_bn' ||
     supplier === 'patriot' ||
     supplier === 'npn'
   ) {
