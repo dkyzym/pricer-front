@@ -1,5 +1,5 @@
 import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
-import { SupplierStatusIndicator } from '@components/indicators/SupplierStatusIndicator';
+import { SupplierSelectMenu } from '@components/indicators/SupplierSelectMenu';
 import { SocketContext } from '@context/SocketContext';
 import useAutocomplete from '@hooks/useAutocomplete';
 import useFilteredResults from '@hooks/useFilteredResults';
@@ -115,17 +115,11 @@ export const SearchComponent = () => {
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', gap: 3 }}>
-            {Object.entries(supplierStatus).map(([supplierKey, status]) => (
-              <SupplierStatusIndicator
-                key={supplierKey}
-                supplierKey={supplierKey}
-                status={status}
-                checked={selectedSuppliers.includes(supplierKey)}
-                onChange={handleSupplierChange}
-              />
-            ))}
-          </Box>
+          <SupplierSelectMenu
+            supplierStatus={supplierStatus}
+            selectedSuppliers={selectedSuppliers}
+            onSupplierChange={handleSupplierChange}
+          />
         </Grid>
         <Grid item xs={12}>
           {<MemoizedResultsTable allResults={filteredResults} />}
