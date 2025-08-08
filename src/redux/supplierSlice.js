@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   supplierStatus: {
     profit: { loading: false, results: [], error: null },
-    turboCars: { loading: false, results: [], error: null },
+    // turboCars: { loading: false, results: [], error: null },
     ug: { loading: false, results: [], error: null },
     ug_f: { loading: false, results: [], error: null },
     ug_bn: { loading: false, results: [], error: null },

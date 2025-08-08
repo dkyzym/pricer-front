@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 // Карта имен поставщиков, которую можно вынести в отдельный файл констант
 const supplierNameMap = {
   profit: 'ПР',
-  turboCars: 'ТК',
+  // turboCars: 'ТК',
   autosputnik: 'АС',
   autosputnik_bn: 'АС-б/н',
   autoImpulse: 'АИ',

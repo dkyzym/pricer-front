@@ -2,6 +2,7 @@ import { getColumns } from '@components/Columns/Columns';
 import { useCalculatedValues } from '@hooks/useCalculateValues';
 import { useEnrichedData } from '@hooks/useEnrichedData';
 import { useFilteredData } from '@hooks/useFilteredData';
+import { usePriceComparison } from '@hooks/usePriceComparison';
 import { memo, useMemo, useState } from 'react';
 import { DataGridWrapper } from '../DataGridWrapper/DataGridWrapper';
 import { FilterControls } from '../FilterControls/FilterControls';
@@ -28,7 +29,10 @@ const ResultsTable = ({ allResults }) => {
     minPrice,
     minDeliveryDate,
   });
-  // Определение столбцов с условным форматированием и иконками
+
+  // 2. Применяем хук сравнения цен
+  const comparedData = usePriceComparison(enrichedData);
+
   const columns = useMemo(
     () =>
       getColumns({ minPrice, minDeadline, maxProbability, minDeliveryDate }),
@@ -47,9 +51,9 @@ const ResultsTable = ({ allResults }) => {
         minQuantity={minQuantity}
         setMinQuantity={setMinQuantity}
       />
-
       <DataGridWrapper
-        rows={enrichedData}
+        // 3. Передаем в таблицу данные с информацией о сравнении цен
+        rows={comparedData}
         columns={columns}
         sortModel={sortModel}
         setSortModel={setSortModel}
@@ -59,5 +63,4 @@ const ResultsTable = ({ allResults }) => {
 };
 
 export const MemoizedResultsTable = memo(ResultsTable);
-
 MemoizedResultsTable.displayName = 'MemoizedResultsTable';

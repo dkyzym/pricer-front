@@ -2,10 +2,16 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StarIcon from '@mui/icons-material/Star';
-import { Box, Tooltip, Typography } from '@mui/material';
+import { Box, Chip, Tooltip, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
 import { AddToCartCell } from './AddToCartCell';
 import { CopiableCell } from './CopiableCell';
+
+const getChipColor = (difference) => {
+  if (difference <= 2) return 'success';
+  if (difference > 2 && difference <= 3) return 'warning';
+  return 'error';
+};
 
 export const getColumns = ({
   minPrice,
@@ -86,7 +92,7 @@ export const getColumns = ({
   {
     field: 'availability',
     headerName: 'Наличие',
-    width: 60,
+    width: 55,
     filterable: false,
     disableColumnMenu: true,
     sortable: false,
@@ -149,7 +155,7 @@ export const getColumns = ({
   {
     field: 'deliveryDate',
     headerName: 'Доставка',
-    width: 110,
+    width: 100,
     disableColumnMenu: true,
     type: 'string',
     cellClassName: (params) => {
@@ -183,9 +189,46 @@ export const getColumns = ({
   {
     field: 'price',
     headerName: 'Цена',
-    width: 100,
-    disableColumnMenu: true,
+    width: 110,
+    sortable: true,
+    type: 'number',
     cellClassName: (params) => (params.value === minPrice ? 'bestPrice' : ''),
+    renderCell: (params) => {
+      const price = params.value;
+      const difference = params.row.priceDifferencePercent;
+      let diffLabel = '';
+      if (typeof difference === 'number') {
+        diffLabel = `${difference > 0 ? '+' : ''}${difference.toFixed(0)}%`;
+      }
+      return (
+        // Этот Box обеспечивает вертикальное центрирование
+        <Box display="flex" alignItems="center" height="100%" width="100%">
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Typography variant="body2">{price}</Typography>
+            {typeof difference === 'number' && (
+              <Tooltip
+                title={`Разница с самой дешевой позицией в группе`}
+                arrow
+              >
+                <Chip
+                  label={diffLabel}
+                  size="small"
+                  // Применяем новую логику цвета
+                  color={getChipColor(difference)}
+                  variant="outlined"
+                  sx={{ ml: 1, height: '18px', fontSize: '0.7rem' }}
+                />
+              </Tooltip>
+            )}
+          </Box>
+        </Box>
+      );
+    },
   },
   {
     field: 'addToCart',
