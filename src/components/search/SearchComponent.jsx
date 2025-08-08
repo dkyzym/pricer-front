@@ -4,6 +4,7 @@ import { SocketContext } from '@context/SocketContext';
 import useAutocomplete from '@hooks/useAutocomplete';
 import useFilteredResults from '@hooks/useFilteredResults';
 import useSearchHandlers from '@hooks/useSearchHandlers';
+import { useSearchHistory } from '@hooks/useSearchHistory';
 import useSocketManager from '@hooks/useSocketManager';
 import useSupplierSelection from '@hooks/useSupplierSelection';
 import {
@@ -36,6 +37,8 @@ export const SearchComponent = () => {
     handleClearInput,
   } = useAutocomplete({ inputRef });
 
+  const { history, addToHistory, clearHistory } = useSearchHistory();
+
   const brandClarifications = useSelector(
     (state) => state.brandClarification.brands
   );
@@ -52,12 +55,61 @@ export const SearchComponent = () => {
     selectedSuppliers,
   });
 
+  const handleOptionSelectionWithHistory = (event, newValue) => {
+    if (!newValue) {
+      return;
+    }
+
+    if (newValue.isClearCommand) {
+      clearHistory();
+      handleInputChange(event, '', 'clear');
+      return;
+    }
+
+    if (typeof newValue === 'object' && newValue !== null) {
+      const itemToSave = { ...newValue };
+
+      if (!itemToSave.key) {
+        itemToSave.key = `${itemToSave.brand}-${itemToSave.number}-${itemToSave.descr}`;
+        console.warn(
+          'У опции не было ключа. Был сгенерирован новый:',
+          itemToSave.key
+        );
+      }
+
+      addToHistory(itemToSave);
+    }
+
+    handleOptionSelect(event, newValue);
+  };
+
   const combinedOptions = useMemo(() => {
     if (isClarifying && brandClarifications?.length) {
       return brandClarifications;
     }
     return autocompleteResults;
   }, [isClarifying, brandClarifications, autocompleteResults]);
+
+  const displayOptions = useMemo(() => {
+    if (inputValue.trim() !== '') {
+      const groupName = isClarifying ? 'Уточнение бренда' : 'Результаты поиска';
+      return combinedOptions.map((option) => ({ ...option, group: groupName }));
+    }
+    if (history.length > 0) {
+      const historyWithOptions = history.map((option) => ({
+        ...option,
+        group: 'История поиска',
+      }));
+      historyWithOptions.push({
+        brand: 'Очистить историю',
+        key: 'clear-history-command',
+        isClearCommand: true,
+        group: 'История поиска',
+      });
+      return historyWithOptions;
+    }
+    return [];
+  }, [inputValue, combinedOptions, history, isClarifying]);
 
   useEffect(() => {
     if (isClarifying && brandClarifications.length > 0) {
@@ -75,6 +127,14 @@ export const SearchComponent = () => {
   const uniqueResults = useMemo(() => dedupeResults(allResults), [allResults]);
   const filteredResults = useFilteredResults(uniqueResults, selectedSuppliers);
 
+  const getOptionLabelText = (option) => {
+    if (typeof option === 'string') return option;
+    if (!option || typeof option !== 'object') return '';
+    // Для команды очистки возвращаем ее название
+    if (option.isClearCommand) return option.brand;
+    return `${option.brand} - ${option.number} - ${option.descr}`;
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
       <Grid container spacing={2}>
@@ -83,22 +143,40 @@ export const SearchComponent = () => {
             <Autocomplete
               sx={{ flexGrow: 1 }}
               freeSolo
+              openOnFocus
               inputValue={inputValue}
-              options={combinedOptions}
+              options={displayOptions}
               filterOptions={(x) => x}
-              getOptionLabel={(option) =>
-                `${option.brand} - ${option.number} - ${option.descr}`
-              }
+              groupBy={(option) => option.group}
+              getOptionLabel={getOptionLabelText}
               onInputChange={handleInputChange}
               getOptionKey={(option) => option.key}
-              onChange={handleOptionSelect}
+              onChange={handleOptionSelectionWithHistory}
+              renderOption={(props, option) => (
+                <Box
+                  component="li"
+                  {...props}
+                  key={option.key}
+                  sx={
+                    option.isClearCommand
+                      ? {
+                          color: 'error.main',
+                          justifyContent: 'center',
+                          fontWeight: 'medium',
+                        }
+                      : {}
+                  }
+                >
+                  {getOptionLabelText(option)}
+                </Box>
+              )}
               renderInput={(params) => (
                 <AutocompleteInput
                   params={params}
                   inputRef={inputRef}
                   isAutocompleteLoading={isAutocompleteLoading}
                   inputValue={inputValue}
-                  hasOptions={Boolean(combinedOptions.length)}
+                  hasOptions={Boolean(displayOptions.length)}
                   handleClearInput={handleClearInput}
                 />
               )}
