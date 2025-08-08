@@ -14,21 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-
-// Карта имен поставщиков, которую можно вынести в отдельный файл констант
-const supplierNameMap = {
-  profit: 'ПР',
-  // turboCars: 'ТК',
-  autosputnik: 'АС',
-  autosputnik_bn: 'АС-б/н',
-  autoImpulse: 'АИ',
-  ug: 'ЮГ',
-  ug_f: 'ЮГ-б',
-  patriot: ' ПТ',
-  armtek: 'АР',
-  npn: 'НПН',
-  ug_bn: 'ЮГ-б/н',
-};
+import { supplierNameMap } from 'src/constants/constants';
 
 export const SupplierSelectMenu = ({
   supplierStatus,
@@ -37,7 +23,6 @@ export const SupplierSelectMenu = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  // ИЗМЕНЕНИЕ: Новый стейт, чтобы отследить, что загрузка вообще была
   const [wasLoading, setWasLoading] = useState(false);
 
   // --- ОБНОВЛЕННАЯ ЛОГИКА ИНДИКАЦИИ ---

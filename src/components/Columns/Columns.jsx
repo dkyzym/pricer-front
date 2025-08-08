@@ -4,12 +4,13 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import StarIcon from '@mui/icons-material/Star';
 import { Box, Chip, Tooltip, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
+import { greenSuppliers, supplierNameMap } from 'src/constants/constants';
 import { AddToCartCell } from './AddToCartCell';
 import { CopiableCell } from './CopiableCell';
 
 const getChipColor = (difference) => {
-  if (difference <= 2) return 'success';
-  if (difference > 2 && difference <= 3) return 'warning';
+  if (difference <= 2.3) return 'success';
+  if (difference > 2.3 && difference <= 3) return 'warning';
   return 'error';
 };
 
@@ -198,7 +199,7 @@ export const getColumns = ({
       const difference = params.row.priceDifferencePercent;
       let diffLabel = '';
       if (typeof difference === 'number') {
-        diffLabel = `${difference > 0 ? '+' : ''}${difference.toFixed(0)}%`;
+        diffLabel = `${difference > 0 ? '+' : ''}${difference.toFixed(1)}%`;
       }
       return (
         // Этот Box обеспечивает вертикальное центрирование
@@ -211,14 +212,10 @@ export const getColumns = ({
           >
             <Typography variant="body2">{price}</Typography>
             {typeof difference === 'number' && (
-              <Tooltip
-                title={`Разница с самой дешевой позицией в группе`}
-                arrow
-              >
+              <Tooltip title={`Насколько дороже безнал`} arrow>
                 <Chip
                   label={diffLabel}
                   size="small"
-                  // Применяем новую логику цвета
                   color={getChipColor(difference)}
                   variant="outlined"
                   sx={{ ml: 1, height: '18px', fontSize: '0.7rem' }}
@@ -242,9 +239,33 @@ export const getColumns = ({
   {
     field: 'supplier',
     headerName: 'Поставщик',
-    width: 100,
+    width: 120, // Немного увеличим ширину
     sortable: false,
     filterable: false,
     disableColumnMenu: true,
+    renderCell: (params) => {
+      const supplierCode = params.value;
+      const supplierName = supplierNameMap[supplierCode] || supplierCode;
+      const textColor = greenSuppliers.has(supplierCode)
+        ? 'success.main'
+        : 'text.primary';
+
+      return (
+        <Box display="flex" alignItems="center" height="100%" width="100%">
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Tooltip title={supplierName} arrow>
+              <Typography variant="body2" noWrap sx={{ color: textColor }}>
+                {supplierName}
+              </Typography>
+            </Tooltip>
+          </Box>
+        </Box>
+      );
+    },
   },
 ];

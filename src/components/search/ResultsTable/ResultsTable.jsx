@@ -52,7 +52,6 @@ const ResultsTable = ({ allResults }) => {
         setMinQuantity={setMinQuantity}
       />
       <DataGridWrapper
-        // 3. Передаем в таблицу данные с информацией о сравнении цен
         rows={comparedData}
         columns={columns}
         sortModel={sortModel}
