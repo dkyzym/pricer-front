@@ -10,14 +10,16 @@ export const supplierNameMap = {
   armtek: 'Армтек',
   npn: 'НПН',
   ug_bn: 'ЮГ-б/н',
+  mikano: 'АВТОМОДУЛЬ',
 };
 
 export const greenSuppliers = new Set([
   'profit',
   'autosputnik_bn',
-  'autoimpulse',
+  'autoImpulse',
   'ug_bn',
   'patriot',
   'armtek',
   'npn',
+  'mikano',
 ]);

@@ -101,7 +101,7 @@ export const getColumns = ({
   {
     field: 'allow_return',
     headerName: '',
-    width: 50,
+    width: 30,
     disableColumnMenu: true,
     sortable: false,
     filterable: false,
@@ -190,7 +190,7 @@ export const getColumns = ({
   {
     field: 'price',
     headerName: 'Цена',
-    width: 110,
+    width: 120,
     sortable: true,
     type: 'number',
     cellClassName: (params) => (params.value === minPrice ? 'bestPrice' : ''),
@@ -210,7 +210,7 @@ export const getColumns = ({
             justifyContent="space-between"
             width="100%"
           >
-            <Typography variant="body2">{price}</Typography>
+            <Typography variant="body1">{price}</Typography>
             {typeof difference === 'number' && (
               <Tooltip title={`Насколько дороже безнал`} arrow>
                 <Chip
@@ -218,7 +218,7 @@ export const getColumns = ({
                   size="small"
                   color={getChipColor(difference)}
                   variant="outlined"
-                  sx={{ ml: 1, height: '18px', fontSize: '0.7rem' }}
+                  sx={{ ml: 0.7, height: '18px', fontSize: '0.9rem' }}
                 />
               </Tooltip>
             )}

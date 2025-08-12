@@ -92,7 +92,7 @@ export const AddToCartCell = (props) => {
   const disabledAddToCartSuppliers = [
     'autosputnik',
     'autosputnik_bn',
-    // 'patriot',
+    'mikano',
     'turboCars',
     'autoImpulse',
     'armtek',

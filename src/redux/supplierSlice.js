@@ -13,6 +13,7 @@ const initialState = {
     autoImpulse: { loading: false, results: [], error: null },
     armtek: { loading: false, results: [], error: null },
     npn: { loading: false, results: [], error: null },
+    mikano: { loading: false, results: [], error: null },
   },
 };
 
