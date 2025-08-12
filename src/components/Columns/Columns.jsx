@@ -42,7 +42,7 @@ export const getColumns = ({
   {
     field: 'description',
     headerName: 'Описание',
-    width: 220,
+    width: 215,
     disableColumnMenu: true,
     sortable: false,
     filterable: false,
