@@ -72,7 +72,7 @@ export const AddToCartCell = (props) => {
     if (row.supplier === 'turboCars') {
       setPaymentDialogOpen(true);
       // Сохранить count в каком-то стейте, чтобы потом передать в handleAddToCart.
-      // Можно просто воспользоваться колбэком onSelect
+      // Можно просто воспользоваться колбэком onSelect //
       // В данном случае сделаем так: передадим count через setState
       setTemporaryCount(count);
     } else {
