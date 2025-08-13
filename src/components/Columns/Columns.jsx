@@ -195,7 +195,7 @@ export const getColumns = ({
     type: 'number',
     cellClassName: (params) => (params.value === minPrice ? 'bestPrice' : ''),
     renderCell: (params) => {
-      const price = params.value;
+      const price = Math.round(params.value);
       const difference = params.row.priceDifferencePercent;
       let diffLabel = '';
       if (typeof difference === 'number') {
