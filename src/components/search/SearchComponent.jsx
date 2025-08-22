@@ -143,7 +143,7 @@ export const SearchComponent = () => {
             <Autocomplete
               sx={{ flexGrow: 1 }}
               freeSolo
-              openOnFocus
+              // openOnFocus
               inputValue={inputValue}
               options={displayOptions}
               filterOptions={(x) => x}
