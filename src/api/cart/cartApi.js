@@ -29,7 +29,8 @@ export const addToCart = async (item) => {
     supplier === 'ug_f' ||
     supplier === 'ug_bn' ||
     supplier === 'patriot' ||
-    supplier === 'npn'
+    supplier === 'npn' ||
+    supplier === 'avtodinamika'
   ) {
     // Для остальных поставщиков унифицированный запрос
     // Предположим у них единый эндпоинт /api/cart/add

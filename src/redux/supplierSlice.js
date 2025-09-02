@@ -14,6 +14,7 @@ const initialState = {
     armtek: { loading: false, results: [], error: null },
     npn: { loading: false, results: [], error: null },
     mikano: { loading: false, results: [], error: null },
+    avtodinamika: { loading: false, results: [], error: null },
   },
 };
 

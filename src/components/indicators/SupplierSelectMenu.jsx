@@ -1,4 +1,4 @@
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // <-- ИМПОРТ ИКОНКИ
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import {
