@@ -6,7 +6,7 @@ import { Box, Chip, Tooltip, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
 import { greenSuppliers, supplierNameMap } from 'src/constants/constants';
 import { AddToCartCell } from './AddToCartCell';
-import { CopiableCell } from './CopiableCell';
+import { CopiableCell, CopiableContent } from './CopiableData';
 
 const getChipColor = (difference) => {
   if (difference <= 2.3) return 'success';
@@ -66,18 +66,20 @@ export const getColumns = ({
             <SpeedIcon style={{ color: 'blue', marginRight: '5px' }} />
           )}
         <Tooltip title={params.value || ''} arrow>
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-              flexGrow: 1,
-            }}
-          >
-            {params.value}
-          </Typography>
+          <CopiableContent value={params.value}>
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                flexGrow: 1,
+              }}
+            >
+              {params.value}
+            </Typography>
+          </CopiableContent>
         </Tooltip>
       </Box>
     ),
