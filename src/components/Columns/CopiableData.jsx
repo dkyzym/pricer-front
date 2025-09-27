@@ -1,3 +1,4 @@
+import { Tooltip } from '@mui/material';
 import { useState } from 'react';
 
 export const CopiableCell = ({ value }) => {
@@ -16,13 +17,13 @@ export const CopiableCell = ({ value }) => {
   };
 
   return (
-    <span
+    <Tooltip
       onClick={handleClick}
       style={{ cursor: 'pointer', textDecoration: 'underline' }}
       title="Кликните, чтобы скопировать"
     >
       {copied ? 'Скопировано' : value}
-    </span>
+    </Tooltip>
   );
 };
 
@@ -42,12 +43,12 @@ export const CopiableContent = ({ value, children }) => {
   };
 
   return (
-    <span
+    <Tooltip
       onClick={handleClick}
       style={{ cursor: 'pointer' }}
-      title={copied ? 'Скопировано' : 'Кликните, чтобы скопировать'}
+      title={copied ? 'Скопировано' : value}
     >
       {copied ? 'Скопировано' : children}
-    </span>
+    </Tooltip>
   );
 };
