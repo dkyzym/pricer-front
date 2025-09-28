@@ -1,12 +1,15 @@
 import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
 import { SupplierSelectMenu } from '@components/indicators/SupplierSelectMenu';
 import { SocketContext } from '@context/SocketContext';
-import useAutocomplete from '@hooks/useAutocomplete';
-import useFilteredResults from '@hooks/useFilteredResults';
-import useSearchHandlers from '@hooks/useSearchHandlers';
+import { useAutocomplete } from '@hooks/useAutocomplete';
+import { useAutoFocusClarification } from '@hooks/useAutoFocusClarification';
+import { useFilteredResults } from '@hooks/useFilteredResults';
+import { useNormalizedOptions } from '@hooks/useNormalizedOptions';
+import { useOptionSelection } from '@hooks/useOptionSelection';
+import { useSearchHandlers } from '@hooks/useSearchHandlers';
 import { useSearchHistory } from '@hooks/useSearchHistory';
-import useSocketManager from '@hooks/useSocketManager';
-import useSupplierSelection from '@hooks/useSupplierSelection';
+import { useSocketManager } from '@hooks/useSocketManager';
+import { useSupplierSelection } from '@hooks/useSupplierSelection';
 import {
   Autocomplete,
   Box,
@@ -16,19 +19,25 @@ import {
   Grid,
 } from '@mui/material';
 import { dedupeResults } from '@utils/dedupeResults';
-import { simulateClick } from '@utils/simulateClick';
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { useContext, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
   const socket = useContext(SocketContext);
-
   useSocketManager(socket);
 
   const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
+  const brandClarifications = useSelector(
+    (state) => state.brandClarification.brands
+  );
+  const isClarifying = useSelector(
+    (state) => state.brandClarification.isClarifying
+  );
+  const isLoading = useSelector((state) => state.brandClarification.isLoading);
 
   const inputRef = useRef(null);
+
   const {
     inputValue,
     handleInputChange,
@@ -38,84 +47,24 @@ export const SearchComponent = () => {
   } = useAutocomplete({ inputRef });
 
   const { history, addToHistory, clearHistory } = useSearchHistory();
-
-  const brandClarifications = useSelector(
-    (state) => state.brandClarification.brands
-  );
-  const isClarifying = useSelector(
-    (state) => state.brandClarification.isClarifying
-  );
-
-  const isLoading = useSelector((state) => state.brandClarification.isLoading);
-
   const { selectedSuppliers, handleSupplierChange } = useSupplierSelection();
-
   const { handleOptionSelect, handleBrandClarification } = useSearchHandlers({
     socket,
     selectedSuppliers,
   });
 
-  // Универсальная функция для генерации уникальных ключей
-  const generateUniqueKey = useCallback((option, index = 0) => {
-    if (option.isClearCommand) {
-      return 'clear-history-command';
-    }
+  // вынесенные хуки
+  const { normalizeOptionsWithKeys, getOptionLabelText, getOptionKey } =
+    useNormalizedOptions();
+  const handleOptionSelectionWithHistory = useOptionSelection({
+    clearHistory,
+    handleInputChange,
+    addToHistory,
+    handleOptionSelect,
+  });
+  useAutoFocusClarification(isClarifying, brandClarifications, inputRef);
 
-    // Если есть уникальный идентификатор, используем его
-    if (option.id) {
-      return `option-${option.id}`;
-    }
-
-    // Если есть готовый ключ, используем его
-    if (option.key) {
-      return option.key;
-    }
-
-    // Генерируем ключ на основе данных + индекс для уникальности
-    const keyParts = [
-      option.brand || '',
-      option.number || '',
-      option.descr || '',
-      index.toString(),
-    ].filter(Boolean);
-
-    return `generated-${keyParts.join('-')}`;
-  }, []);
-
-  // Нормализация опций с гарантированными ключами
-  const normalizeOptionsWithKeys = useCallback(
-    (options, groupName) => {
-      return options.map((option, index) => ({
-        ...option,
-        group: groupName,
-        key: generateUniqueKey(option, index),
-      }));
-    },
-    [generateUniqueKey]
-  );
-
-  const handleOptionSelectionWithHistory = useCallback(
-    (event, newValue) => {
-      if (!newValue) {
-        return;
-      }
-
-      if (newValue.isClearCommand) {
-        clearHistory();
-        handleInputChange(event, '', 'clear');
-        return;
-      }
-
-      if (typeof newValue === 'object' && newValue !== null) {
-        // Ключ уже должен быть назначен в normalizeOptionsWithKeys
-        addToHistory(newValue);
-      }
-
-      handleOptionSelect(event, newValue);
-    },
-    [clearHistory, handleInputChange, addToHistory, handleOptionSelect]
-  );
-
+  // выбор источника опций
   const combinedOptions = useMemo(() => {
     if (isClarifying && brandClarifications?.length) {
       return brandClarifications;
@@ -123,6 +72,7 @@ export const SearchComponent = () => {
     return autocompleteResults;
   }, [isClarifying, brandClarifications, autocompleteResults]);
 
+  // итоговые опции для отображения
   const displayOptions = useMemo(() => {
     if (inputValue.trim() !== '') {
       const groupName = isClarifying ? 'Уточнение бренда' : 'Результаты поиска';
@@ -134,16 +84,15 @@ export const SearchComponent = () => {
         history,
         'История поиска'
       );
-
-      // Добавляем команду очистки
-      const clearCommand = {
-        brand: 'Очистить историю',
-        key: 'clear-history-command',
-        isClearCommand: true,
-        group: 'История поиска',
-      };
-
-      return [...historyOptions, clearCommand];
+      return [
+        ...historyOptions,
+        {
+          brand: 'Очистить историю',
+          key: 'clear-history-command',
+          isClearCommand: true,
+          group: 'История поиска',
+        },
+      ];
     }
 
     return [];
@@ -155,34 +104,12 @@ export const SearchComponent = () => {
     normalizeOptionsWithKeys,
   ]);
 
-  useEffect(() => {
-    if (isClarifying && brandClarifications.length > 0) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-        simulateClick(inputRef.current);
-      }, 0);
-    }
-  }, [isClarifying, brandClarifications]);
-
+  // результаты таблицы
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results.data || []
   );
-
   const uniqueResults = useMemo(() => dedupeResults(allResults), [allResults]);
   const filteredResults = useFilteredResults(uniqueResults, selectedSuppliers);
-
-  const getOptionLabelText = useCallback((option) => {
-    if (typeof option === 'string') return option;
-    if (!option || typeof option !== 'object') return '';
-    // Для команды очистки возвращаем ее название
-    if (option.isClearCommand) return option.brand;
-    return `${option.brand} - ${option.number} - ${option.descr}`;
-  }, []);
-
-  // Упрощенная функция получения ключа (теперь ключ всегда есть)
-  const getOptionKey = useCallback((option) => {
-    return option.key;
-  }, []);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
@@ -192,7 +119,6 @@ export const SearchComponent = () => {
             <Autocomplete
               sx={{ flexGrow: 1 }}
               freeSolo
-              // openOnFocus
               inputValue={inputValue}
               options={displayOptions}
               filterOptions={(x) => x}
@@ -241,6 +167,7 @@ export const SearchComponent = () => {
             </Button>
           </Box>
         </Grid>
+
         <Grid item xs={12}>
           <SupplierSelectMenu
             supplierStatus={supplierStatus}
@@ -248,8 +175,9 @@ export const SearchComponent = () => {
             onSupplierChange={handleSupplierChange}
           />
         </Grid>
+
         <Grid item xs={12}>
-          {<MemoizedResultsTable allResults={filteredResults} />}
+          <MemoizedResultsTable allResults={filteredResults} />
         </Grid>
       </Grid>
     </Container>

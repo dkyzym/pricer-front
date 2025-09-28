@@ -1,7 +1,6 @@
 import { API_URL } from '@api/config';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
-// Импортируем useEffect для создания эффекта с очисткой
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -12,7 +11,7 @@ import {
 } from '../redux/autocompleteSlice';
 import { clearBrandClarifications } from '../redux/brandClarificationSlice';
 
-const useAutocomplete = ({ inputRef }) => {
+export const useAutocomplete = ({ inputRef }) => {
   const dispatch = useDispatch();
   const inputValue = useSelector((state) => state.autocomplete.inputValue);
   const autocompleteResults = useSelector(
@@ -46,8 +45,6 @@ const useAutocomplete = ({ inputRef }) => {
     [dispatch]
   );
 
-  // --- НАЧАЛО ИЗМЕНЕНИЙ ---
-  // Добавляем этот useEffect для очистки при размонтировании компонента
   useEffect(() => {
     // Эта функция будет вызвана, когда компонент, использующий хук, будет удален
     return () => {
@@ -61,7 +58,6 @@ const useAutocomplete = ({ inputRef }) => {
       dispatch(clearBrandClarifications());
     };
   }, [dispatch, debouncedFetchAutocomplete]); // Зависимости эффекта
-  // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
   const handleInputChange = (_event, newValue, reason) => {
     if (reason === 'input') {
@@ -102,5 +98,3 @@ const useAutocomplete = ({ inputRef }) => {
     handleClearInput,
   };
 };
-
-export default useAutocomplete;

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-const useSupplierSelection = () => {
+export const useSupplierSelection = () => {
   const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
 
   const supplierKeys = useMemo(
@@ -33,5 +33,3 @@ const useSupplierSelection = () => {
 
   return { selectedSuppliers, handleSupplierChange };
 };
-
-export default useSupplierSelection;

@@ -10,7 +10,7 @@ import {
 
 import { resetSupplierStatus } from '../redux/supplierSlice';
 
-const useSearchHandlers = ({ socket, selectedSuppliers }) => {
+export const useSearchHandlers = ({ socket, selectedSuppliers }) => {
   const dispatch = useDispatch();
 
   const handleBrandClarification = useCallback(
@@ -104,5 +104,3 @@ const useSearchHandlers = ({ socket, selectedSuppliers }) => {
     handleBrandSelect,
   };
 };
-
-export default useSearchHandlers;

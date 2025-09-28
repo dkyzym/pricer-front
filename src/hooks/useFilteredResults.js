@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 const normalizeSupplier = (supplier) => (supplier === 'ug_f' ? 'ug' : supplier);
 
-const useFilteredResults = (allResults, selectedSuppliers) =>
+export const useFilteredResults = (allResults, selectedSuppliers) =>
   useMemo(() => {
     const normalizedSuppliers = selectedSuppliers.map(normalizeSupplier);
 
@@ -10,5 +10,3 @@ const useFilteredResults = (allResults, selectedSuppliers) =>
       normalizedSuppliers.includes(normalizeSupplier(item.supplier))
     );
   }, [allResults, selectedSuppliers]);
-
-export default useFilteredResults;

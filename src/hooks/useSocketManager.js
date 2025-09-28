@@ -25,7 +25,7 @@ import {
 // Константа для таймаута в миллисекундах.
 const CLIENT_SIDE_TIMEOUT_MS = 25000; // 25 секунд
 
-const useSocketManager = (socket) => {
+export const useSocketManager = (socket) => {
   const dispatch = useDispatch();
   const store = useStore();
 
@@ -215,8 +215,8 @@ const useSocketManager = (socket) => {
   }, [
     socket,
     handleSocketConnect,
-    handleAutocompleteResults, // Эта зависимость была пропущена, но лучше ее включить для полноты
-    handleAutocompleteError, // Эта зависимость была пропущена, но лучше ее включить для полноты
+    handleAutocompleteResults,
+    handleAutocompleteError,
     handleBrandClarificationResults,
     handleBrandClarificationError,
     handleSupplierDataFetchStarted,
@@ -224,5 +224,3 @@ const useSocketManager = (socket) => {
     handleSupplierDataFetchError,
   ]);
 };
-
-export default useSocketManager;
