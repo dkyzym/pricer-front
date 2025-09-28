@@ -74,22 +74,5 @@ export const addToCart = async (item) => {
         ? 'Товар добавлен в корзину'
         : 'Ошибка добавления в корзину',
     };
-  } else if (supplier === 'turboCars') {
-    const url = '/api/cart/add';
-
-    const data = {
-      supplier,
-      QTY: quantity,
-      StockID: item.turboCars.stock_id,
-      ZakazCode: item.turboCars.zakazCode,
-      nal: item.turboCars.nal,
-    };
-    console.log(data);
-    const response = await axiosInstance.post(url, data);
-    console.log(response);
-    return {
-      success: response.data.success,
-      message: response.data.message,
-    };
-  }
+  } 
 };

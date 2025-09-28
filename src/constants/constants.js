@@ -1,6 +1,5 @@
 export const supplierNameMap = {
   profit: 'Профит',
-  // turboCars: 'ТК',
   autosputnik: 'Автоспутник',
   autosputnik_bn: 'Автоспутн.-б/н',
   autoImpulse: 'Автоимпульс',
