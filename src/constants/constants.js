@@ -11,7 +11,7 @@ export const supplierNameMap = {
   ug_bn: 'ЮГ-б/н',
   mikano: 'АВТОМОДУЛЬ',
   avtodinamika: 'Автодинамика',
-  avtoPartner: 'Автопартнер',
+  avtoPartner: 'АвтоПартнер',
 };
 
 export const greenSuppliers = new Set([
