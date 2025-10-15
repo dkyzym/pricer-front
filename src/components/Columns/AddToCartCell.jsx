@@ -59,6 +59,7 @@ export const AddToCartCell = (props) => {
     'mikano',
     'autoImpulse',
     'armtek',
+    'avtoPartner'
   ].includes(row.supplier);
 
   return (

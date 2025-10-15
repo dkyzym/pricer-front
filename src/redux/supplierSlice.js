@@ -14,6 +14,7 @@ const initialState = {
     npn: { loading: false, results: [], error: null },
     mikano: { loading: false, results: [], error: null },
     avtodinamika: { loading: false, results: [], error: null },
+    avtoPartner: { loading: false, results: [], error: null },
   },
 };
 
