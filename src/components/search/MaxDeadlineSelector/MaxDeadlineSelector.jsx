@@ -39,7 +39,7 @@ export const MaxDeadlineSelector = ({ value, onChange }) => {
 
   return (
     <Autocomplete
-      sx={{ width: 150 }}
+      sx={{ width: 180 }}
       freeSolo
       options={options}
       inputValue={inputValue}
@@ -47,8 +47,9 @@ export const MaxDeadlineSelector = ({ value, onChange }) => {
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Макс. (дни)"
+          label="Макс. дн."
           variant="outlined"
+          size="small"
           type="number"
           inputProps={{
             ...params.inputProps,
@@ -56,6 +57,7 @@ export const MaxDeadlineSelector = ({ value, onChange }) => {
             step: 1,
           }}
           sx={{
+            // Стили для скрытия стрелок удалены, так как они теперь глобальные
             ...(inputValue !== '' && {
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -69,3 +71,4 @@ export const MaxDeadlineSelector = ({ value, onChange }) => {
     />
   );
 };
+

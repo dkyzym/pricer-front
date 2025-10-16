@@ -25,8 +25,6 @@ export const SupplierSelectMenu = ({
   const open = Boolean(anchorEl);
   const [wasLoading, setWasLoading] = useState(false);
 
-  // --- ОБНОВЛЕННАЯ ЛОГИКА ИНДИКАЦИИ ---
-
   const isAnyLoading = Object.values(supplierStatus).some(
     (status) => status.loading
   );
@@ -35,17 +33,13 @@ export const SupplierSelectMenu = ({
     .map(([key]) => supplierNameMap[key] || key);
   const hasErrors = suppliersWithErrors.length > 0;
 
-  // ИЗМЕНЕНИЕ: Эффект для отслеживания состояния загрузки
   useEffect(() => {
     if (isAnyLoading) {
       setWasLoading(true);
     }
   }, [isAnyLoading]);
 
-  // ИЗМЕНЕНИЕ: Условие для показа иконки успеха
   const showSuccessIcon = wasLoading && !isAnyLoading && !hasErrors;
-
-  // --- КОНЕЦ ОБНОВЛЕННОЙ ЛОГИКИ ---
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -114,7 +108,6 @@ export const SupplierSelectMenu = ({
                 ) : hasErrors ? (
                   <ErrorOutlineIcon color="error" />
                 ) : showSuccessIcon ? (
-                  // ИЗМЕНЕНИЕ: Показываем иконку успеха
                   <CheckCircleIcon color="success" />
                 ) : null}
               </Box>

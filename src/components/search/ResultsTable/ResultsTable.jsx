@@ -1,36 +1,23 @@
 import { getColumns } from '@components/Columns/Columns';
 import { useCalculatedValues } from '@hooks/useCalculateValues';
 import { useEnrichedData } from '@hooks/useEnrichedData';
-import { useFilteredData } from '@hooks/useFilteredData';
 import { usePriceComparison } from '@hooks/usePriceComparison';
 import { memo, useMemo, useState } from 'react';
 import { DataGridWrapper } from '../DataGridWrapper/DataGridWrapper';
-import { FilterControls } from '../FilterControls/FilterControls';
 
-const ResultsTable = ({ allResults }) => {
-  const [maxDeadline, setMaxDeadline] = useState('');
-  const [maxDeliveryDate, setMaxDeliveryDate] = useState(null);
-  const [maxPrice, setMaxPrice] = useState('');
+
+const ResultsTable = ({ data }) => {
+
   const [sortModel, setSortModel] = useState([{ field: 'price', sort: 'asc' }]);
-  const [minQuantity, setMinQuantity] = useState('');
-
-  const filteredData = useFilteredData(
-    allResults,
-    maxDeadline,
-    maxDeliveryDate,
-    maxPrice,
-    minQuantity
-  );
 
   const { minPrice, minDeadline, maxProbability, minDeliveryDate } =
-    useCalculatedValues(filteredData);
+    useCalculatedValues(data);
 
-  const enrichedData = useEnrichedData(filteredData, {
+  const enrichedData = useEnrichedData(data, {
     minPrice,
     minDeliveryDate,
   });
 
-  // 2. Применяем хук сравнения цен
   const comparedData = usePriceComparison(enrichedData);
 
   const columns = useMemo(
@@ -41,16 +28,6 @@ const ResultsTable = ({ allResults }) => {
 
   return (
     <div>
-      <FilterControls
-        maxDeadline={maxDeadline}
-        setMaxDeadline={setMaxDeadline}
-        maxDeliveryDate={maxDeliveryDate}
-        setMaxDeliveryDate={setMaxDeliveryDate}
-        maxPrice={maxPrice}
-        setMaxPrice={setMaxPrice}
-        minQuantity={minQuantity}
-        setMinQuantity={setMinQuantity}
-      />
       <DataGridWrapper
         rows={comparedData}
         columns={columns}

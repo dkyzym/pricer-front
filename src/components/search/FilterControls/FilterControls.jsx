@@ -15,13 +15,22 @@ export const FilterControls = ({
 }) => {
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="ru">
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          maxWidth: '60%',
+        }}
+      >
         <MaxDeadlineSelector value={maxDeadline} onChange={setMaxDeadline} />
         <DatePicker
-          label="Максимальная дата"
+          label="Макс. дата"
           value={maxDeliveryDate}
           onChange={setMaxDeliveryDate}
-          slotProps={{ field: { clearable: true } }}
+          slotProps={{
+            field: { clearable: true, size: 'small' },
+          }}
           disablePast
           sx={{
             ...(maxDeliveryDate && {
@@ -34,7 +43,7 @@ export const FilterControls = ({
           }}
         />
         <TextField
-          label="Максимальная цена"
+          label="Макс. цена"
           variant="outlined"
           value={maxPrice}
           onChange={(e) => {
@@ -45,7 +54,9 @@ export const FilterControls = ({
           }}
           type="number"
           inputProps={{ min: 0 }}
+          size="small"
           sx={{
+            // Стили для скрытия стрелок удалены, так как они теперь глобальные
             ...(maxPrice !== '' && {
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -56,7 +67,7 @@ export const FilterControls = ({
           }}
         />
         <TextField
-          label="Минимальное количество"
+          label="Мин.к-во"
           variant="outlined"
           value={minQuantity}
           onChange={(e) => {
@@ -67,6 +78,7 @@ export const FilterControls = ({
           }}
           type="number"
           inputProps={{ min: 0 }}
+          size="small"
           sx={{
             ...(minQuantity !== '' && {
               '& .MuiOutlinedInput-root': {
@@ -81,3 +93,4 @@ export const FilterControls = ({
     </LocalizationProvider>
   );
 };
+
