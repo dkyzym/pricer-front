@@ -39,7 +39,7 @@ export const Header = () => {
   };
 
   useEffect(() => {
-    const collapseThreshold = 600; // Высота окна, при которой скрываем хедер
+    const collapseThreshold = 500; // Высота окна, при которой скрываем хедер
 
     const handleResize = () => {
       setVisible(window.innerHeight >= collapseThreshold);
