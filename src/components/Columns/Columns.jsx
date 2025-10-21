@@ -29,6 +29,9 @@ export const getColumns = ({
     filterable: false,
     cellClassName: (params) =>
       params.row.needToCheckBrand ? 'highlightBrand' : '',
+    renderCell: (params) => {
+      return <CopiableCell value={params.value} />;
+    },
   },
   {
     field: 'article',
