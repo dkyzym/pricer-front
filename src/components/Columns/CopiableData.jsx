@@ -3,7 +3,6 @@ import { Tooltip } from '@mui/material';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
 export const CopiableCell = ({ value }) => {
-  console.log(value);
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef(null);
 

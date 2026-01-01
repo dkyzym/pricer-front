@@ -22,17 +22,32 @@ import { DateTime } from 'luxon';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-/**
- * Компонент для просмотра "исторических" логов по дате, с фильтрами по уровню, пользователю и article.
- *
- * - По умолчанию ставится текущая дата (YYYY-MM-DD).
- * - В запросе /api/logs?date=YYYY-MM-DD отправляется только параметр date.
- * - Счётчик поисковых запросов (GET_ITEM_RESULTS) считается на фронте.
- */
+// 1. ВЫНОСИМ КОМПОНЕНТ НАРУЖУ
+// DataGrid будет стабильно его рендерить и обновлять пропсы
+const CustomFooter = ({ searchCount, ...other }) => {
+  return (
+    <GridFooterContainer
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        p: 1,
+      }}
+    >
+      <div style={{ marginLeft: 16 }}>
+        {/* Если searchCount пустой, покажем 0 */}
+        <strong>Search count (GET_ITEM_RESULTS): </strong>
+        {searchCount || '0'}
+      </div>
+
+      <GridPagination {...other} />
+    </GridFooterContainer>
+  );
+};
+
 export const HistoryLogs = ({ token }) => {
   const [logs, setLogs] = useState([]);
-
-  const [dateValue, setDateValue] = useState(DateTime.now()); // По умолчанию сегодня
+  const [dateValue, setDateValue] = useState(DateTime.now());
 
   // Фильтры
   const [levelFilter, setLevelFilter] = useState('');
@@ -40,13 +55,9 @@ export const HistoryLogs = ({ token }) => {
   const [articleFilter, setArticleFilter] = useState('');
 
   const [loading, setLoading] = useState(false);
-
-  // Счётчик поисковых запросов
   const [searchCounts, setSearchCounts] = useState({});
 
-  // Функция загрузки логов
   const fetchLogs = async () => {
-    // Преобразуем dateValue в формат YYYY-MM-DD через luxon
     if (!dateValue) return;
     const dateStr = dateValue.toFormat('yyyy-MM-dd');
 
@@ -57,7 +68,6 @@ export const HistoryLogs = ({ token }) => {
       });
       const rawLogs = res.data.logs || [];
 
-      // Очищаем ANSI и подготавливаем данные для DataGrid
       const cleanLogs = rawLogs.map((l, idx) => ({
         id: idx,
         ...l,
@@ -65,65 +75,25 @@ export const HistoryLogs = ({ token }) => {
         stack: l.stack ? stripAnsi(l.stack) : null,
       }));
 
-      // ========== Подсчёт поисков GET_ITEM_RESULTS по пользователям ==========
-
-      // userSearchCounts[user] = число запросов
+      // ========== Подсчёт ==========
       const userSearchCounts = {};
-      // prevCombos[user] = предыдущий combo brand:article
-      const prevSearch = {};
-      console.log(cleanLogs);
+      // const prevSearch = {};
+
       cleanLogs.forEach((log) => {
-        // Логика определения user: может лежать в log.user
-        const currentUser = log.user || 'unknown';
+        if (log.message?.includes('[Global Search]')) {
+          const currentUser = log.user || 'unknown';
 
-        if (log.message?.includes('Received GET_ITEM_RESULTS event:')) {
-          // Ищем кусок JSON после "event:"
-          const jsonPartMatch = log.message.match(/event:\s*(\{.*\})/);
-          if (jsonPartMatch && jsonPartMatch[1]) {
-            try {
-              const parsed = JSON.parse(jsonPartMatch[1]);
-              const brand = parsed.item?.brand;
-              const article = parsed.item?.article;
-
-              const combo = `${brand}:${article}`;
-              const currentTimestamp = log.timestamp;
-              // например, "2025-03-17 10:23:45" или другой формат
-
-              // Инициируем счётчики и структуру
-              if (!userSearchCounts[currentUser]) {
-                userSearchCounts[currentUser] = 0;
-              }
-              if (!prevSearch[currentUser]) {
-                // prevSearch[currentUser] будет объектом типа { combo, timestamp }
-                prevSearch[currentUser] = { combo: '', timestamp: '' };
-              }
-
-              // Сравниваем combo + timestamp с предыдущими
-              const wasSameCombo = prevSearch[currentUser].combo === combo;
-              const wasSameTime =
-                prevSearch[currentUser].timestamp === currentTimestamp;
-
-              // Если combo и timestamp такие же, считаем что это тот же поиск
-              // Иначе считаем это новым поиском
-              if (combo && (!wasSameCombo || !wasSameTime)) {
-                userSearchCounts[currentUser]++;
-                // Запоминаем новые значения
-                prevSearch[currentUser] = {
-                  combo,
-                  timestamp: currentTimestamp,
-                };
-              }
-            } catch (e) {
-              // Если JSON.parse упал — игнорируем
-            }
+          // Просто инкрементим. Никаких проверок времени, никаких prevSearch.
+          if (!userSearchCounts[currentUser]) {
+            userSearchCounts[currentUser] = 0;
           }
+          userSearchCounts[currentUser]++;
         }
       });
 
       setSearchCounts(userSearchCounts);
-
-      // Переворачиваем, чтобы новые логи были сверху
-      setLogs(cleanLogs.reverse());
+      // Сначала посчитали, потом перевернули для отображения (reverse мутирует массив!)
+      setLogs([...cleanLogs].reverse());
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.message || 'Error loading logs');
@@ -132,7 +102,6 @@ export const HistoryLogs = ({ token }) => {
     }
   };
 
-  // Фильтрация на фронте
   const filteredLogs = logs.filter((l) => {
     if (levelFilter && l.level !== levelFilter) return false;
     if (userFilter && l.user !== userFilter) return false;
@@ -145,19 +114,10 @@ export const HistoryLogs = ({ token }) => {
     return true;
   });
 
-  const getRowHeight = () => {
-    // Если у нас длинный message или stack, DataGrid сам увеличит высоту.
-    // Можно вернуть 'auto' для адаптивной высоты.
-    return 'auto';
-  };
+  const getRowHeight = () => 'auto';
 
-  // Определяем колонки для DataGrid
   const columns = [
-    {
-      field: 'timestamp',
-      headerName: 'Time',
-      flex: 1,
-    },
+    { field: 'timestamp', headerName: 'Time', flex: 1 },
     {
       field: 'level',
       headerName: 'Level',
@@ -182,7 +142,6 @@ export const HistoryLogs = ({ token }) => {
       field: 'message',
       headerName: 'Message',
       flex: 3,
-      // Многострочный вывод:
       renderCell: (params) => (
         <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
           {params.value}
@@ -211,25 +170,6 @@ export const HistoryLogs = ({ token }) => {
     },
   ];
 
-  const CustomFooter = ({ searchCount, ...other }) => {
-    return (
-      <GridFooterContainer
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          p: 1,
-        }}
-      >
-        <div style={{ marginLeft: 16 }}>
-          <span>Search count (GET_ITEM_RESULTS):</span> {searchCount || 0}
-        </div>
-
-        <GridPagination {...other} />
-      </GridFooterContainer>
-    );
-  };
-
   const searchCountString = Object.entries(searchCounts)
     .map(([user, cnt]) => `${user}=${cnt}`)
     .join(', ');
@@ -247,17 +187,12 @@ export const HistoryLogs = ({ token }) => {
     >
       {/* Панель управления */}
       <Box sx={{ display: 'flex', gap: 2 }}>
-        {/* 2) MUI DatePicker для выбора даты */}
         <LocalizationProvider dateAdapter={AdapterLuxon}>
           <DatePicker
             label="Select date"
             value={dateValue}
             format="yyyy-MM-dd"
-            onChange={(newValue) => {
-              if (newValue) {
-                setDateValue(newValue);
-              }
-            }}
+            onChange={(newValue) => newValue && setDateValue(newValue)}
             slots={{ textField: TextField }}
             slotProps={{
               textField: { size: 'small', style: { maxWidth: 170 } },
@@ -305,13 +240,13 @@ export const HistoryLogs = ({ token }) => {
           label="Article filter"
           variant="outlined"
           size="small"
-          value={articleFilter.trimStart()}
+          value={articleFilter}
           onChange={(e) => setArticleFilter(e.target.value)}
           style={{ maxWidth: 200 }}
         />
       </Box>
 
-      {/* Таблица с логами */}
+      {/* Таблица */}
       <Box
         sx={{
           display: 'flex',
@@ -326,7 +261,9 @@ export const HistoryLogs = ({ token }) => {
           rowsPerPageOptions={[10, 25, 50, 100]}
           disableSelectionOnClick
           getRowHeight={getRowHeight}
+          // Передаем CustomFooter
           slots={{ footer: CustomFooter }}
+          // Передаем данные в CustomFooter
           slotProps={{ footer: { searchCount: searchCountString } }}
           pagination
         />
