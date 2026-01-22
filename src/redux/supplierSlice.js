@@ -1,21 +1,40 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const initialSupplierStatus = {
+  profit: { loading: false, results: [], error: null },
+  ug: { loading: false, results: [], error: null },
+  ug_f: { loading: false, results: [], error: null },
+  ug_bn: { loading: false, results: [], error: null },
+  patriot: { loading: false, results: [], error: null },
+  autosputnik: { loading: false, results: [], error: null },
+  autosputnik_bn: { loading: false, results: [], error: null },
+  autoImpulse: { loading: false, results: [], error: null },
+  armtek: { loading: false, results: [], error: null },
+  npn: { loading: false, results: [], error: null },
+  mikano: { loading: false, results: [], error: null },
+  avtodinamika: { loading: false, results: [], error: null },
+  avtoPartner: { loading: false, results: [], error: null },
+};
+
+const SUPPLIERS_STORAGE_KEY = 'pricer_selected_suppliers';
+
+// Функция для получения сохраненных поставщиков или дефолтного значения (все выбраны)
+const getSavedSuppliers = () => {
+  try {
+    const saved = localStorage.getItem(SUPPLIERS_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Ошибка чтения из localStorage', e);
+  }
+  // Если в хранилище пусто, возвращаем ключи всех поставщиков по умолчанию
+  return Object.keys(initialSupplierStatus);
+};
+
 const initialState = {
-  supplierStatus: {
-    profit: { loading: false, results: [], error: null },
-    ug: { loading: false, results: [], error: null },
-    ug_f: { loading: false, results: [], error: null },
-    ug_bn: { loading: false, results: [], error: null },
-    patriot: { loading: false, results: [], error: null },
-    autosputnik: { loading: false, results: [], error: null },
-    autosputnik_bn: { loading: false, results: [], error: null },
-    autoImpulse: { loading: false, results: [], error: null },
-    armtek: { loading: false, results: [], error: null },
-    npn: { loading: false, results: [], error: null },
-    mikano: { loading: false, results: [], error: null },
-    avtodinamika: { loading: false, results: [], error: null },
-    avtoPartner: { loading: false, results: [], error: null },
-  },
+  supplierStatus: initialSupplierStatus,
+  selectedSuppliers: getSavedSuppliers(),
 };
 
 const supplierSlice = createSlice({
@@ -37,22 +56,24 @@ const supplierSlice = createSlice({
     },
     setSupplierStatusLoading(state, action) {
       const supplier = action.payload;
-      state.supplierStatus[supplier] = {
-        ...(state.supplierStatus[supplier] || {}),
-        loading: true,
-        error: null,
-      };
+      if (state.supplierStatus[supplier]) {
+        state.supplierStatus[supplier] = {
+          ...state.supplierStatus[supplier],
+          loading: true,
+          error: null,
+        };
+      }
     },
     setSupplierStatusSuccess(state, action) {
       const { supplier, results } = action.payload;
-
-      if (!supplier) {
-        console.error('Supplier is undefined in setSupplierStatusSuccess');
+      if (!supplier || !state.supplierStatus[supplier]) {
+        console.error(
+          'Supplier not found or undefined in setSupplierStatusSuccess'
+        );
         return;
       }
-
       state.supplierStatus[supplier] = {
-        ...(state.supplierStatus[supplier] || {}),
+        ...state.supplierStatus[supplier],
         loading: false,
         results,
         error: null,
@@ -60,11 +81,13 @@ const supplierSlice = createSlice({
     },
     setSupplierStatusError(state, action) {
       const { supplier, error } = action.payload;
-      state.supplierStatus[supplier] = {
-        ...(state.supplierStatus[supplier] || {}),
-        loading: false,
-        error,
-      };
+      if (state.supplierStatus[supplier]) {
+        state.supplierStatus[supplier] = {
+          ...state.supplierStatus[supplier],
+          loading: false,
+          error,
+        };
+      }
     },
     setSupplierArticle(state, action) {
       const { supplier, article } = action.payload;
@@ -77,6 +100,36 @@ const supplierSlice = createSlice({
       }
       state.supplierStatus[supplier].article = article;
     },
+    // --- Новые редюсеры для управления выбором ---
+    toggleSupplierSelection(state, action) {
+      const supplierKey = action.payload;
+      const index = state.selectedSuppliers.indexOf(supplierKey);
+      if (index !== -1) {
+        state.selectedSuppliers.splice(index, 1);
+      } else {
+        state.selectedSuppliers.push(supplierKey);
+      }
+      // Сохраняем в localStorage
+      localStorage.setItem(
+        SUPPLIERS_STORAGE_KEY,
+        JSON.stringify(state.selectedSuppliers)
+      );
+    },
+    setAllSuppliersSelected(state) {
+      // Выбираем всех, кто есть сейчас в supplierStatus
+      state.selectedSuppliers = Object.keys(state.supplierStatus);
+      localStorage.setItem(
+        SUPPLIERS_STORAGE_KEY,
+        JSON.stringify(state.selectedSuppliers)
+      );
+    },
+    clearAllSuppliersSelected(state) {
+      state.selectedSuppliers = [];
+      localStorage.setItem(
+        SUPPLIERS_STORAGE_KEY,
+        JSON.stringify(state.selectedSuppliers)
+      );
+    },
   },
 });
 
@@ -87,6 +140,9 @@ export const {
   setSupplierStatusSuccess,
   setSupplierStatusError,
   setSupplierArticle,
+  toggleSupplierSelection,
+  setAllSuppliersSelected,
+  clearAllSuppliersSelected,
 } = supplierSlice.actions;
 
 export default supplierSlice.reducer;

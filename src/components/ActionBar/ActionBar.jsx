@@ -4,8 +4,6 @@ import { Box } from '@mui/material';
 
 export const ActionBar = ({
   supplierStatus,
-  selectedSuppliers,
-  onSupplierChange,
   maxDeadline,
   setMaxDeadline,
   maxDeliveryDate,
@@ -26,8 +24,7 @@ export const ActionBar = ({
     >
       <SupplierSelectMenu
         supplierStatus={supplierStatus}
-        selectedSuppliers={selectedSuppliers}
-        onSupplierChange={onSupplierChange}
+        // Убрали передачу пропсов, теперь компонент сам берет данные из Redux
       />
       <FilterControls
         maxDeadline={maxDeadline}

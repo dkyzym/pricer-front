@@ -1,35 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleSupplierSelection } from 'src/redux/supplierSlice';
 
 export const useSupplierSelection = () => {
-  const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
+  const dispatch = useDispatch();
 
-  const supplierKeys = useMemo(
-    () => Object.keys(supplierStatus),
-    [supplierStatus]
+  const selectedSuppliers = useSelector(
+    (state) => state.supplier.selectedSuppliers
   );
 
-  const [selectedSuppliers, setSelectedSuppliers] = useState(() =>
-    supplierKeys.filter((key) => key !== 'undefined' && key)
+  const handleSupplierChange = useCallback(
+    (supplierKey) => {
+      // Вместо локального стейта диспатчим экшен, который обновит Redux и LocalStorage
+      dispatch(toggleSupplierSelection(supplierKey));
+    },
+    [dispatch]
   );
-
-  useEffect(() => {
-    // Обновление выбранных поставщиков при изменении списка поставщиков
-    setSelectedSuppliers((prevSelected) => {
-      const validSuppliers = supplierKeys.filter((key) =>
-        prevSelected.includes(key)
-      );
-      return validSuppliers.length ? validSuppliers : supplierKeys;
-    });
-  }, [supplierKeys]);
-
-  const handleSupplierChange = useCallback((supplierKey) => {
-    setSelectedSuppliers((prev) =>
-      prev.includes(supplierKey)
-        ? prev.filter((s) => s !== supplierKey)
-        : [...prev, supplierKey]
-    );
-  }, []);
 
   return { selectedSuppliers, handleSupplierChange };
 };

@@ -48,7 +48,10 @@ export const SearchComponent = () => {
   } = useAutocomplete({ inputRef });
 
   const { history, addToHistory, clearHistory } = useSearchHistory();
-  const { selectedSuppliers, handleSupplierChange } = useSupplierSelection();
+
+  // Теперь этот хук возвращает данные из Redux, синхронизированные с меню
+  const { selectedSuppliers } = useSupplierSelection();
+
   const { handleOptionSelect, handleBrandClarification } = useSearchHandlers({
     socket,
     selectedSuppliers,
@@ -116,7 +119,7 @@ export const SearchComponent = () => {
 
   const resultsFilteredBySupplier = useFilteredResults(
     uniqueResults,
-    selectedSuppliers
+    selectedSuppliers // Теперь здесь актуальный список из Redux
   );
   const finalFilteredData = useFilteredData(
     resultsFilteredBySupplier,
@@ -186,8 +189,8 @@ export const SearchComponent = () => {
         <Grid item xs={12}>
           <ActionBar
             supplierStatus={supplierStatus}
-            selectedSuppliers={selectedSuppliers}
-            onSupplierChange={handleSupplierChange}
+            // Удалены пропсы selectedSuppliers и onSupplierChange,
+            // так как ActionBar теперь работает через Redux внутри себя.
             maxDeadline={maxDeadline}
             setMaxDeadline={setMaxDeadline}
             maxDeliveryDate={maxDeliveryDate}

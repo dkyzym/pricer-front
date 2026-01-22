@@ -14,13 +14,22 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { supplierNameMap } from 'src/constants/constants';
+import {
+  clearAllSuppliersSelected,
+  setAllSuppliersSelected,
+  toggleSupplierSelection,
+} from 'src/redux/supplierSlice';
 
-export const SupplierSelectMenu = ({
-  supplierStatus,
-  selectedSuppliers,
-  onSupplierChange,
-}) => {
+export const SupplierSelectMenu = ({ supplierStatus }) => {
+  const dispatch = useDispatch();
+
+  // Берем список выбранных поставщиков из Redux
+  const selectedSuppliers = useSelector(
+    (state) => state.supplier.selectedSuppliers
+  );
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [wasLoading, setWasLoading] = useState(false);
@@ -49,25 +58,21 @@ export const SupplierSelectMenu = ({
     setAnchorEl(null);
   };
 
-  const handleSelectAll = () => {
-    const allSupplierKeys = Object.keys(supplierStatus);
-    if (selectedSuppliers.length < allSupplierKeys.length) {
-      allSupplierKeys.forEach((key) => {
-        if (!selectedSuppliers.includes(key)) {
-          onSupplierChange(key);
-        }
-      });
+  const allSuppliersCount = Object.keys(supplierStatus).length;
+  // Проверяем, выбраны ли все (сравнение длины массивов - простой и быстрый способ)
+  const isAllSelected = selectedSuppliers.length === allSuppliersCount;
+
+  const handleSelectAllToggle = () => {
+    if (isAllSelected) {
+      dispatch(clearAllSuppliersSelected());
     } else {
-      allSupplierKeys.forEach((key) => {
-        if (selectedSuppliers.includes(key)) {
-          onSupplierChange(key);
-        }
-      });
+      dispatch(setAllSuppliersSelected());
     }
   };
 
-  const allSuppliersCount = Object.keys(supplierStatus).length;
-  const isAllSelected = selectedSuppliers.length === allSuppliersCount;
+  const handleToggleSupplier = (key) => {
+    dispatch(toggleSupplierSelection(key));
+  };
 
   return (
     <Box>
@@ -133,7 +138,7 @@ export const SupplierSelectMenu = ({
           },
         }}
       >
-        <MenuItem onClick={handleSelectAll}>
+        <MenuItem onClick={handleSelectAllToggle}>
           <Checkbox
             checked={isAllSelected}
             indeterminate={selectedSuppliers.length > 0 && !isAllSelected}
@@ -146,7 +151,7 @@ export const SupplierSelectMenu = ({
         {Object.entries(supplierStatus).map(([supplierKey, status]) => (
           <MenuItem
             key={supplierKey}
-            onClick={() => onSupplierChange(supplierKey)}
+            onClick={() => handleToggleSupplier(supplierKey)}
           >
             <Stack
               direction="row"
