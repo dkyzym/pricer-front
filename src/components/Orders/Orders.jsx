@@ -1,22 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Typography, Box, Paper, Chip } from '@mui/material';
 import axiosInstance from '@api/axiosInstance';
 import { API_URL } from '@api/config';
+import { Box, Chip, Paper, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 
-// // Можно временно вставить интерфейс сюда или импортировать, если есть общие типы на фронте
-// interface UnifiedOrderItem {
-//   id: string;
-//   brand: string;
-//   article: string;
-//   name: string;
-//   price: number;
-//   quantity: number;
-//   status: string;
-//   statusRaw: string;
-//   supplier: string;
-// }
-
-export const Cart = () => {
+export const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

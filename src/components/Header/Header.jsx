@@ -2,7 +2,8 @@ import { SocketStatusIndicator } from '@components/indicators/SocketStatusIndica
 import HistoryIcon from '@mui/icons-material/History';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
-import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+// import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import {
   AppBar,
   Box,
@@ -46,7 +47,7 @@ export const Header = () => {
     };
 
     // Вызываем сразу при монтировании, чтобы установить правильное начальное состояние
-    handleResize(); 
+    handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -107,10 +108,10 @@ export const Header = () => {
                   <Button
                     color="inherit"
                     component={Link}
-                    to="/cart"
-                    startIcon={<ShoppingCartCheckoutIcon />}
+                    to="/orders"
+                    startIcon={<ReceiptLongIcon />}
                   >
-                    Корзина
+                    Заказы
                   </Button>
                   <Tooltip title="Логи">
                     <Button color="inherit" component={Link} to="/admin/logs">
