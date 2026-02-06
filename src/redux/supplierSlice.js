@@ -18,18 +18,19 @@ const initialSupplierStatus = {
 
 const SUPPLIERS_STORAGE_KEY = 'pricer_selected_suppliers';
 
-// Функция для получения сохраненных поставщиков или дефолтного значения (все выбраны)
+// Функция для получения сохраненных поставщиков или дефолтного значения (ничего не выбрано)
 const getSavedSuppliers = () => {
   try {
     const saved = localStorage.getItem(SUPPLIERS_STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
     }
   } catch (e) {
     console.error('Ошибка чтения из localStorage', e);
   }
-  // Если в хранилище пусто, возвращаем ключи всех поставщиков по умолчанию
-  return Object.keys(initialSupplierStatus);
+  // Если в хранилище пусто, по умолчанию ничего не выбрано
+  return [];
 };
 
 const initialState = {

@@ -3,6 +3,7 @@ import authReducer from './authSlice';
 import autocompleteReducer from './autocompleteSlice';
 import brandClarificationReducer from './brandClarificationSlice';
 import supplierReducer from './supplierSlice';
+import ordersReducer from './ordersSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     supplier: supplierReducer,
     brandClarification: brandClarificationReducer,
     auth: authReducer,
+    orders: ordersReducer,
   },
 });
 
