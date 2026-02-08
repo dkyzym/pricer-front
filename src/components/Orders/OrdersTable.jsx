@@ -1,8 +1,9 @@
+import { CopiableCell } from '@components/Columns/CopiableData';
+import { Box, Chip, Paper, Tooltip, Typography } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Box, Chip, Paper, Typography, Tooltip } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import { supplierNameMap } from '../../constants/constants'; // Убедись, что путь верен
+import { supplierNameMap } from '../../constants/constants';
 
 const formatDateTime = (isoString) => {
   if (!isoString) return '';
@@ -52,6 +53,12 @@ const getRowFromArgs = (args) => {
   return undefined;
 };
 
+// Функция нормализации строки: приводит к нижнему регистру и удаляет всё, кроме букв и цифр
+const normalizeStr = (str) =>
+  String(str || '')
+    .toLowerCase()
+    .replace(/[^a-zа-яё0-9]/gi, '');
+
 export const OrdersTable = () => {
   const items = useSelector((state) => state.orders.items);
   const { searchQuery, statusFilter } = useSelector(
@@ -60,38 +67,45 @@ export const OrdersTable = () => {
   const status = useSelector((state) => state.orders.status);
 
   const filteredRows = useMemo(() => {
-    // Если items null/undefined, вернуть пустой массив, чтобы не упал .filter
     if (!items || !Array.isArray(items)) return [];
 
-    const q = (searchQuery || '').trim().toLowerCase();
+    // Подготовка поискового запроса: разбиваем на части по пробелам и нормализуем каждую часть
+    const queryParts = (searchQuery || '')
+      .trim()
+      .split(/\s+/)
+      .map(normalizeStr)
+      .filter((part) => part.length > 0);
 
     return items.filter((item) => {
-      // 1. Фильтрация по строке поиска
-      let matchesSearch = true;
-      if (q) {
-        const orderId = (item.orderId || '').toString().toLowerCase();
-        const name = (item.name || '').toLowerCase();
-        const brand = (item.brand || '').toLowerCase();
-        const article = (item.article || '').toLowerCase();
-        const supplier = (item.supplier || '').toLowerCase();
-        const comment = (item.comment || '').toLowerCase();
-
-        matchesSearch =
-          orderId.includes(q) ||
-          name.includes(q) ||
-          brand.includes(q) ||
-          article.includes(q) ||
-          supplier.includes(q) ||
-          comment.includes(q);
-      }
-
-      // 2. Фильтрация по статусу
-      let matchesStatus = true;
+      // 1. Фильтрация по статусу
       if (statusFilter && statusFilter.length > 0) {
-        matchesStatus = statusFilter.includes(item.status);
+        if (!statusFilter.includes(item.status)) return false;
       }
 
-      return matchesSearch && matchesStatus;
+      // 2. Умный поиск
+      if (queryParts.length > 0) {
+        // Собираем "сырую" строку для поиска из всех релевантных полей и нормализуем её
+        // Можно нормализовать каждое поле отдельно, но конкатенация проще для общей проверки
+        const searchableRaw = `
+          ${item.orderId || ''} 
+          ${item.name || ''} 
+          ${item.brand || ''} 
+          ${item.article || ''} 
+          ${item.supplier || ''} 
+          ${item.comment || ''}
+        `;
+        const normalizedTarget = normalizeStr(searchableRaw);
+
+        // Проверяем, что КАЖДАЯ часть запроса содержится в нормализованной строке товара
+        // Пример: item="123cat-456.bro" -> norm="123cat456bro". query="23c 6" -> parts=["23c", "6"]. Оба содержатся -> true.
+        const matchesSearch = queryParts.every((part) =>
+          normalizedTarget.includes(part)
+        );
+
+        if (!matchesSearch) return false;
+      }
+
+      return true;
     });
   }, [items, searchQuery, statusFilter]);
 
@@ -99,11 +113,10 @@ export const OrdersTable = () => {
     () => [
       {
         field: 'supplier',
-        headerName: 'Пост.', // Сократили
+        headerName: 'Пост.',
         width: 80,
         renderCell: (params) => {
           const code = params.value;
-          // Пытаемся найти красивое имя или берем код и апперкейсим
           const label = supplierNameMap[code] || (code || '').toUpperCase();
           return (
             <Typography variant="caption" fontWeight="bold">
@@ -116,6 +129,7 @@ export const OrdersTable = () => {
         field: 'orderId',
         headerName: '№ Заказа',
         width: 100,
+        renderCell: (params) => <CopiableCell value={params.value} />,
       },
       {
         field: 'createdAt',
@@ -131,12 +145,14 @@ export const OrdersTable = () => {
       {
         field: 'article',
         headerName: 'Артикул',
-        width: 120,
+        width: 150,
+        renderCell: (params) => <CopiableCell value={params.value} />,
       },
       {
         field: 'name',
         headerName: 'Наименование',
-        width: 220, // Фиксированная, уменьшенная ширина
+        flex: 1,
+        width: 220,
         renderCell: (params) => (
           <Tooltip title={params.value || ''}>
             <span
@@ -145,6 +161,7 @@ export const OrdersTable = () => {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 width: '100%',
+                display: 'block',
               }}
             >
               {params.value}
@@ -155,7 +172,6 @@ export const OrdersTable = () => {
       {
         field: 'comment',
         headerName: 'Комментарий',
-        flex: 1, // Занимает всё оставшееся место
         minWidth: 150,
         renderCell: (params) => (
           <Typography
@@ -177,13 +193,15 @@ export const OrdersTable = () => {
           const statusRaw = row?.statusRaw || statusKey || '';
 
           return (
-            <Chip
-              label={statusRaw}
-              size="small"
-              color={mapStatusToColor(statusKey)}
-              variant={statusKey === 'refused' ? 'filled' : 'outlined'}
-              sx={{ maxWidth: '100%' }}
-            />
+            <Tooltip title={statusRaw} placement="left">
+              <Chip
+                label={statusRaw}
+                size="small"
+                color={mapStatusToColor(statusKey)}
+                variant={statusKey === 'refused' ? 'filled' : 'outlined'}
+                sx={{ maxWidth: '100%' }}
+              />
+            </Tooltip>
           );
         },
         sortable: false,

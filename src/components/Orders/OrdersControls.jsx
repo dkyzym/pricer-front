@@ -31,7 +31,6 @@ import {
   setStatusFilter,
 } from '../../redux/ordersSlice';
 
-// Жесткий список поставщиков (бизнес-логика: работаем только с этими)
 const ORDERS_SUPPLIERS = [
   'profit',
   'autosputnik',
@@ -70,7 +69,6 @@ export const OrdersControls = () => {
     return raw.filter((s) => ORDERS_SUPPLIERS.includes(s));
   }, [selectedSuppliers]);
 
-  // Считаем количество заказов, чтобы отобразить в меню
   const countsBySupplier = useMemo(() => {
     const map = new Map();
     for (const key of ORDERS_SUPPLIERS) map.set(key, 0);
@@ -137,7 +135,7 @@ export const OrdersControls = () => {
           spacing={2}
           alignItems="center"
         >
-          {/* Кнопка Меню Поставщиков (для массового выбора) */}
+          {/* Кнопка Меню Поставщиков */}
           <Box>
             <Button
               id="orders-suppliers-button"
@@ -160,7 +158,11 @@ export const OrdersControls = () => {
               anchorEl={anchorEl}
               open={open}
               onClose={handleClose}
-              PaperProps={{ style: { maxHeight: 420, width: '300px' } }}
+              slotProps={{
+                paper: {
+                  sx: { maxHeight: 420, width: '300px' },
+                },
+              }}
             >
               <MenuItem onClick={handleSelectAllToggle}>
                 <Checkbox
@@ -227,7 +229,7 @@ export const OrdersControls = () => {
             sx={{ flexGrow: 1 }}
             size="small"
             label="Поиск"
-            placeholder="ID, бренд, артикул, название, коммент..."
+            placeholder="ID, бренд, артикул (игнор. символы)..."
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -250,7 +252,7 @@ export const OrdersControls = () => {
           </Button>
         </Stack>
 
-        {/* 2. Панель активных чипов (для наглядности и быстрого удаления) */}
+        {/* 2. Панель активных чипов */}
         {safeSelectedSuppliers.length > 0 && (
           <Box
             sx={{
