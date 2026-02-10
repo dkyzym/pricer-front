@@ -40,6 +40,8 @@ const ORDERS_SUPPLIERS = [
   'patriot',
   'npn',
   'avtodinamika',
+  'mikano',
+  'autoImpulse',
 ];
 
 const STATUS_OPTIONS = [
