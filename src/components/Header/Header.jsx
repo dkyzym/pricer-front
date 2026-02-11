@@ -103,16 +103,19 @@ export const Header = () => {
                 Поиск
               </Button>
 
+              {user && (
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/orders"
+                  startIcon={<ReceiptLongIcon />}
+                >
+                  Заказы
+                </Button>
+              )}
+
               {isAdmin && (
                 <>
-                  <Button
-                    color="inherit"
-                    component={Link}
-                    to="/orders"
-                    startIcon={<ReceiptLongIcon />}
-                  >
-                    Заказы
-                  </Button>
                   <Tooltip title="Логи">
                     <Button color="inherit" component={Link} to="/admin/logs">
                       <HistoryIcon />
