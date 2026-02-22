@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { fetchOrdersApi } from '../api/ordersApi'; // Проверь путь
+import { fetchOrdersApi } from '../api/ordersApi';
 
 const ORDERS_SUPPLIERS_STORAGE_KEY = 'pricer_orders_selected_suppliers';
 
@@ -18,12 +18,17 @@ const loadSavedSuppliers = () => {
 
 const initialState = {
   items: [],
+  meta: {
+    totalOrders: 0,
+    successCount: 0,
+    failedSuppliers: [],
+  },
   status: 'idle',
   error: null,
   filters: {
     selectedSuppliers: loadSavedSuppliers(),
     searchQuery: '',
-    statusFilter: [], // Массив выбранных статусов (например ['refused', 'work'])
+    statusFilter: [],
   },
 };
 
@@ -63,7 +68,6 @@ const ordersSlice = createSlice({
       state.filters.searchQuery = action.payload || '';
     },
     setStatusFilter(state, action) {
-      // Экшен принимает массив статусов
       state.filters.statusFilter = action.payload || [];
     },
     resetOrdersState() {
@@ -78,7 +82,15 @@ const ordersSlice = createSlice({
       })
       .addCase(fetchOrders.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.items = Array.isArray(action.payload) ? action.payload : [];
+        // Поддержка нового формата { data, meta }
+        if (action.payload && action.payload.data) {
+          state.items = action.payload.data;
+          state.meta = action.payload.meta || initialState.meta;
+        } else {
+          // Фолбэк на случай, если бэкенд еще отдает просто массив
+          state.items = Array.isArray(action.payload) ? action.payload : [];
+          state.meta = initialState.meta;
+        }
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.status = 'failed';

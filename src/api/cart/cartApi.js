@@ -47,7 +47,7 @@ export const addToCart = async (item) => {
     };
 
     const response = await axiosInstance.post(url, data);
-    console.log(response);
+
     return {
       success: response.data.success,
       message: response.data.success
@@ -65,14 +65,14 @@ export const addToCart = async (item) => {
       id_shop_prices: item?.autosputnik.id_shop_prices,
       price: item.price,
     };
-    console.log(data);
+
     const response = await axiosInstance.post(url, data);
-    console.log(response);
+
     return {
       success: response.data.success,
       message: response.data.success
         ? 'Товар добавлен в корзину'
         : 'Ошибка добавления в корзину',
     };
-  } 
+  }
 };

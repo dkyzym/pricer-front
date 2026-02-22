@@ -3,8 +3,7 @@ import { API_URL } from './config';
 
 /**
  * Fetch orders from backend.
- * @param {string[] | undefined} suppliers - array of supplier aliases (e.g. ['ug', 'ug_bn']).
- *   If omitted or empty, backend will fall back to its default (all handlers).
+ * @param {string[] | undefined} suppliers - array of supplier aliases.
  */
 export const fetchOrdersApi = async (suppliers) => {
   const hasSuppliers =
@@ -16,10 +15,11 @@ export const fetchOrdersApi = async (suppliers) => {
       }
     : undefined;
 
+  // Переопределяем таймаут для этого конкретного тяжелого запроса (60 секунд)
   const response = await axiosInstance.get(`${API_URL}/api/orders`, {
     params,
+    timeout: 60000,
   });
 
   return response.data;
 };
-
