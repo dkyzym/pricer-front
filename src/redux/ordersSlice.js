@@ -21,12 +21,13 @@ const initialState = {
   meta: {
     totalOrders: 0,
     successCount: 0,
-    failedSuppliers: [],
+    failedSuppliers: [], // Сюда будут падать поставщики с ошибками: [{ name: 'ug', reason: '...' }]
   },
   status: 'idle',
   error: null,
   filters: {
     selectedSuppliers: loadSavedSuppliers(),
+    hiddenSuppliers: [],
     searchQuery: '',
     statusFilter: [],
   },
@@ -68,7 +69,19 @@ const ordersSlice = createSlice({
       state.filters.searchQuery = action.payload || '';
     },
     setStatusFilter(state, action) {
+      // Экшен принимает массив статусов
       state.filters.statusFilter = action.payload || [];
+    },
+    toggleHiddenSupplier(state, action) {
+      const supplier = action.payload;
+      const isHidden = state.filters.hiddenSuppliers.includes(supplier);
+      if (isHidden) {
+        state.filters.hiddenSuppliers = state.filters.hiddenSuppliers.filter(
+          (s) => s !== supplier
+        );
+      } else {
+        state.filters.hiddenSuppliers.push(supplier);
+      }
     },
     resetOrdersState() {
       return initialState;
@@ -106,6 +119,7 @@ export const {
   setSelectedSuppliers,
   setSearchQuery,
   setStatusFilter,
+  toggleHiddenSupplier,
   resetOrdersState,
 } = ordersSlice.actions;
 

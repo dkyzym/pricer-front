@@ -1,7 +1,7 @@
 import { CopiableCell } from '@components/Columns/CopiableData';
 import { Box, Chip, Paper, Tooltip, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { supplierNameMap } from '../../constants/constants';
 
@@ -61,10 +61,21 @@ const normalizeStr = (str) =>
 
 export const OrdersTable = () => {
   const items = useSelector((state) => state.orders.items);
-  const { searchQuery, statusFilter } = useSelector(
-    (state) => state.orders.filters
-  );
+  const {
+    searchQuery,
+    statusFilter,
+    hiddenSuppliers = [],
+  } = useSelector((state) => state.orders.filters);
   const status = useSelector((state) => state.orders.status);
+
+  // Локальное состояние для фиксации времени последнего успешного обновления
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  useEffect(() => {
+    if (status === 'succeeded') {
+      setLastUpdated(new Date());
+    }
+  }, [status]);
 
   const filteredRows = useMemo(() => {
     if (!items || !Array.isArray(items)) return [];
@@ -82,10 +93,13 @@ export const OrdersTable = () => {
         if (!statusFilter.includes(item.status)) return false;
       }
 
+      // 1.5 Фильтрация скрытых поставщиков
+      if (hiddenSuppliers && hiddenSuppliers.includes(item.supplier)) {
+        return false;
+      }
+
       // 2. Умный поиск
       if (queryParts.length > 0) {
-        // Собираем "сырую" строку для поиска из всех релевантных полей и нормализуем её
-        // Можно нормализовать каждое поле отдельно, но конкатенация проще для общей проверки
         const searchableRaw = `
           ${item.orderId || ''} 
           ${item.name || ''} 
@@ -96,8 +110,6 @@ export const OrdersTable = () => {
         `;
         const normalizedTarget = normalizeStr(searchableRaw);
 
-        // Проверяем, что КАЖДАЯ часть запроса содержится в нормализованной строке товара
-        // Пример: item="123cat-456.bro" -> norm="123cat456bro". query="23c 6" -> parts=["23c", "6"]. Оба содержатся -> true.
         const matchesSearch = queryParts.every((part) =>
           normalizedTarget.includes(part)
         );
@@ -107,7 +119,7 @@ export const OrdersTable = () => {
 
       return true;
     });
-  }, [items, searchQuery, statusFilter]);
+  }, [items, searchQuery, statusFilter, hiddenSuppliers]);
 
   const columns = useMemo(
     () => [
@@ -292,9 +304,20 @@ export const OrdersTable = () => {
           gap: 2,
         }}
       >
-        <Typography variant="body2" color="text.secondary">
-          Показано: {filteredRows.length} из {items?.length || 0}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Показано: {filteredRows.length} из {items?.length || 0}
+          </Typography>
+          {lastUpdated && (
+            <Typography variant="body2" color="text.secondary">
+              Обновлено:{' '}
+              {lastUpdated.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Typography>
+          )}
+        </Box>
         <Typography variant="h6" color="primary">
           Итого: {totalSum.toLocaleString('ru-RU')} ₽
         </Typography>
