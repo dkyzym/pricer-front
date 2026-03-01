@@ -15,17 +15,21 @@ import {
   Autocomplete,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Container,
   Grid,
+  InputAdornment,
 } from '@mui/material';
 import { dedupeResults } from '@utils/dedupeResults';
-import { useContext, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearBrandClarifications } from 'src/redux/brandClarificationSlice';
 import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
   const socket = useContext(SocketContext);
+  const dispatch = useDispatch();
   useSocketManager(socket);
 
   const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
@@ -36,6 +40,9 @@ export const SearchComponent = () => {
     (state) => state.brandClarification.isClarifying
   );
   const isLoading = useSelector((state) => state.brandClarification.isLoading);
+  const clarifyingArticle = useSelector(
+    (state) => state.brandClarification.clarifyingArticle
+  );
 
   const inputRef = useRef(null);
 
@@ -45,43 +52,64 @@ export const SearchComponent = () => {
     autocompleteResults,
     isAutocompleteLoading,
     handleClearInput,
-  } = useAutocomplete({ inputRef });
+  } = useAutocomplete({ inputRef, isClarifying });
 
   const { history, addToHistory, clearHistory } = useSearchHistory();
-
-  // Этот хук возвращает данные из Redux, синхронизированные с меню
   const { selectedSuppliers } = useSupplierSelection();
+
+  // Функция отмены режима уточнения
+  const handleCancelClarification = useCallback(
+    (e) => {
+      if (e) e.stopPropagation();
+      dispatch(clearBrandClarifications());
+      handleInputChange(null, clarifyingArticle, 'input');
+      setTimeout(() => inputRef.current?.focus(), 0);
+    },
+    [dispatch, clarifyingArticle, handleInputChange]
+  );
 
   const { handleOptionSelect, handleBrandClarification } = useSearchHandlers({
     socket,
     selectedSuppliers,
+    onStartClarify: () => handleInputChange(null, '', 'input'),
   });
 
   const { normalizeOptionsWithKeys, getOptionLabelText, getOptionKey } =
     useNormalizedOptions();
+
   const handleOptionSelectionWithHistory = useOptionSelection({
     clearHistory,
     handleInputChange,
     addToHistory,
     handleOptionSelect,
   });
+
   useAutoFocusClarification(isClarifying, brandClarifications, inputRef);
 
-  // --- Состояние для фильтров (поднято из ResultsTable) ---
   const [maxDeadline, setMaxDeadline] = useState('');
   const [maxDeliveryDate, setMaxDeliveryDate] = useState(null);
   const [maxPrice, setMaxPrice] = useState('');
   const [minQuantity, setMinQuantity] = useState('');
 
+  // Двойной поиск: локальная фильтрация по брендам
+  const filteredBrands = useMemo(() => {
+    if (!isClarifying || !brandClarifications?.length) return [];
+
+    const lowerInput = inputValue.toLowerCase();
+    return brandClarifications.filter((option) =>
+      option.brand?.toLowerCase().includes(lowerInput)
+    );
+  }, [isClarifying, brandClarifications, inputValue]);
+
   const combinedOptions = useMemo(() => {
-    if (isClarifying && brandClarifications?.length) {
-      return brandClarifications;
+    if (isClarifying) {
+      return filteredBrands;
     }
     return autocompleteResults;
-  }, [isClarifying, brandClarifications, autocompleteResults]);
+  }, [isClarifying, filteredBrands, autocompleteResults]);
 
   const displayOptions = useMemo(() => {
-    if (inputValue.trim() !== '') {
+    if (inputValue.trim() !== '' || isClarifying) {
       const groupName = isClarifying ? 'Уточнение бренда' : 'Результаты поиска';
       return normalizeOptionsWithKeys(combinedOptions, groupName);
     }
@@ -111,7 +139,6 @@ export const SearchComponent = () => {
     normalizeOptionsWithKeys,
   ]);
 
-  // --- Логика фильтрации данных ---
   const allResults = Object.values(supplierStatus).flatMap(
     (status) => status.results.data || []
   );
@@ -119,7 +146,7 @@ export const SearchComponent = () => {
 
   const resultsFilteredBySupplier = useFilteredResults(
     uniqueResults,
-    selectedSuppliers // Теперь здесь актуальный список из Redux
+    selectedSuppliers
   );
   const finalFilteredData = useFilteredData(
     resultsFilteredBySupplier,
@@ -128,6 +155,20 @@ export const SearchComponent = () => {
     maxPrice,
     minQuantity
   );
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Backspace' && isClarifying && inputValue === '') {
+      handleCancelClarification(e);
+    }
+  };
+
+  const onOptionChange = (event, newValue) => {
+    handleOptionSelectionWithHistory(event, newValue);
+
+    if (newValue && !newValue.isClearCommand) {
+      handleInputChange(event, '', 'input');
+    }
+  };
 
   return (
     <Container maxWidth="lg" sx={{ mt: 1.5 }}>
@@ -144,7 +185,8 @@ export const SearchComponent = () => {
               getOptionLabel={getOptionLabelText}
               onInputChange={handleInputChange}
               getOptionKey={getOptionKey}
-              onChange={handleOptionSelectionWithHistory}
+              onChange={onOptionChange}
+              onKeyDown={handleKeyDown}
               renderOption={(props, option) => (
                 <Box
                   component="li"
@@ -163,22 +205,51 @@ export const SearchComponent = () => {
                   {getOptionLabelText(option)}
                 </Box>
               )}
-              renderInput={(params) => (
-                <AutocompleteInput
-                  params={params}
-                  inputRef={inputRef}
-                  isAutocompleteLoading={isAutocompleteLoading}
-                  inputValue={inputValue}
-                  hasOptions={Boolean(displayOptions.length)}
-                  handleClearInput={handleClearInput}
-                />
-              )}
+              renderInput={(params) => {
+                const startAdornment =
+                  isClarifying && clarifyingArticle ? (
+                    <InputAdornment position="start">
+                      <Chip
+                        size="small"
+                        label={`Артикул: ${clarifyingArticle}`}
+                        onDelete={handleCancelClarification}
+                        color="primary"
+                        variant="outlined"
+                        sx={{ mr: 0.5, fontWeight: 'medium' }}
+                      />
+                    </InputAdornment>
+                  ) : null;
+
+                const mergedInputProps = {
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      {startAdornment}
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                };
+
+                return (
+                  <AutocompleteInput
+                    params={{ ...params, InputProps: mergedInputProps }}
+                    inputRef={inputRef}
+                    isAutocompleteLoading={isAutocompleteLoading}
+                    inputValue={inputValue}
+                    hasOptions={Boolean(displayOptions.length)}
+                    handleClearInput={handleClearInput}
+                    placeholder={
+                      isClarifying ? 'Введите бренд...' : 'Введите артикул...'
+                    }
+                  />
+                );
+              }}
             />
             <Button
               variant="outlined"
               color="primary"
               onClick={() => handleBrandClarification(inputValue)}
-              disabled={!inputValue.trim() || isLoading}
+              disabled={!inputValue.trim() || isLoading || isClarifying}
               startIcon={isLoading ? <CircularProgress size={20} /> : null}
             >
               Уточнить бренд
@@ -207,3 +278,5 @@ export const SearchComponent = () => {
     </Container>
   );
 };
+
+export default SearchComponent;

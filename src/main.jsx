@@ -5,6 +5,15 @@ import { HomePage } from '@pages/Home';
 
 import './index.css';
 
+// Cloudflare Insights только в продакшене — в dev (localhost:5173) их CORS отдаёт http://localhost без порта, запрос блокируется
+if (import.meta.env.PROD) {
+  const cf = document.createElement('script');
+  cf.defer = true;
+  cf.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+  cf.setAttribute('data-cf-beacon', '{"token":"47f8a9132572408f9884035616740de4"}');
+  document.body.appendChild(cf);
+}
+
 import AppProviders from '@context/AppProviders';
 import { ErrorPage } from '@pages/ErrorPage';
 import { LoginPage } from '@pages/LoginPage';

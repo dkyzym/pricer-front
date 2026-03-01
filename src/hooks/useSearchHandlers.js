@@ -1,14 +1,21 @@
 import { SOCKET_EVENTS } from '@api/ws/socket';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   clearBrandClarifications,
+  setBrandClarificationError,
+  setBrandClarifications,
   setLoading,
+  setClarifyingArticle,
 } from '../redux/brandClarificationSlice';
 
 import { resetSupplierStatus } from '../redux/supplierSlice';
 
-export const useSearchHandlers = ({ socket, selectedSuppliers }) => {
+export const useSearchHandlers = ({
+  socket,
+  selectedSuppliers,
+  onStartClarify,
+}) => {
   const dispatch = useDispatch();
 
   const handleBrandClarification = useCallback(
@@ -17,10 +24,17 @@ export const useSearchHandlers = ({ socket, selectedSuppliers }) => {
         console.warn('Пустой запрос для уточнения бренда.');
         return;
       }
+
       dispatch(setLoading());
-      socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, { query });
+      dispatch(setClarifyingArticle(query.trim()));
+
+      if (onStartClarify) {
+        onStartClarify();
+      }
+
+      socket.emit(SOCKET_EVENTS.BRAND_CLARIFICATION, { query: query.trim() });
     },
-    [socket, dispatch]
+    [socket, dispatch, onStartClarify]
   );
 
   const handleDetailedSearch = useCallback(
@@ -60,6 +74,7 @@ export const useSearchHandlers = ({ socket, selectedSuppliers }) => {
         };
         dispatch(resetSupplierStatus());
         const { brand, description } = mappedValue;
+
         if (brand.trim().includes('Найти') && !description) {
           handleBrandClarification(mappedValue.article);
         } else {
@@ -70,6 +85,30 @@ export const useSearchHandlers = ({ socket, selectedSuppliers }) => {
     },
     [dispatch, handleBrandClarification, handleDetailedSearch]
   );
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleBrandClarificationResponse = (response) => {
+      if (response.error) {
+        dispatch(setBrandClarificationError(response.error));
+      } else {
+        dispatch(setBrandClarifications(response.brands));
+      }
+    };
+
+    socket.on(
+      SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
+      handleBrandClarificationResponse
+    );
+
+    return () => {
+      socket.off(
+        SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
+        handleBrandClarificationResponse
+      );
+    };
+  }, [socket, dispatch]);
 
   return {
     handleBrandClarification,

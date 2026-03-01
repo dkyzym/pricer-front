@@ -5,6 +5,7 @@ const initialState = {
   isClarifying: false,
   isLoading: false,
   error: null,
+  clarifyingArticle: '',
 };
 
 const brandClarificationSlice = createSlice({
@@ -20,18 +21,20 @@ const brandClarificationSlice = createSlice({
       state.brands = [];
       state.isClarifying = false;
       state.error = null;
+      state.clarifyingArticle = '';
     },
     setBrandClarificationError(state, action) {
       state.error = action.payload;
       state.isClarifying = false;
     },
     setLoading(state) {
-      // Экшен  начала загрузки
       state.isLoading = true;
     },
     unsetLoading(state) {
-      // Экшен окончания загрузки
       state.isLoading = false;
+    },
+    setClarifyingArticle(state, action) {
+      state.clarifyingArticle = action.payload;
     },
   },
 });
@@ -42,6 +45,7 @@ export const {
   setBrandClarificationError,
   setLoading,
   unsetLoading,
+  setClarifyingArticle,
 } = brandClarificationSlice.actions;
 
 export default brandClarificationSlice.reducer;
