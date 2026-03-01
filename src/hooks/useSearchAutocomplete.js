@@ -4,7 +4,6 @@ import { useNormalizedOptions } from '@hooks/useNormalizedOptions';
 import { useOptionSelection } from '@hooks/useOptionSelection';
 import { useSearchHandlers } from '@hooks/useSearchHandlers';
 import { useSearchHistory } from '@hooks/useSearchHistory';
-import { useSupplierSelection } from '@hooks/useSupplierSelection';
 import { useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearBrandClarifications } from 'src/redux/brandClarificationSlice';
@@ -74,7 +73,6 @@ export const useSearchAutocomplete = (socket) => {
   } = useAutocomplete({ inputRef, isClarifying });
 
   const { history, addToHistory, clearHistory } = useSearchHistory();
-  const { selectedSuppliers } = useSupplierSelection();
 
   const handleCancelClarification = useCallback(
     (e) => {
@@ -88,7 +86,6 @@ export const useSearchAutocomplete = (socket) => {
 
   const { handleOptionSelect, handleBrandClarification } = useSearchHandlers({
     socket,
-    selectedSuppliers,
     onStartClarify: () => handleInputChange(null, '', 'input'),
   });
 

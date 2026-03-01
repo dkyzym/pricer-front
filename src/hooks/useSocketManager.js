@@ -92,6 +92,14 @@ export const useSocketManager = (socket) => {
       dispatch(unsetLoading());
     },
 
+    handleBrandClarificationResponse(response) {
+      if (response.error) {
+        dispatch(setBrandClarificationError(response.error));
+      } else {
+        dispatch(setBrandClarifications(response.brands));
+      }
+    },
+
     // --- Supplier handlers ---
 
     handleSupplierDataFetchStarted({ supplier, article }) {
@@ -171,6 +179,8 @@ export const useSocketManager = (socket) => {
       handlersRef.current.handleBrandClarificationResults(...args);
     const onBrandClarificationError = (...args) =>
       handlersRef.current.handleBrandClarificationError(...args);
+    const onBrandClarificationResponse = (...args) =>
+      handlersRef.current.handleBrandClarificationResponse(...args);
     const onSupplierStarted = (...args) =>
       handlersRef.current.handleSupplierDataFetchStarted(...args);
     const onSupplierSuccess = (...args) =>
@@ -187,6 +197,10 @@ export const useSocketManager = (socket) => {
       SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR,
       onBrandClarificationError
     );
+    socket.on(
+      SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
+      onBrandClarificationResponse
+    );
     socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED, onSupplierStarted);
     socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS, onSupplierSuccess);
     socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR, onSupplierError);
@@ -200,6 +214,10 @@ export const useSocketManager = (socket) => {
       socket.off(
         SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR,
         onBrandClarificationError
+      );
+      socket.off(
+        SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
+        onBrandClarificationResponse
       );
       socket.off(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED, onSupplierStarted);
       socket.off(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS, onSupplierSuccess);

@@ -1,21 +1,15 @@
 import { SOCKET_EVENTS } from '@api/ws/socket';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   clearBrandClarifications,
-  setBrandClarificationError,
-  setBrandClarifications,
   setLoading,
   setClarifyingArticle,
 } from '../redux/brandClarificationSlice';
-
 import { resetSupplierStatus } from '../redux/supplierSlice';
+import { store } from '../redux/store';
 
-export const useSearchHandlers = ({
-  socket,
-  selectedSuppliers,
-  onStartClarify,
-}) => {
+export const useSearchHandlers = ({ socket, onStartClarify }) => {
   const dispatch = useDispatch();
 
   const handleBrandClarification = useCallback(
@@ -39,7 +33,8 @@ export const useSearchHandlers = ({
 
   const handleDetailedSearch = useCallback(
     (value) => {
-      selectedSuppliers.forEach((supplier) => {
+      const suppliers = store.getState().supplier.selectedSuppliers;
+      suppliers.forEach((supplier) => {
         if (!supplier) {
           console.error('Invalid supplierKey:', supplier);
           return;
@@ -47,13 +42,14 @@ export const useSearchHandlers = ({
         socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, { item: value, supplier });
       });
     },
-    [socket, selectedSuppliers]
+    [socket]
   );
 
   const handleBrandSelect = useCallback(
     (selectedItem) => {
+      const suppliers = store.getState().supplier.selectedSuppliers;
       dispatch(resetSupplierStatus());
-      selectedSuppliers.forEach((supplierKey) => {
+      suppliers.forEach((supplierKey) => {
         socket.emit(SOCKET_EVENTS.GET_ITEM_RESULTS, {
           item: selectedItem,
           supplier: supplierKey,
@@ -61,54 +57,30 @@ export const useSearchHandlers = ({
       });
       dispatch(clearBrandClarifications());
     },
-    [dispatch, socket, selectedSuppliers]
+    [dispatch, socket]
   );
 
   const handleOptionSelect = useCallback(
     (_event, value) => {
-      if (value) {
-        const mappedValue = {
-          brand: value.brand,
-          article: value.number,
-          description: value.descr || '',
-        };
-        dispatch(resetSupplierStatus());
-        const { brand, description } = mappedValue;
+      if (!value) return;
 
-        if (brand.trim().includes('Найти') && !description) {
-          handleBrandClarification(mappedValue.article);
-        } else {
-          handleDetailedSearch(mappedValue);
-          dispatch(clearBrandClarifications());
-        }
+      const mappedValue = {
+        brand: value.brand,
+        article: value.number,
+        description: value.descr || '',
+      };
+
+      dispatch(resetSupplierStatus());
+
+      if (value.type === 'CLARIFY') {
+        handleBrandClarification(mappedValue.article);
+      } else {
+        handleDetailedSearch(mappedValue);
+        dispatch(clearBrandClarifications());
       }
     },
     [dispatch, handleBrandClarification, handleDetailedSearch]
   );
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleBrandClarificationResponse = (response) => {
-      if (response.error) {
-        dispatch(setBrandClarificationError(response.error));
-      } else {
-        dispatch(setBrandClarifications(response.brands));
-      }
-    };
-
-    socket.on(
-      SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
-      handleBrandClarificationResponse
-    );
-
-    return () => {
-      socket.off(
-        SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
-        handleBrandClarificationResponse
-      );
-    };
-  }, [socket, dispatch]);
 
   return {
     handleBrandClarification,
