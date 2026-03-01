@@ -1,10 +1,8 @@
 import { SOCKET_EVENTS } from '@api/ws/socket';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   clearBrandClarifications,
-  setBrandClarificationError,
-  setBrandClarifications,
   setLoading,
 } from '../redux/brandClarificationSlice';
 
@@ -72,30 +70,6 @@ export const useSearchHandlers = ({ socket, selectedSuppliers }) => {
     },
     [dispatch, handleBrandClarification, handleDetailedSearch]
   );
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleBrandClarificationResponse = (response) => {
-      if (response.error) {
-        dispatch(setBrandClarificationError(response.error));
-      } else {
-        dispatch(setBrandClarifications(response.brands));
-      }
-    };
-
-    socket.on(
-      SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
-      handleBrandClarificationResponse
-    );
-
-    return () => {
-      socket.off(
-        SOCKET_EVENTS.BRAND_CLARIFICATION_RESPONSE,
-        handleBrandClarificationResponse
-      );
-    };
-  }, [socket, dispatch]);
 
   return {
     handleBrandClarification,
