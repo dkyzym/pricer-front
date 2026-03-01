@@ -1,13 +1,9 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useStore } from 'react-redux';
 import { toast } from 'react-toastify';
 
 import { SOCKET_EVENTS } from '@api/ws/socket';
-import {
-  setAutocompleteError,
-  setAutocompleteLoading,
-  setAutocompleteResults,
-} from '../redux/autocompleteSlice';
+import { setAutocompleteResults } from '../redux/autocompleteSlice';
 import {
   clearBrandClarifications,
   setBrandClarificationError,
@@ -33,52 +29,33 @@ export const useSocketManager = (socket) => {
   // Это не вызывает перерисовку компонента при изменении.
   const supplierTimeoutRefs = useRef({});
 
-  const handleSocketConnect = useCallback(() => {
-    toast.info('WebSocket connected');
-    dispatch(setAutocompleteResults([]));
-    dispatch(clearBrandClarifications());
-  }, [dispatch]);
+  // latestRef-паттерн: храним обработчики в ref, чтобы они всегда
+  // имели актуальный скоуп (dispatch, store), но их «обёртки» в useEffect
+  // оставались стабильными и не вызывали переподписок.
+  const handlersRef = useRef(null);
 
-  const handleAutocompleteResults = useCallback(
-    ({ results }) => {
-      dispatch(setAutocompleteResults(results?.data || []));
-      dispatch(setAutocompleteLoading(false));
-    },
-    [dispatch]
-  );
-
-  const handleAutocompleteError = useCallback(
-    (error) => {
-      toast.error(`Autocomplete Error: ${error.message}`);
+  handlersRef.current = {
+    handleSocketConnect() {
+      toast.info('WebSocket connected');
       dispatch(setAutocompleteResults([]));
-      dispatch(setAutocompleteLoading(false));
-      dispatch(setAutocompleteError(error.message));
+      dispatch(clearBrandClarifications());
     },
-    [dispatch]
-  );
 
-  const handleBrandClarificationResults = useCallback(
-    (data) => {
+    handleBrandClarificationResults(data) {
       toast.success(data?.message);
       dispatch(setBrandClarifications(data?.brands));
       dispatch(unsetLoading());
     },
-    [dispatch]
-  );
 
-  const handleBrandClarificationError = useCallback(
-    (error) => {
+    handleBrandClarificationError(error) {
       toast.error(`Brand Clarification Error: ${error.message}`);
       dispatch(setBrandClarificationError(error.message));
       dispatch(unsetLoading());
     },
-    [dispatch]
-  );
 
-  // --- ИЗМЕНЕНИЯ НАЧИНАЮТСЯ ЗДЕСЬ ---
+    // --- Supplier handlers ---
 
-  const handleSupplierDataFetchStarted = useCallback(
-    ({ supplier, article }) => {
+    handleSupplierDataFetchStarted({ supplier, article }) {
       if (!supplier) {
         console.error(
           'Supplier is undefined in handleSupplierDataFetchStarted'
@@ -116,11 +93,8 @@ export const useSocketManager = (socket) => {
         delete supplierTimeoutRefs.current[supplier];
       }, CLIENT_SIDE_TIMEOUT_MS);
     },
-    [dispatch, store]
-  );
 
-  const handleSupplierDataFetchSuccess = useCallback(
-    ({ supplier, result }) => {
+    handleSupplierDataFetchSuccess({ supplier, result }) {
       // При получении успешного ответа, очищаем таймер.
       if (supplierTimeoutRefs.current[supplier]) {
         clearTimeout(supplierTimeoutRefs.current[supplier]);
@@ -141,11 +115,8 @@ export const useSocketManager = (socket) => {
         })
       );
     },
-    [dispatch]
-  );
 
-  const handleSupplierDataFetchError = useCallback(
-    ({ supplier, error }) => {
+    handleSupplierDataFetchError({ supplier, error }) {
       // При получении ошибки, также очищаем таймер.
       if (supplierTimeoutRefs.current[supplier]) {
         clearTimeout(supplierTimeoutRefs.current[supplier]);
@@ -155,72 +126,58 @@ export const useSocketManager = (socket) => {
       console.error(`Error fetching data for supplier: ${supplier}`, error);
       dispatch(setSupplierStatusError({ supplier, error }));
     },
-    [dispatch]
-  );
+  };
 
   useEffect(() => {
     if (!socket) {
       return;
     }
 
-    socket.on(SOCKET_EVENTS.CONNECT, handleSocketConnect);
+    // Тонкие обёртки: ссылка на функцию стабильна, но внутри
+    // всегда вызывается актуальная версия из handlersRef.current.
+    const onConnect = (...args) =>
+      handlersRef.current.handleSocketConnect(...args);
+    const onBrandClarificationResults = (...args) =>
+      handlersRef.current.handleBrandClarificationResults(...args);
+    const onBrandClarificationError = (...args) =>
+      handlersRef.current.handleBrandClarificationError(...args);
+    const onSupplierStarted = (...args) =>
+      handlersRef.current.handleSupplierDataFetchStarted(...args);
+    const onSupplierSuccess = (...args) =>
+      handlersRef.current.handleSupplierDataFetchSuccess(...args);
+    const onSupplierError = (...args) =>
+      handlersRef.current.handleSupplierDataFetchError(...args);
+
+    socket.on(SOCKET_EVENTS.CONNECT, onConnect);
     socket.on(
       SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
-      handleBrandClarificationResults
+      onBrandClarificationResults
     );
     socket.on(
       SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR,
-      handleBrandClarificationError
+      onBrandClarificationError
     );
-    socket.on(
-      SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED,
-      handleSupplierDataFetchStarted
-    );
-    socket.on(
-      SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS,
-      handleSupplierDataFetchSuccess
-    );
-    socket.on(
-      SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR,
-      handleSupplierDataFetchError
-    );
+    socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED, onSupplierStarted);
+    socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS, onSupplierSuccess);
+    socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR, onSupplierError);
 
     // Функция очистки при размонтировании компонента.
     return () => {
-      socket.off(SOCKET_EVENTS.CONNECT, handleSocketConnect);
+      socket.off(SOCKET_EVENTS.CONNECT, onConnect);
       socket.off(
         SOCKET_EVENTS.BRAND_CLARIFICATION_RESULTS,
-        handleBrandClarificationResults
+        onBrandClarificationResults
       );
       socket.off(
         SOCKET_EVENTS.BRAND_CLARIFICATION_ERROR,
-        handleBrandClarificationError
+        onBrandClarificationError
       );
-      socket.off(
-        SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED,
-        handleSupplierDataFetchStarted
-      );
-      socket.off(
-        SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS,
-        handleSupplierDataFetchSuccess
-      );
-      socket.off(
-        SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR,
-        handleSupplierDataFetchError
-      );
+      socket.off(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_STARTED, onSupplierStarted);
+      socket.off(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS, onSupplierSuccess);
+      socket.off(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR, onSupplierError);
 
       // Очищаем ВСЕ активные таймеры, чтобы избежать утечек памяти.
       Object.values(supplierTimeoutRefs.current).forEach(clearTimeout);
     };
-  }, [
-    socket,
-    handleSocketConnect,
-    handleAutocompleteResults,
-    handleAutocompleteError,
-    handleBrandClarificationResults,
-    handleBrandClarificationError,
-    handleSupplierDataFetchStarted,
-    handleSupplierDataFetchSuccess,
-    handleSupplierDataFetchError,
-  ]);
+  }, [socket]);
 };

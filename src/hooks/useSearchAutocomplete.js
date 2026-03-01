@@ -86,7 +86,13 @@ export const useSearchAutocomplete = (socket) => {
       return normalizeOptionsWithKeys(history, 'История поиска');
     }
     return [];
-  }, [inputValue, combinedOptions, history, isClarifying, normalizeOptionsWithKeys]);
+  }, [
+    inputValue,
+    combinedOptions,
+    history,
+    isClarifying,
+    normalizeOptionsWithKeys,
+  ]);
 
   const showClearHistory =
     history.length > 0 && inputValue.trim() === '' && !isClarifying;
