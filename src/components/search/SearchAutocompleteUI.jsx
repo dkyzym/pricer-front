@@ -8,7 +8,25 @@ import {
   InputAdornment,
   Paper,
 } from '@mui/material';
-import { useMemo } from 'react';
+
+const ClearHistoryPaper = ({ showClearHistory, onClearHistory, children, ...paperProps }) => (
+  <Paper {...paperProps}>
+    {children}
+    {showClearHistory && (
+      <Box sx={{ p: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Button
+          fullWidth
+          size="small"
+          color="error"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={onClearHistory}
+        >
+          Очистить историю
+        </Button>
+      </Box>
+    )}
+  </Paper>
+);
 
 export const SearchAutocompleteUI = ({
   inputValue,
@@ -29,37 +47,6 @@ export const SearchAutocompleteUI = ({
   isLoading,
   onBrandClarify,
 }) => {
-  const PaperWithFooter = useMemo(
-    () =>
-      function CustomPaper(paperProps) {
-        return (
-          <Paper {...paperProps}>
-            {paperProps.children}
-            {showClearHistory && (
-              <Box
-                sx={{
-                  p: 0.5,
-                  borderTop: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <Button
-                  fullWidth
-                  size="small"
-                  color="error"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={onClearHistory}
-                >
-                  Очистить историю
-                </Button>
-              </Box>
-            )}
-          </Paper>
-        );
-      },
-    [showClearHistory, onClearHistory]
-  );
-
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
       <Autocomplete
@@ -74,7 +61,8 @@ export const SearchAutocompleteUI = ({
         getOptionKey={getOptionKey}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        PaperComponent={PaperWithFooter}
+        PaperComponent={ClearHistoryPaper}
+        componentsProps={{ paper: { showClearHistory, onClearHistory } }}
         renderOption={(props, option) => (
           <Box component="li" {...props} key={option.key}>
             {getOptionLabel(option)}
