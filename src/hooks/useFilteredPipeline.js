@@ -1,5 +1,6 @@
+import { useSupplierSelection } from '@hooks/useSupplierSelection';
 import { DateTime } from 'luxon';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { dedupeResults } from '@utils/dedupeResults';
 
 const normalizeSupplier = (s) => (s === 'ug_f' ? 'ug' : s);
@@ -10,15 +11,20 @@ const normalizeSupplier = (s) => (s === 'ug_f' ? 'ug' : s);
  *
  * Каждый шаг обёрнут в собственный useMemo, поэтому пересчитывается
  * только та часть цепочки, чьи входные данные реально изменились.
+ *
+ * Возвращает { data, filterProps } — отфильтрованные данные и стейт фильтров
+ * для передачи в ActionBar.
  */
-export const useFilteredPipeline = (
-  supplierStatus,
-  selectedSuppliers,
-  { maxDeadline, maxDeliveryDate, maxPrice, minQuantity }
-) => {
+export const useFilteredPipeline = (supplierStatus) => {
+  const { selectedSuppliers } = useSupplierSelection();
+
+  const [maxDeadline, setMaxDeadline] = useState('');
+  const [maxDeliveryDate, setMaxDeliveryDate] = useState(null);
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minQuantity, setMinQuantity] = useState('');
+
   const allResults = useMemo(
-    () =>
-      Object.values(supplierStatus).flatMap((s) => s.results.data || []),
+    () => Object.values(supplierStatus).flatMap((s) => s.results.data || []),
     [supplierStatus]
   );
 
@@ -34,7 +40,7 @@ export const useFilteredPipeline = (
     );
   }, [uniqueResults, selectedSuppliers]);
 
-  return useMemo(() => {
+  const data = useMemo(() => {
     const now = DateTime.now();
 
     return bySupplier.filter((item) => {
@@ -69,9 +75,20 @@ export const useFilteredPipeline = (
       const isMultiValid =
         !item.multi || (isAvailabilityValid && availability % item.multi === 0);
 
-      return (
-        isDeadlineValid && isPriceValid && isMinQuantityValid && isMultiValid
-      );
+      return isDeadlineValid && isPriceValid && isMinQuantityValid && isMultiValid;
     });
   }, [bySupplier, maxDeadline, maxDeliveryDate, maxPrice, minQuantity]);
+
+  const filterProps = {
+    maxDeadline,
+    setMaxDeadline,
+    maxDeliveryDate,
+    setMaxDeliveryDate,
+    maxPrice,
+    setMaxPrice,
+    minQuantity,
+    setMinQuantity,
+  };
+
+  return { data, filterProps };
 };
