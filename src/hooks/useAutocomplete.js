@@ -1,19 +1,18 @@
 import { API_URL } from '@api/config';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   clearAutocomplete,
   setAutocompleteLoading,
   setAutocompleteResults,
-  setInputValue,
 } from '../redux/autocompleteSlice';
 import { clearBrandClarifications } from '../redux/brandClarificationSlice';
 
 export const useAutocomplete = ({ inputRef, isClarifying }) => {
   const dispatch = useDispatch();
-  const inputValue = useSelector((state) => state.autocomplete.inputValue);
+  const [inputValue, setInputValue] = useState('');
   const autocompleteResults = useSelector(
     (state) => state.autocomplete.results
   );
@@ -55,7 +54,7 @@ export const useAutocomplete = ({ inputRef, isClarifying }) => {
 
   const handleInputChange = (_event, newValue, reason) => {
     if (reason === 'input') {
-      dispatch(setInputValue(newValue));
+      setInputValue(newValue.trimStart());
 
       if (isClarifying) {
         return;
@@ -70,6 +69,7 @@ export const useAutocomplete = ({ inputRef, isClarifying }) => {
       dispatch(setAutocompleteLoading(true));
       debouncedFetchAutocomplete(newValue.trim());
     } else if (reason === 'clear') {
+      setInputValue('');
       dispatch(clearAutocomplete());
       dispatch(clearBrandClarifications());
       if (inputRef.current) {
@@ -79,6 +79,7 @@ export const useAutocomplete = ({ inputRef, isClarifying }) => {
   };
 
   const handleClearInput = () => {
+    setInputValue('');
     dispatch(clearAutocomplete());
     dispatch(clearBrandClarifications());
     if (inputRef.current) {
