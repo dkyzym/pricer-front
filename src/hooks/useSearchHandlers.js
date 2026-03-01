@@ -9,6 +9,35 @@ import {
 import { resetSupplierStatus } from '../redux/supplierSlice';
 import { store } from '../redux/store';
 
+/**
+ * @typedef {Object} UseSearchHandlersParams
+ * @property {import('socket.io-client').Socket | null} socket
+ * @property {function(): void} [onStartClarify] — вызывается перед отправкой BRAND_CLARIFICATION (например сброс поля ввода)
+ */
+
+/**
+ * Элемент, отправляемый на бэкенд: артикул/бренд + описание для запроса к поставщикам.
+ * @typedef {Object} SearchItemPayload
+ * @property {string} [brand]
+ * @property {string} [article] — артикул (number из опции автокомплита)
+ * @property {string} [description]
+ */
+
+/**
+ * @typedef {Object} UseSearchHandlersReturn
+ * @property {function(string): void} handleBrandClarification — запрос уточнения бренда по артикулу
+ * @property {function(SearchItemPayload): void} handleDetailedSearch — запрос результатов по выбранной опции (всем выбранным поставщикам)
+ * @property {function(React.SyntheticEvent, object|null): void} handleOptionSelect — выбор в Autocomplete (CLARIFY → уточнение бренда, иначе detailed search)
+ * @property {function(object): void} handleBrandSelect — выбор бренда из уточнения; запрос по всем поставщикам
+ */
+
+/**
+ * Обработчики поиска и уточнения бренда: эмит сокет-событий + обновление Redux.
+ * selectedSuppliers берётся через store.getState() внутри колбэков, чтобы не включать в зависимости и не пересоздавать обработчики при смене выбора поставщиков.
+ *
+ * @param {UseSearchHandlersParams} params
+ * @returns {UseSearchHandlersReturn}
+ */
 export const useSearchHandlers = ({ socket, onStartClarify }) => {
   const dispatch = useDispatch();
 
