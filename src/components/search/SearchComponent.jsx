@@ -49,7 +49,7 @@ export const SearchComponent = () => {
 
   const { history, addToHistory, clearHistory } = useSearchHistory();
 
-  // Теперь этот хук возвращает данные из Redux, синхронизированные с меню
+  // Этот хук возвращает данные из Redux, синхронизированные с меню
   const { selectedSuppliers } = useSupplierSelection();
 
   const { handleOptionSelect, handleBrandClarification } = useSearchHandlers({
@@ -189,8 +189,6 @@ export const SearchComponent = () => {
         <Grid item xs={12}>
           <ActionBar
             supplierStatus={supplierStatus}
-            // Удалены пропсы selectedSuppliers и onSupplierChange,
-            // так как ActionBar теперь работает через Redux внутри себя.
             maxDeadline={maxDeadline}
             setMaxDeadline={setMaxDeadline}
             maxDeliveryDate={maxDeliveryDate}
