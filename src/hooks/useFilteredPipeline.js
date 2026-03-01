@@ -1,6 +1,7 @@
 import { useSupplierSelection } from '@hooks/useSupplierSelection';
 import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { dedupeResults } from '@utils/dedupeResults';
 
 const normalizeSupplier = (s) => (s === 'ug_f' ? 'ug' : s);
@@ -15,7 +16,8 @@ const normalizeSupplier = (s) => (s === 'ug_f' ? 'ug' : s);
  * Возвращает { data, filterProps } — отфильтрованные данные и стейт фильтров
  * для передачи в ActionBar.
  */
-export const useFilteredPipeline = (supplierStatus) => {
+export const useFilteredPipeline = () => {
+  const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
   const { selectedSuppliers } = useSupplierSelection();
 
   const [maxDeadline, setMaxDeadline] = useState('');
@@ -80,6 +82,7 @@ export const useFilteredPipeline = (supplierStatus) => {
   }, [bySupplier, maxDeadline, maxDeliveryDate, maxPrice, minQuantity]);
 
   const filterProps = {
+    supplierStatus,
     maxDeadline,
     setMaxDeadline,
     maxDeliveryDate,

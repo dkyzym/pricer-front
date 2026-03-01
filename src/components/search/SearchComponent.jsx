@@ -5,7 +5,6 @@ import { useSearchAutocomplete } from '@hooks/useSearchAutocomplete';
 import { useSocketManager } from '@hooks/useSocketManager';
 import { Container, Grid } from '@mui/material';
 import { useContext } from 'react';
-import { useSelector } from 'react-redux';
 import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 import { SearchAutocompleteUI } from './SearchAutocompleteUI';
 
@@ -13,10 +12,8 @@ export const SearchComponent = () => {
   const socket = useContext(SocketContext);
   useSocketManager(socket);
 
-  const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
-
   const searchAutocompleteProps = useSearchAutocomplete(socket);
-  const { data, filterProps } = useFilteredPipeline(supplierStatus);
+  const { data, filterProps } = useFilteredPipeline();
 
   return (
     <Container maxWidth="lg" sx={{ mt: 1.5 }}>
@@ -26,7 +23,7 @@ export const SearchComponent = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <ActionBar supplierStatus={supplierStatus} {...filterProps} />
+          <ActionBar {...filterProps} />
         </Grid>
 
         <Grid item xs={12}>
