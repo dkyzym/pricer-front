@@ -8,6 +8,7 @@ import { useSupplierSelection } from '@hooks/useSupplierSelection';
 import { useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearBrandClarifications } from 'src/redux/brandClarificationSlice';
+import { buildDisplayOptions } from 'src/utils/buildDisplayOptions';
 
 export const useSearchAutocomplete = (socket) => {
   const dispatch = useDispatch();
@@ -52,8 +53,7 @@ export const useSearchAutocomplete = (socket) => {
     onStartClarify: () => handleInputChange(null, '', 'input'),
   });
 
-  const { normalizeOptionsWithKeys, getOptionLabelText, getOptionKey } =
-    useNormalizedOptions();
+  const { getOptionLabelText, getOptionKey } = useNormalizedOptions();
 
   const handleOptionSelectionWithHistory = useOptionSelection({
     clearHistory,
@@ -64,35 +64,17 @@ export const useSearchAutocomplete = (socket) => {
 
   useAutoFocusClarification(isClarifying, brandClarifications, inputRef);
 
-  const filteredBrands = useMemo(() => {
-    if (!isClarifying || !brandClarifications?.length) return [];
-    const lowerInput = inputValue.toLowerCase();
-    return brandClarifications.filter((option) =>
-      option.brand?.toLowerCase().includes(lowerInput)
-    );
-  }, [isClarifying, brandClarifications, inputValue]);
-
-  const combinedOptions = useMemo(
-    () => (isClarifying ? filteredBrands : autocompleteResults),
-    [isClarifying, filteredBrands, autocompleteResults]
+  const displayOptions = useMemo(
+    () =>
+      buildDisplayOptions({
+        isClarifying,
+        brandClarifications,
+        inputValue,
+        autocompleteResults,
+        history,
+      }),
+    [isClarifying, brandClarifications, inputValue, autocompleteResults, history]
   );
-
-  const displayOptions = useMemo(() => {
-    if (inputValue.trim() !== '' || isClarifying) {
-      const groupName = isClarifying ? 'Уточнение бренда' : 'Результаты поиска';
-      return normalizeOptionsWithKeys(combinedOptions, groupName);
-    }
-    if (history.length > 0) {
-      return normalizeOptionsWithKeys(history, 'История поиска');
-    }
-    return [];
-  }, [
-    inputValue,
-    combinedOptions,
-    history,
-    isClarifying,
-    normalizeOptionsWithKeys,
-  ]);
 
   const showClearHistory =
     history.length > 0 && inputValue.trim() === '' && !isClarifying;
