@@ -18,20 +18,59 @@ import {
   setSupplierStatusSuccess,
 } from '../redux/supplierSlice';
 
-// Константа для таймаута в миллисекундах.
-const CLIENT_SIDE_TIMEOUT_MS = 25000; // 25 секунд
+/** @type {number} Таймаут ожидания ответа от поставщика (мс). По истечении — принудительный setSupplierStatusError. */
+const CLIENT_SIDE_TIMEOUT_MS = 25000;
 
+/**
+ * @typedef {Object} SupplierFetchStartedPayload
+ * @property {string} [supplier] — идентификатор поставщика
+ * @property {string} [article] — артикул запроса
+ */
+
+/**
+ * @typedef {Object} SupplierFetchSuccessPayload
+ * @property {string} [supplier] — идентификатор поставщика
+ * @property {SupplierResultSet} [result] — данные от поставщика
+ */
+
+/**
+ * @typedef {Object} SupplierResultSet
+ * @property {SupplierResultItem[]} [data] — массив предложений по артикулу
+ */
+
+/**
+ * Данные одного предложения в агрегаторе запчастей (ответ поставщика).
+ * @typedef {Object} SupplierResultItem
+ * @property {string} [supplier] — идентификатор поставщика (например 'ug', 'ug_f')
+ * @property {string} [article] — артикул
+ * @property {number} [price] — цена
+ * @property {string} [deliveryDate] — дата поставки (ISO)
+ * @property {number|string} [availability] — наличие, кол-во
+ * @property {number} [multi] — кратность отгрузки (проверка availability % multi === 0)
+ */
+
+/**
+ * @typedef {Object} SupplierFetchErrorPayload
+ * @property {string} [supplier] — идентификатор поставщика
+ * @property {Error|string} [error] — ошибка
+ */
+
+/**
+ * Подписывает сокет на события бренд-уточнения и запросов к поставщикам,
+ * диспатчит результаты в Redux и ведёт клиентские таймауты по поставщикам.
+ *
+ * @param {import('socket.io-client').Socket | null} socket — экземпляр сокета
+ */
 export const useSocketManager = (socket) => {
   const dispatch = useDispatch();
   const store = useStore();
 
-  // Используем useRef для хранения идентификаторов таймеров.
-  // Это не вызывает перерисовку компонента при изменении.
   const supplierTimeoutRefs = useRef({});
 
-  // latestRef-паттерн: храним обработчики в ref, чтобы они всегда
-  // имели актуальный скоуп (dispatch, store), но их «обёртки» в useEffect
-  // оставались стабильными и не вызывали переподписок.
+  /**
+   * latestRef: обработчики в ref всегда видят актуальные dispatch/store;
+   * стабильные обёртки в useEffect не переподписывают сокет при каждом рендере.
+   */
   const handlersRef = useRef(null);
 
   handlersRef.current = {
@@ -68,18 +107,14 @@ export const useSocketManager = (socket) => {
         dispatch(setSupplierArticle({ supplier, article }));
       }
 
-      // Очищаем предыдущий таймер для этого поставщика, если он вдруг остался.
       if (supplierTimeoutRefs.current[supplier]) {
         clearTimeout(supplierTimeoutRefs.current[supplier]);
       }
 
-      // Устанавливаем новый "сторожевой" таймер.
       supplierTimeoutRefs.current[supplier] = setTimeout(() => {
-        // Проверяем актуальное состояние Redux.
         const currentStatus =
           store.getState().supplier.supplierStatus[supplier];
 
-        // Если спинер все еще крутится, принудительно завершаем с ошибкой.
         if (currentStatus?.loading) {
           console.warn(`[Client Timeout] Supplier ${supplier} took too long.`);
           dispatch(
@@ -89,13 +124,11 @@ export const useSocketManager = (socket) => {
             })
           );
         }
-        // Удаляем ссылку на таймер после его выполнения.
         delete supplierTimeoutRefs.current[supplier];
       }, CLIENT_SIDE_TIMEOUT_MS);
     },
 
     handleSupplierDataFetchSuccess({ supplier, result }) {
-      // При получении успешного ответа, очищаем таймер.
       if (supplierTimeoutRefs.current[supplier]) {
         clearTimeout(supplierTimeoutRefs.current[supplier]);
         delete supplierTimeoutRefs.current[supplier];
@@ -117,7 +150,6 @@ export const useSocketManager = (socket) => {
     },
 
     handleSupplierDataFetchError({ supplier, error }) {
-      // При получении ошибки, также очищаем таймер.
       if (supplierTimeoutRefs.current[supplier]) {
         clearTimeout(supplierTimeoutRefs.current[supplier]);
         delete supplierTimeoutRefs.current[supplier];
@@ -133,8 +165,6 @@ export const useSocketManager = (socket) => {
       return;
     }
 
-    // Тонкие обёртки: ссылка на функцию стабильна, но внутри
-    // всегда вызывается актуальная версия из handlersRef.current.
     const onConnect = (...args) =>
       handlersRef.current.handleSocketConnect(...args);
     const onBrandClarificationResults = (...args) =>
@@ -161,7 +191,6 @@ export const useSocketManager = (socket) => {
     socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS, onSupplierSuccess);
     socket.on(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR, onSupplierError);
 
-    // Функция очистки при размонтировании компонента.
     return () => {
       socket.off(SOCKET_EVENTS.CONNECT, onConnect);
       socket.off(
@@ -176,7 +205,6 @@ export const useSocketManager = (socket) => {
       socket.off(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_SUCCESS, onSupplierSuccess);
       socket.off(SOCKET_EVENTS.SUPPLIER_DATA_FETCH_ERROR, onSupplierError);
 
-      // Очищаем ВСЕ активные таймеры, чтобы избежать утечек памяти.
       Object.values(supplierTimeoutRefs.current).forEach(clearTimeout);
     };
   }, [socket]);

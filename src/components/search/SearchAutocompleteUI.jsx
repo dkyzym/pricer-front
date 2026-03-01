@@ -9,6 +9,10 @@ import {
   Paper,
 } from '@mui/material';
 
+/**
+ * PaperComponent для Autocomplete: добавляет футер «Очистить историю».
+ * onMouseDown preventDefault — чтобы Autocomplete не закрывался при клике по кнопке.
+ */
 const ClearHistoryPaper = ({ showClearHistory, onClearHistory, children, ...paperProps }) => (
   <Paper {...paperProps}>
     {children}
@@ -28,6 +32,34 @@ const ClearHistoryPaper = ({ showClearHistory, onClearHistory, children, ...pape
   </Paper>
 );
 
+/**
+ * Пропсы SearchAutocompleteUI. Соответствуют UseSearchAutocompleteReturn.
+ * @typedef {Object} SearchAutocompleteUIProps
+ * @property {string} inputValue
+ * @property {Array<{group?: string, key?: string, brand?: string, number?: string, descr?: string}>} displayOptions
+ * @property {function(React.SyntheticEvent, string): void} onInputChange
+ * @property {function(React.SyntheticEvent, object|null): void} onChange
+ * @property {function(React.KeyboardEvent): void} onKeyDown
+ * @property {function(object): string} getOptionLabel
+ * @property {function(object): string} getOptionKey
+ * @property {boolean} isClarifying
+ * @property {string} [clarifyingArticle]
+ * @property {function(React.SyntheticEvent): void} onCancelClarification
+ * @property {React.RefObject<HTMLInputElement|null>} inputRef
+ * @property {boolean} isAutocompleteLoading
+ * @property {function(): void} onClearInput
+ * @property {boolean} showClearHistory
+ * @property {function(): void} onClearHistory
+ * @property {boolean} isLoading
+ * @property {function(): void} onBrandClarify
+ */
+
+/**
+ * UI поиска: Autocomplete (артикул/бренд) + кнопка «Уточнить бренд».
+ * Фильтрация опций выполняется в buildDisplayOptions; filterOptions={(x) => x} отключает встроенный фильтр MUI.
+ *
+ * @param {SearchAutocompleteUIProps} props
+ */
 export const SearchAutocompleteUI = ({
   inputValue,
   displayOptions,

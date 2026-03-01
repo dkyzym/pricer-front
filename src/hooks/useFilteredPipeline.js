@@ -4,17 +4,40 @@ import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { dedupeResults } from '@utils/dedupeResults';
 
+/**
+ * Один элемент цепочки фильтрации: предложение от поставщика в агрегаторе запчастей.
+ * @typedef {Object} FilteredPipelineItem
+ * @property {string} [supplier] — идентификатор поставщика
+ * @property {string} [article] — артикул
+ * @property {number} [price] — цена
+ * @property {string} [deliveryDate] — дата поставки (ISO)
+ * @property {number|string} [availability] — наличие, кол-во
+ * @property {number} [multi] — кратность отгрузки
+ */
+
+/**
+ * Стейт и сеттеры фильтров, передаваемые в ActionBar.
+ * Инкапсуляция здесь не даёт «размазывать» множество useState по компонентам.
+ * @typedef {Object} FilterProps
+ * @property {Object} supplierStatus — статусы поставщиков из Redux
+ * @property {string} maxDeadline — макс. срок доставки в днях (строка)
+ * @property {function(string): void} setMaxDeadline
+ * @property {import('luxon').DateTime | null} maxDeliveryDate — макс. дата доставки
+ * @property {function(import('luxon').DateTime | null): void} setMaxDeliveryDate
+ * @property {string} maxPrice — макс. цена (строка)
+ * @property {function(string): void} setMaxPrice
+ * @property {string} minQuantity — мин. количество (строка)
+ * @property {function(string): void} setMinQuantity
+ */
+
+/** ug_f в UI отображается как ug; нормализация для сопоставления с item.supplier. */
 const normalizeSupplier = (s) => (s === 'ug_f' ? 'ug' : s);
 
 /**
- * Единый пайплайн:
- * supplierStatus → allResults → uniqueResults → bySupplier → finalFiltered
+ * Пайплайн: supplierStatus → allResults → uniqueResults → bySupplier → data.
+ * Каждый шаг в отдельном useMemo — пересчёт только при изменении входов шага.
  *
- * Каждый шаг обёрнут в собственный useMemo, поэтому пересчитывается
- * только та часть цепочки, чьи входные данные реально изменились.
- *
- * Возвращает { data, filterProps } — отфильтрованные данные и стейт фильтров
- * для передачи в ActionBar.
+ * @returns {{ data: FilteredPipelineItem[], filterProps: FilterProps }}
  */
 export const useFilteredPipeline = () => {
   const supplierStatus = useSelector((state) => state.supplier.supplierStatus);
@@ -42,6 +65,7 @@ export const useFilteredPipeline = () => {
     );
   }, [uniqueResults, selectedSuppliers]);
 
+  /** Финальный фильтр: срок/дата, цена, мин. количество, кратность (multi). */
   const data = useMemo(() => {
     const now = DateTime.now();
 

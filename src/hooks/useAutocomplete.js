@@ -10,6 +10,38 @@ import {
 } from '../redux/autocompleteSlice';
 import { clearBrandClarifications } from '../redux/brandClarificationSlice';
 
+/**
+ * Опция автокомплита / уточнения бренда (API или Redux).
+ * @typedef {Object} AutocompleteOption
+ * @property {string} [id] — уникальный идентификатор
+ * @property {string} [key] — ключ для React
+ * @property {string} [brand] — бренд
+ * @property {string} [number] — артикул/номер
+ * @property {string} [descr] — описание
+ */
+
+/**
+ * @typedef {Object} UseAutocompleteParams
+ * @property {React.RefObject<HTMLInputElement|null>} inputRef — ref поля ввода (для focus при clear)
+ * @property {boolean} isClarifying — режим уточнения бренда; при true fetch не вызывается
+ */
+
+/**
+ * @typedef {Object} UseAutocompleteReturn
+ * @property {string} inputValue — текущее значение поля
+ * @property {function(React.SyntheticEvent, string, string): void} handleInputChange — обработчик change (event, newValue, reason)
+ * @property {AutocompleteOption[]} autocompleteResults — результаты из Redux
+ * @property {boolean} isAutocompleteLoading — загрузка
+ * @property {function(): void} handleClearInput — очистка и focus
+ */
+
+/**
+ * Локальный стейт ввода + debounced fetch автокомплита (UG API).
+ * При isClarifying запросы не выполняются — ввод используется только для фильтрации брендов.
+ *
+ * @param {UseAutocompleteParams} params
+ * @returns {UseAutocompleteReturn}
+ */
 export const useAutocomplete = ({ inputRef, isClarifying }) => {
   const dispatch = useDispatch();
   const [inputValue, setInputValue] = useState('');
@@ -20,6 +52,7 @@ export const useAutocomplete = ({ inputRef, isClarifying }) => {
     (state) => state.autocomplete.loading
   );
 
+  /** useMemo + debounce: стабильная ссылка для useEffect cleanup (cancel) и зависимостей. */
   const debouncedFetchAutocomplete = useMemo(
     () =>
       debounce(async (term) => {

@@ -8,6 +8,10 @@ import { useContext } from 'react';
 import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 import { SearchAutocompleteUI } from './SearchAutocompleteUI';
 
+/**
+ * Корневой компонент поиска: сокет-менеджер (side-effect), автокомплит, фильтры, таблица результатов.
+ * useSocketManager вызывается без возвращаемого значения — только подписка на события.
+ */
 export const SearchComponent = () => {
   const socket = useContext(SocketContext);
   useSocketManager(socket);
