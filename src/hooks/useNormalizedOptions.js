@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 
 export const useNormalizedOptions = () => {
   const generateUniqueKey = useCallback((option, index = 0) => {
-    if (option.isClearCommand) return 'clear-history-command';
     if (option.id) return `option-${option.id}`;
     if (option.key) return option.key;
 
@@ -29,7 +28,6 @@ export const useNormalizedOptions = () => {
   const getOptionLabelText = useCallback((option) => {
     if (typeof option === 'string') return option;
     if (!option || typeof option !== 'object') return '';
-    if (option.isClearCommand) return option.brand;
     return `${option.brand} - ${option.number} - ${option.descr}`;
   }, []);
 

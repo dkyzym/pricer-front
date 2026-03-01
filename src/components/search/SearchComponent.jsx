@@ -1,30 +1,19 @@
 import { ActionBar } from '@components/ActionBar/ActionBar';
-import { AutocompleteInput } from '@components/AutocompleteInput/AutocompleteInput';
 import { SocketContext } from '@context/SocketContext';
 import { useAutocomplete } from '@hooks/useAutocomplete';
 import { useAutoFocusClarification } from '@hooks/useAutoFocusClarification';
-import { useFilteredData } from '@hooks/useFilteredData';
-import { useFilteredResults } from '@hooks/useFilteredResults';
+import { useFilteredPipeline } from '@hooks/useFilteredPipeline';
 import { useNormalizedOptions } from '@hooks/useNormalizedOptions';
 import { useOptionSelection } from '@hooks/useOptionSelection';
 import { useSearchHandlers } from '@hooks/useSearchHandlers';
 import { useSearchHistory } from '@hooks/useSearchHistory';
 import { useSocketManager } from '@hooks/useSocketManager';
 import { useSupplierSelection } from '@hooks/useSupplierSelection';
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Container,
-  Grid,
-  InputAdornment,
-} from '@mui/material';
-import { dedupeResults } from '@utils/dedupeResults';
+import { Container, Grid } from '@mui/material';
 import { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearBrandClarifications } from 'src/redux/brandClarificationSlice';
+import { SearchAutocompleteUI } from './SearchAutocompleteUI';
 import { MemoizedResultsTable } from './ResultsTable/ResultsTable';
 
 export const SearchComponent = () => {
@@ -57,7 +46,6 @@ export const SearchComponent = () => {
   const { history, addToHistory, clearHistory } = useSearchHistory();
   const { selectedSuppliers } = useSupplierSelection();
 
-  // Функция отмены режима уточнения
   const handleCancelClarification = useCallback(
     (e) => {
       if (e) e.stopPropagation();
@@ -91,7 +79,6 @@ export const SearchComponent = () => {
   const [maxPrice, setMaxPrice] = useState('');
   const [minQuantity, setMinQuantity] = useState('');
 
-  // Двойной поиск: локальная фильтрация по брендам
   const filteredBrands = useMemo(() => {
     if (!isClarifying || !brandClarifications?.length) return [];
 
@@ -102,9 +89,7 @@ export const SearchComponent = () => {
   }, [isClarifying, brandClarifications, inputValue]);
 
   const combinedOptions = useMemo(() => {
-    if (isClarifying) {
-      return filteredBrands;
-    }
+    if (isClarifying) return filteredBrands;
     return autocompleteResults;
   }, [isClarifying, filteredBrands, autocompleteResults]);
 
@@ -115,45 +100,19 @@ export const SearchComponent = () => {
     }
 
     if (history.length > 0) {
-      const historyOptions = normalizeOptionsWithKeys(
-        history,
-        'История поиска'
-      );
-      return [
-        ...historyOptions,
-        {
-          brand: 'Очистить историю',
-          key: 'clear-history-command',
-          isClearCommand: true,
-          group: 'История поиска',
-        },
-      ];
+      return normalizeOptionsWithKeys(history, 'История поиска');
     }
 
     return [];
-  }, [
-    inputValue,
-    combinedOptions,
-    history,
-    isClarifying,
-    normalizeOptionsWithKeys,
-  ]);
+  }, [inputValue, combinedOptions, history, isClarifying, normalizeOptionsWithKeys]);
 
-  const allResults = Object.values(supplierStatus).flatMap(
-    (status) => status.results.data || []
-  );
-  const uniqueResults = useMemo(() => dedupeResults(allResults), [allResults]);
+  const showClearHistory =
+    history.length > 0 && inputValue.trim() === '' && !isClarifying;
 
-  const resultsFilteredBySupplier = useFilteredResults(
-    uniqueResults,
-    selectedSuppliers
-  );
-  const finalFilteredData = useFilteredData(
-    resultsFilteredBySupplier,
-    maxDeadline,
-    maxDeliveryDate,
-    maxPrice,
-    minQuantity
+  const finalFilteredData = useFilteredPipeline(
+    supplierStatus,
+    selectedSuppliers,
+    { maxDeadline, maxDeliveryDate, maxPrice, minQuantity }
   );
 
   const handleKeyDown = (e) => {
@@ -165,7 +124,7 @@ export const SearchComponent = () => {
   const onOptionChange = (event, newValue) => {
     handleOptionSelectionWithHistory(event, newValue);
 
-    if (newValue && !newValue.isClearCommand) {
+    if (newValue) {
       handleInputChange(event, '', 'input');
     }
   };
@@ -174,87 +133,25 @@ export const SearchComponent = () => {
     <Container maxWidth="lg" sx={{ mt: 1.5 }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Autocomplete
-              sx={{ flexGrow: 1 }}
-              freeSolo
-              inputValue={inputValue}
-              options={displayOptions}
-              filterOptions={(x) => x}
-              groupBy={(option) => option.group}
-              getOptionLabel={getOptionLabelText}
-              onInputChange={handleInputChange}
-              getOptionKey={getOptionKey}
-              onChange={onOptionChange}
-              onKeyDown={handleKeyDown}
-              renderOption={(props, option) => (
-                <Box
-                  component="li"
-                  {...props}
-                  key={option.key}
-                  sx={
-                    option.isClearCommand
-                      ? {
-                          color: 'error.main',
-                          justifyContent: 'center',
-                          fontWeight: 'medium',
-                        }
-                      : {}
-                  }
-                >
-                  {getOptionLabelText(option)}
-                </Box>
-              )}
-              renderInput={(params) => {
-                const startAdornment =
-                  isClarifying && clarifyingArticle ? (
-                    <InputAdornment position="start">
-                      <Chip
-                        size="small"
-                        label={`Артикул: ${clarifyingArticle}`}
-                        onDelete={handleCancelClarification}
-                        color="primary"
-                        variant="outlined"
-                        sx={{ mr: 0.5, fontWeight: 'medium' }}
-                      />
-                    </InputAdornment>
-                  ) : null;
-
-                const mergedInputProps = {
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      {startAdornment}
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                };
-
-                return (
-                  <AutocompleteInput
-                    params={{ ...params, InputProps: mergedInputProps }}
-                    inputRef={inputRef}
-                    isAutocompleteLoading={isAutocompleteLoading}
-                    inputValue={inputValue}
-                    hasOptions={Boolean(displayOptions.length)}
-                    handleClearInput={handleClearInput}
-                    placeholder={
-                      isClarifying ? 'Введите бренд...' : 'Введите артикул...'
-                    }
-                  />
-                );
-              }}
-            />
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleBrandClarification(inputValue)}
-              disabled={!inputValue.trim() || isLoading || isClarifying}
-              startIcon={isLoading ? <CircularProgress size={20} /> : null}
-            >
-              Уточнить бренд
-            </Button>
-          </Box>
+          <SearchAutocompleteUI
+            inputValue={inputValue}
+            displayOptions={displayOptions}
+            onInputChange={handleInputChange}
+            onChange={onOptionChange}
+            onKeyDown={handleKeyDown}
+            getOptionLabel={getOptionLabelText}
+            getOptionKey={getOptionKey}
+            isClarifying={isClarifying}
+            clarifyingArticle={clarifyingArticle}
+            onCancelClarification={handleCancelClarification}
+            inputRef={inputRef}
+            isAutocompleteLoading={isAutocompleteLoading}
+            onClearInput={handleClearInput}
+            showClearHistory={showClearHistory}
+            onClearHistory={clearHistory}
+            isLoading={isLoading}
+            onBrandClarify={() => handleBrandClarification(inputValue)}
+          />
         </Grid>
 
         <Grid item xs={12}>

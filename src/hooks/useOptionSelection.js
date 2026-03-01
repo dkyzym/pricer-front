@@ -10,18 +10,12 @@ export const useOptionSelection = ({
     (event, newValue) => {
       if (!newValue) return;
 
-      if (newValue.isClearCommand) {
-        clearHistory();
-        handleInputChange(event, '', 'clear');
-        return;
-      }
-
       if (typeof newValue === 'object' && newValue !== null) {
         addToHistory(newValue);
       }
 
       handleOptionSelect(event, newValue);
     },
-    [clearHistory, handleInputChange, addToHistory, handleOptionSelect]
+    [addToHistory, handleOptionSelect]
   );
 };
