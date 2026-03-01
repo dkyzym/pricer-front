@@ -131,9 +131,11 @@ export const OrdersTable = () => {
           const code = params.value;
           const label = supplierNameMap[code] || (code || '').toUpperCase();
           return (
-            <Typography variant="caption" fontWeight="bold">
-              {label}
-            </Typography>
+            <Tooltip title={label}>
+              <Typography variant="caption" fontWeight="bold">
+                {label}
+              </Typography>
+            </Tooltip>
           );
         },
       },
